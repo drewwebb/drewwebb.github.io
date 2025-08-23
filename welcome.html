@@ -1,95 +1,73 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>Welcome — Drew Webb</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin:0; padding:24px; background:#0b0c10; color:#eaeaea;}
-    .wrap { max-width: 900px; margin: 0 auto; }
-    .hero { background:#14161a; border-radius:16px; padding:24px; margin-bottom:20px; box-shadow: 0 6px 30px rgba(0,0,0,.4);}
-    h1 { margin: 0 0 12px; }
-    .muted { opacity:.85; }
-    .pill { display:inline-block; padding:6px 10px; border-radius:999px; background:#1d2330; margin-right:8px; font-size:13px;}
-    a { color:#a0b9ff; text-decoration:none; }
-    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px; }
-    .card { background:#14161a; border-radius:16px; padding:16px; }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <section class="hero">
-      <div id="hello"><h1>Welcome!</h1></div>
-      <p id="context" class="muted"></p>
-      <div id="tags"></div>
-    </section>
+<script>
+  const params   = new URLSearchParams(location.search);
+  const id       = params.get('id');                 // advanced path (stored submission)
+  const isGuest  = params.get('guest') === '1';
+  const nameQP   = params.get('name');               // simple path (no storage)
+  const emailQP  = params.get('email');
+  const endpoint = 'https://api.drewwebbai.com/submission?id='; // keep for future
 
-    <section class="grid">
-      <div class="card">
-        <h3>Martech Integrations @ Scale</h3>
-        <p class="muted">How I connect data, intent, and outreach to shorten speed-to-lead.</p>
-        <a href="#">View case</a>
-      </div>
-      <div class="card">
-        <h3>AI + Automation</h3>
-        <p class="muted">Clay + 6sense + Common Room + Workers → real, measurable lift.</p>
-        <a href="#">View case</a>
-      </div>
-      <div class="card">
-        <h3>Attribution & Ops</h3>
-        <p class="muted">Pardot/SFDC orchestration, lead scoring, and pipeline reporting.</p>
-        <a href="#">View case</a>
-      </div>
-    </section>
+  const $ = sel => document.querySelector(sel);
+  const hello   = $('#hello');
+  const context = $('#context');
+  const tagsBox = $('#tags');
 
-    <p class="muted" style="margin-top:18px">
-      Not you? <a href="/index.html">Start over</a>
-    </p>
-  </div>
+  function renderWelcome({ firstName, lastName, company, title, linkedin, email }) {
+    const name = [firstName, lastName].filter(Boolean).join(' ');
+    const who  = name || email || 'there';
+    hello.innerHTML = `<h1>Welcome, ${who} 👋</h1>`;
 
-  <script>
-    const params = new URLSearchParams(location.search);
-    const id = params.get('id');
-    const isGuest = params.get('guest') === '1';
-    const endpoint = 'https://api.drewwebbai.com/submission?id='; // updated to your custom Worker domain
+    const parts = [];
+    if (title)   parts.push(title);
+    if (company) parts.push(company);
+    context.textContent =
+      parts.length ? `I pulled a few highlights relevant to ${parts.join(' @ ')}.` :
+                     `I pulled a few highlights I think you’ll care about.`;
 
-    async function load() {
-      if (isGuest || !id) {
-        document.querySelector('#hello').innerHTML = `<h1>Welcome, guest 👋</h1>`;
-        document.querySelector('#context').textContent =
-          "Here’s a quick tour of my work. If you’d like a tailored view, introduce yourself on the previous page.";
-        return;
-      }
+    const tags = [];
+    if (company) tags.push(company);
+    if (title)   tags.push(title);
+    if (linkedin)tags.push('LinkedIn');
+    if (email)   tags.push(email);
+    tagsBox.innerHTML = tags.map(t => `<span class="pill">${t}</span>`).join('');
+  }
+
+  async function load() {
+    // Guest view
+    if (isGuest) {
+      hello.innerHTML = `<h1>Welcome, guest 👋</h1>`;
+      context.textContent = "Here’s a quick tour of my work. If you’d like a tailored view, introduce yourself on the previous page.";
+      return;
+    }
+
+    // Simple path: form.js redirected with ?name=&email=
+    if (nameQP || emailQP) {
+      const [firstName, ...rest] = (nameQP || '').split(' ');
+      const lastName = rest.join(' ');
+      renderWelcome({
+        firstName: firstName || '',
+        lastName:  lastName  || '',
+        company:   '', title: '', linkedin: '', email: emailQP || ''
+      });
+      return;
+    }
+
+    // Advanced path: if you later store submissions & redirect with ?id=...
+    if (id) {
       try {
         const res = await fetch(endpoint + encodeURIComponent(id));
         const data = await res.json();
         if (!data.ok) throw new Error(data.error || 'not_found');
-
-        const { firstName, lastName, company, title, linkedin, email } = data.data;
-        const name = [firstName, lastName].filter(Boolean).join(' ');
-        const who = name || email || 'there';
-        document.querySelector('#hello').innerHTML = `<h1>Welcome, ${who} 👋</h1>`;
-
-        const parts = [];
-        if (title) parts.push(title);
-        if (company) parts.push(company);
-        document.querySelector('#context').textContent =
-          parts.length ? `I pulled a few highlights relevant to ${parts.join(' @ ')}.` :
-          `I pulled a few highlights I think you’ll care about.`;
-
-        const tags = [];
-        if (company) tags.push(company);
-        if (title) tags.push(title);
-        if (linkedin) tags.push('LinkedIn');
-        if (email) tags.push(email);
-        document.querySelector('#tags').innerHTML = tags.map(t => `<span class="pill">${t}</span>`).join('');
+        renderWelcome(data.data);
+        return;
       } catch (e) {
-        document.querySelector('#hello').innerHTML = `<h1>Welcome!</h1>`;
-        document.querySelector('#context').textContent =
-          "I couldn’t load the tailored view, but here are some highlights.";
+        // fall through to generic
       }
     }
-    load();
-  </script>
-</body>
-</html>
+
+    // Generic fallback
+    hello.innerHTML = `<h1>Welcome!</h1>`;
+    context.textContent = "I couldn’t load the tailored view, but here are some highlights.";
+  }
+
+  load();
+</script>
