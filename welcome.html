@@ -24,7 +24,6 @@
       <div id="tags"></div>
     </section>
 
-    <!-- Example: your showcase tiles -->
     <section class="grid">
       <div class="card">
         <h3>Martech Integrations @ Scale</h3>
@@ -52,7 +51,7 @@
     const params = new URLSearchParams(location.search);
     const id = params.get('id');
     const isGuest = params.get('guest') === '1';
-    const endpoint = 'https://portfolio-form.drewr83.workers.dev/submission?id=';
+    const endpoint = 'https://api.drewwebbai.com/submission?id='; // updated to your custom Worker domain
 
     async function load() {
       if (isGuest || !id) {
@@ -65,8 +64,8 @@
         const res = await fetch(endpoint + encodeURIComponent(id));
         const data = await res.json();
         if (!data.ok) throw new Error(data.error || 'not_found');
-        const { firstName, lastName, company, title, linkedin, email } = data.data;
 
+        const { firstName, lastName, company, title, linkedin, email } = data.data;
         const name = [firstName, lastName].filter(Boolean).join(' ');
         const who = name || email || 'there';
         document.querySelector('#hello').innerHTML = `<h1>Welcome, ${who} 👋</h1>`;
