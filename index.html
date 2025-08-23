@@ -66,7 +66,6 @@
       </div>
 
       <!-- Turnstile widget -->
-      <!-- Replace TURNSTILE_SITE_KEY_HERE with your actual Turnstile site key -->
       <div class="cf-turnstile" data-sitekey="0x4AAAAAABsD3RaVvPQfjsNv"></div>
 
       <div class="actions">
@@ -77,61 +76,9 @@
     </form>
   </div>
 
+  <!-- Turnstile -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-  <script>
-    const endpoint = 'https://portfolio-form.drewr83.workers.dev/submit';
-
-    const $ = sel => document.querySelector(sel);
-    const errBox = $('#msg-error');
-    const okBox = $('#msg-success');
-    const btn = $('#submitBtn');
-
-    function show(el, text) { el.textContent = text; el.style.display = 'block'; }
-    function hide(el) { el.style.display = 'none'; }
-
-    $('#lead-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      hide(errBox); hide(okBox);
-      btn.disabled = true;
-
-      const token = window.turnstile && window.turnstile.getResponse();
-      if (!token) {
-        show(errBox, 'Please complete the verification.');
-        btn.disabled = false;
-        return;
-      }
-
-      const payload = {
-        firstName: $('#firstName').value,
-        lastName: $('#lastName').value,
-        company: $('#company').value,
-        title: $('#title').value,
-        linkedin: $('#linkedin').value,
-        email: $('#email').value,
-        token
-      };
-
-      try {
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (data.ok) {
-          localStorage.setItem('lastSubmissionId', data.id);
-          window.location.href = `/welcome.html?id=${encodeURIComponent(data.id)}`;
-        } else {
-          show(errBox, `Submission failed: ${data.error || 'unknown'}`);
-          if (window.turnstile) window.turnstile.reset();
-        }
-      } catch (err) {
-        show(errBox, `Network error. Please try again.`);
-        if (window.turnstile) window.turnstile.reset();
-      } finally {
-        btn.disabled = false;
-      }
-    });
-  </script>
+  <!-- Your form logic (external file) -->
+  <script src="/js/form.js" defer></script>
 </body>
 </html>
