@@ -1,25 +1,55 @@
-// ...keep your existing code above
+// /js/form.js
+document.addEventListener('DOMContentLoaded', () => {
+  const form   = document.querySelector('#lead-form');
+  const errBox = document.querySelector('#msg-error');
+  const okBox  = document.querySelector('#msg-success');
+  const btn    = document.querySelector('#submitBtn');
 
-try {
-  const res = await fetch(API, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ name, email, message })
+  const API = 'https://api.drewwebbai.com/send';
+
+  const show = (el, msg) => { el.textContent = msg; el.style.display = 'block'; };
+  const hide = (el) => { el.style.display = 'none'; };
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hide(errBox); hide(okBox);
+    btn.disabled = true;
+
+    const firstName = document.querySelector('#firstName')?.value?.trim() || '';
+    const lastName  = document.querySelector('#lastName')?.value?.trim()  || '';
+    const company   = document.querySelector('#company')?.value?.trim()   || '';
+    const title     = document.querySelector('#title')?.value?.trim()     || '';
+    const linkedin  = document.querySelector('#linkedin')?.value?.trim()  || '';
+    const email     = document.querySelector('#email')?.value?.trim()     || '';
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      show(errBox, 'Please enter a valid email address.');
+      btn.disabled = false;
+      return;
+    }
+
+    try {
+      const res = await fetch(API, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ firstName, lastName, company, title, linkedin, email })
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
+        const detail = (data && (data.detail || data.error)) || `HTTP ${res.status}`;
+        throw new Error(typeof detail === 'string' ? detail : JSON.stringify(detail));
+      }
+
+      // still pass name/email to your welcome page UX
+      const name = [firstName, lastName].filter(Boolean).join(' ') || 'Friend';
+      const params = new URLSearchParams({ name, email });
+      window.location.href = `/welcome.html?${params.toString()}`;
+
+    } catch (err) {
+      show(errBox, `Server error: ${err.message || 'please try again.'}`);
+    } finally {
+      btn.disabled = false;
+    }
   });
-
-  const data = await res.json().catch(() => ({}));
-
-  if (!res.ok || !data.ok) {
-    const detail = (data && (data.detail || data.error)) || `HTTP ${res.status}`;
-    throw new Error(typeof detail === 'string' ? detail : JSON.stringify(detail));
-  }
-
-  const params = new URLSearchParams({ name: name || 'Friend', email });
-  window.location.href = `/welcome.html?${params.toString()}`;
-
-} catch (err) {
-  show(errBox, `Server error: ${err.message || 'please try again.'}`);
-  window.turnstile && window.turnstile.reset();
-} finally {
-  btn.disabled = false;
-}
+});
