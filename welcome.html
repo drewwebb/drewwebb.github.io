@@ -13,6 +13,8 @@
       color:#eaeaea;
     }
 
+    html { scroll-behavior: smooth; }
+
     .page {
       max-width: 960px;
       margin: 0 auto;
@@ -21,6 +23,7 @@
 
     h1 { font-size: 48px; line-height: 1.1; margin-bottom: 16px; }
     h2 { font-size: 24px; margin-bottom: 12px; }
+    h3 { margin: 0 0 8px; }
     p  { line-height: 1.6; }
 
     .muted { opacity: .75; }
@@ -33,20 +36,62 @@
       margin-bottom: 96px;
     }
 
-    .bullets {
-      list-style: none;
-      padding: 0;
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #1e293b, transparent);
+      margin: 96px 0;
     }
 
-    .bullets li {
-      margin-bottom: 12px;
+    /* Pills */
+    .pill {
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#1d2330;
+      margin-right:8px;
+      font-size:13px;
     }
 
-    .bullets li::before {
-      content: "— ";
+    /* ===== Interactive Tiles ===== */
+    .tiles {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .tile {
+      text-decoration: none;
+      color: inherit;
+      background: linear-gradient(180deg, #12151b, #0f1217);
+      border: 1px solid #1e293b;
+      border-radius: 18px;
+      padding: 22px;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+
+    .tile:hover {
+      transform: translateY(-4px);
+      border-color: #22c55e;
+      box-shadow: 0 18px 50px rgba(34,197,94,.12);
+    }
+
+    .tile .preview {
+      font-size: 14px;
+      opacity: .7;
+      transition: opacity .2s ease;
+    }
+
+    .tile:hover .preview {
+      opacity: 1;
+    }
+
+    .tile .cta {
+      margin-top: 14px;
+      font-size: 13px;
       color: #22c55e;
     }
 
+    /* ===== Cards ===== */
     .cards {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -64,6 +109,21 @@
       font-size:12px;
       letter-spacing:.08em;
       color:#22c55e;
+    }
+
+    /* ===== Lists ===== */
+    .bullets {
+      list-style: none;
+      padding: 0;
+    }
+
+    .bullets li {
+      margin-bottom: 12px;
+    }
+
+    .bullets li::before {
+      content: "— ";
+      color: #22c55e;
     }
 
     .principles {
@@ -87,13 +147,33 @@
       padding-left:24px;
     }
 
-    .pill {
-      display:inline-block;
-      padding:6px 10px;
-      border-radius:999px;
-      background:#1d2330;
-      margin-right:8px;
-      font-size:13px;
+    /* ===== Cost Table ===== */
+    .cost-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 24px;
+      font-size: 14px;
+    }
+
+    .cost-table th,
+    .cost-table td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .cost-table th {
+      opacity: .7;
+      font-weight: 500;
+    }
+
+    .cost-pill {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(34,197,94,.12);
+      color: #bbf7d0;
+      font-size: 12px;
     }
 
     a { color:#a0b9ff; text-decoration:none; }
@@ -103,65 +183,127 @@
 <body>
   <main class="page">
 
-    <!-- HERO (IDs REQUIRED for personalization) -->
+    <!-- HERO (IDs REQUIRED) -->
     <section class="hero">
       <div id="hello"><h1>Welcome 👋</h1></div>
       <p id="context" class="muted"></p>
       <div id="tags"></div>
     </section>
 
-    <!-- WHAT THIS PAGE IS -->
+    <!-- INTERACTIVE OVERVIEW -->
     <section class="section">
-      <h2>What this page demonstrates</h2>
-      <p class="muted">
-        This isn’t a static portfolio — it’s a working system.
-      </p>
-      <ul class="bullets">
-        <li>Referral-aware routing without UTMs</li>
-        <li>Human vs bot detection</li>
-        <li>Lightweight event logging</li>
-        <li>Private observability via Cloudflare</li>
-      </ul>
-    </section>
+      <h2>Explore the work</h2>
+      <p class="muted">Hover to preview. Click to dive deeper.</p>
 
-    <!-- WHY -->
-    <section class="section">
-      <h2>Why I built it this way</h2>
-      <p>
-        I’m often brought in to untangle messy growth stacks — figuring out
-        where signals break down, how attribution actually works, and what
-        can scale without adding unnecessary complexity.
-      </p>
-      <p>
-        This page is a distilled example of how I think about systems:
-        design the signal, capture it cleanly, and make it useful.
-      </p>
-    </section>
+      <div class="tiles">
+        <a class="tile" href="#about">
+          <h3>About Me & My Work</h3>
+          <p class="preview">
+            How I operate, what I’ve built, and the problems teams bring me in to solve.
+          </p>
+          <div class="cta">Jump to section →</div>
+        </a>
 
-    <!-- HOW -->
-    <section class="section">
-      <h2>How it works</h2>
-      <div class="cards">
-        <div class="card"><span class="step">01</span><p>Context captured on arrival</p></div>
-        <div class="card"><span class="step">02</span><p>Noise filtered automatically</p></div>
-        <div class="card"><span class="step">03</span><p>Engagement logged efficiently</p></div>
-        <div class="card"><span class="step">04</span><p>Insights surfaced privately</p></div>
+        <a class="tile" href="#stacks">
+          <h3>Tech Stacks I’ve Run</h3>
+          <p class="preview">
+            First-hand experience across MarTech, data, lifecycle, and automation.
+          </p>
+          <div class="cta">Jump to section →</div>
+        </a>
+
+        <a class="tile" href="#architecture">
+          <h3>How This Site Works</h3>
+          <p class="preview">
+            A transparent look at the system powering this page.
+          </p>
+          <div class="cta">Jump to section →</div>
+        </a>
       </div>
     </section>
 
-    <!-- PRINCIPLES -->
-    <section class="section">
-      <h2>How I think about systems</h2>
-      <ul class="principles">
-        <li>Simple to use</li>
-        <li>Hard to misuse</li>
-        <li>Measured by default</li>
-        <li>Respectful of users</li>
-        <li>Built to evolve</li>
+    <div class="divider"></div>
+
+    <!-- ABOUT -->
+    <section id="about" class="section">
+      <h2>About me</h2>
+      <p>
+        I’m a senior Marketing Operations & Growth leader who specializes in turning
+        fragmented systems into clean, measurable engines.
+      </p>
+      <p>
+        I’m often brought in when attribution is unclear, speed-to-lead is slow,
+        or tooling has outpaced strategy.
+      </p>
+
+      <p>
+        <a href="/assets/Drew_Webb_Resume.pdf" download>Download resume (PDF)</a>
+      </p>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- STACKS -->
+    <section id="stacks" class="section">
+      <h2>Tech stacks I’ve owned</h2>
+      <ul class="bullets">
+        <li>Salesforce, Pardot, HubSpot, Marketo</li>
+        <li>6sense, Demandbase, Common Room, Clearbit</li>
+        <li>Segment, RudderStack, GA4</li>
+        <li>Clay, Zapier, n8n, Cloudflare Workers</li>
+        <li>Snowflake, dbt, Looker</li>
       </ul>
     </section>
 
-    <!-- CALLOUT -->
+    <div class="divider"></div>
+
+    <!-- ARCHITECTURE -->
+    <section id="architecture" class="section">
+      <h2>How this site works</h2>
+      <p class="muted">
+        This page is intentionally lightweight. Every component earns its keep.
+      </p>
+
+      <table class="cost-table">
+        <thead>
+          <tr>
+            <th>Component</th>
+            <th>Purpose</th>
+            <th>Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Cloudflare Workers</td>
+            <td>Routing, personalization, logging</td>
+            <td><span class="cost-pill">$0–$5</span></td>
+          </tr>
+          <tr>
+            <td>Cloudflare KV + D1</td>
+            <td>Event + metadata storage</td>
+            <td><span class="cost-pill">Free tier</span></td>
+          </tr>
+          <tr>
+            <td>GitHub Pages</td>
+            <td>Static hosting</td>
+            <td><span class="cost-pill">Free</span></td>
+          </tr>
+          <tr>
+            <td>Domain (GoDaddy)</td>
+            <td>drewwebbai.com</td>
+            <td><span class="cost-pill">~$15/yr</span></td>
+          </tr>
+          <tr>
+            <td>Cloudflare Turnstile</td>
+            <td>Bot protection</td>
+            <td><span class="cost-pill">Free</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="divider"></div>
+
     <section class="section callout">
       <p>
         If you’re evaluating how I think as much as what I’ve done —
@@ -175,7 +317,7 @@
 
   </main>
 
-  <!-- PERSONALIZATION SCRIPT (UNCHANGED, REQUIRED) -->
+  <!-- PERSONALIZATION SCRIPT (UNCHANGED) -->
   <script>
     (function () {
       try {
