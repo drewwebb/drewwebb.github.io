@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -130,6 +129,7 @@
     }
     .hero > *{ position: relative; }
 
+    /* UPDATED: hero grid now supports full-width intro row + 2-col content row */
     .hero-grid{
       display:grid;
       gap: 18px;
@@ -138,6 +138,9 @@
       .hero-grid{
         grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
         align-items: start;
+      }
+      .hero-grid .hero-span-2{
+        grid-column: 1 / -1; /* full width */
       }
     }
 
@@ -486,7 +489,9 @@
     <!-- HERO -->
     <section class="hero">
       <div class="hero-grid">
-        <div>
+
+        <!-- FULL-WIDTH TOP INTRO -->
+        <div class="hero-span-2">
           <!-- IDs REQUIRED for personalization -->
           <div id="hello"><h1>Welcome</h1></div>
 
@@ -503,7 +508,10 @@
           </div>
 
           <div class="divider"></div>
+        </div>
 
+        <!-- LEFT: WHAT YOU'RE GETTING -->
+        <div>
           <div class="section-header" style="margin-bottom:6px;">
             <h2 style="font-size:16px; margin:0;">What you’re getting on this page</h2>
           </div>
@@ -555,7 +563,7 @@
           </div>
         </div>
 
-        <!-- ABOUT YOU (Option B: explanation + visually called-out personalization) -->
+        <!-- RIGHT: ABOUT YOU (moved next to "what you're getting") -->
         <aside class="panel" aria-label="About you panel">
           <div class="panel-title">
             <h3>About you</h3>
@@ -574,6 +582,7 @@
             Tip: arriving through <span class="chip mono"><span class="k">ref</span><span id="ref-chip">direct</span></span> enables clean attribution without messy UTMs.
           </div>
         </aside>
+
       </div>
 
       <!-- “Choose your path” -->
@@ -865,15 +874,19 @@
         const displayName = (name || email || 'there').trim();
 
         // Headline: keep it clean (no waving hand)
-        hello.innerHTML = `<h1>Welcome, ${escapeHtml(displayName)}</h1>`;
+        if (hello) {
+          hello.innerHTML = `<h1>Welcome, ${escapeHtml(displayName)}</h1>`;
+        }
 
         // Context line: subtle, warm, and explains the journey
-        if (guest) {
-          context.textContent =
-            "You’re viewing the guest version of my live Marketing Ops portfolio. Fill out the intro form to unlock subtle personalization + cleaner attribution signals.";
-        } else {
-          context.textContent =
-            "Glad you’re here. This page is a live example of how I build Marketing Ops systems — personalization, attribution, capture, and follow-up — happening as you read.";
+        if (context) {
+          if (guest) {
+            context.textContent =
+              "You’re viewing the guest version of my live Marketing Ops portfolio. Fill out the intro form to unlock subtle personalization + cleaner attribution signals.";
+          } else {
+            context.textContent =
+              "Glad you’re here. This page is a live example of how I build Marketing Ops systems — personalization, attribution, capture, and follow-up — happening as you read.";
+          }
         }
 
         // Attribution chip
@@ -924,7 +937,7 @@
           }
         }
 
-        tags.innerHTML = chips.join('');
+        if (tags) tags.innerHTML = chips.join('');
 
         // Path card click -> scroll to section
         document.querySelectorAll('.path[data-target]').forEach(btn => {
