@@ -926,7 +926,9 @@
           if (company) addChip('company', company, { mono: false });
           if (title) addChip('title', title, { mono: false });
           if (linkedin) addChip('linkedin', shorten(linkedin), { mono: false });
-          addChip('ref', ref || 'direct', { mono: true });
+
+          // NOTE: removed duplicate ref chip here (keeps the bottom "Attribution label detected")
+          // addChip('ref', ref || 'direct', { mono: true });
 
           // Lifecycle note (matches your intent)
           // Keep it calm and not over-promising.
