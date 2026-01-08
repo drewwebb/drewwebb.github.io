@@ -22,8 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const linkedin  = document.querySelector('#linkedin')?.value?.trim()  || '';
     const email     = document.querySelector('#email')?.value?.trim()     || '';
 
-    // Turnstile token (Cloudflare injects this hidden field)
-    const token = document.querySelector('[name="cf-turnstile-response"]')?.value || '';
+    // ✅ Correct Turnstile token source
+    const token = window.__turnstileToken || '';
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       show(errBox, 'Please enter a valid email address.');
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (!token) {
-      show(errBox, 'Please complete the Turnstile check.');
+      show(errBox, 'Please complete the verification.');
       btn.disabled = false;
       return;
     }
@@ -41,13 +41,21 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch(API, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ firstName, lastName, company, title, linkedin, email, token })
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          company,
+          title,
+          linkedin,
+          email,
+          token
+        })
       });
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok) {
-        const detail = (data && (data.detail || data.error)) || `HTTP ${res.status}`;
-        throw new Error(typeof detail === 'string' ? detail : JSON.stringify(detail));
+        const detail = data?.detail || data?.error || `HTTP ${res.status}`;
+        throw new Error(detail);
       }
 
       const name = [firstName, lastName].filter(Boolean).join(' ') || 'Friend';
