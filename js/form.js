@@ -22,8 +22,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const linkedin  = document.querySelector('#linkedin')?.value?.trim()  || '';
     const email     = document.querySelector('#email')?.value?.trim()     || '';
 
+    // Turnstile token (Cloudflare injects this hidden field)
+    const token = document.querySelector('[name="cf-turnstile-response"]')?.value || '';
+
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       show(errBox, 'Please enter a valid email address.');
+      btn.disabled = false;
+      return;
+    }
+
+    if (!token) {
+      show(errBox, 'Please complete the Turnstile check.');
       btn.disabled = false;
       return;
     }
@@ -32,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch(API, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ firstName, lastName, company, title, linkedin, email })
+        body: JSON.stringify({ firstName, lastName, company, title, linkedin, email, token })
       });
 
       const data = await res.json().catch(() => ({}));
@@ -41,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(typeof detail === 'string' ? detail : JSON.stringify(detail));
       }
 
-      // still pass name/email to your welcome page UX
       const name = [firstName, lastName].filter(Boolean).join(' ') || 'Friend';
       const params = new URLSearchParams({ name, email });
       window.location.href = `/welcome.html?${params.toString()}`;
