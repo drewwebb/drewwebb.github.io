@@ -67,11 +67,10 @@
 
       <!-- Turnstile widget -->
       <div
-  class="cf-turnstile"
-  data-sitekey="0x4AAAAAABsD3RaVvPQfjsNv"
-  data-callback="onTurnstileSuccess">
-</div>
-
+        class="cf-turnstile"
+        data-sitekey="0x4AAAAAABsD3RaVvPQfjsNv"
+        data-callback="onTurnstileSuccess">
+      </div>
 
       <div class="actions">
         <button id="submitBtn" type="submit">Continue →</button>
@@ -83,6 +82,15 @@
 
   <!-- Turnstile JS -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+  <!-- Turnstile callback (GLOBAL) -->
+  <script>
+    window.__turnstileToken = null;
+
+    function onTurnstileSuccess(token) {
+      window.__turnstileToken = token;
+    }
+  </script>
 
   <!-- Your form logic (external) -->
   <script src="/js/form.js?v=2" defer></script>
