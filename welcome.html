@@ -508,9 +508,16 @@
       </div>
 
       <div class="top-actions">
-        <a class="btn primary" href="/Drew-Webb-Resume.pdf" target="_blank" rel="noopener">
+        <!-- UPDATED: JS will rewrite href to /out tracking -->
+        <a class="btn primary" id="resume-link" href="/resume" target="_blank" rel="noopener">
           <span class="icon"></span> View resume (PDF)
         </a>
+
+        <!-- NEW: LinkedIn tracked -->
+        <a class="btn" id="linkedin-link" href="https://www.linkedin.com/in/drewrwebb/" target="_blank" rel="noopener">
+          LinkedIn
+        </a>
+
         <a class="btn" href="/index.html" title="Start over / re-personalize">Start over</a>
       </div>
     </div>
@@ -690,7 +697,8 @@
 
           <div class="divider"></div>
 
-          <a class="btn primary" href="/Drew-Webb-Resume.pdf" target="_blank" rel="noopener">
+          <!-- UPDATED: JS will rewrite href to /out tracking -->
+          <a class="btn primary" id="resume-link-2" href="/resume" target="_blank" rel="noopener">
             <span class="icon"></span> View resume (PDF)
           </a>
         </section>
@@ -877,9 +885,12 @@
     </div>
   </div>
 
-  <!-- PERSONALIZATION SCRIPT
+  <!-- PERSONALIZATION + TRACKING SCRIPT
        KEEP IDs: hello, context, tags
-       Adds: guest-mode styling + ref display + optional company/title/linkedin if present
+       Adds:
+         - guest-mode styling + ref display + optional company/title/linkedin if present
+         - tracked Resume + LinkedIn links via /out
+         - time-on-page event fire at 30s and 90s (only if email exists)
   -->
   <script>
     (function () {
@@ -1004,6 +1015,63 @@
             btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
           });
         });
+
+        // -----------------------------
+        // TRACKED OUTBOUND LINKS (/out)
+        // -----------------------------
+        const API_OUT = "https://api.drewwebbai.com/out";
+        const RESUME_TO = "https://drewwebbai.com/resume";
+        const LINKEDIN_TO = "https://www.linkedin.com/in/drewrwebb/";
+
+        function buildOutUrl(eventName, toUrl) {
+          const u = new URL(API_OUT);
+          u.searchParams.set("event", eventName);
+          u.searchParams.set("to", toUrl);
+          if (email) u.searchParams.set("email", email);
+          // (optional) carry ref for your own logging later if you want; harmless if unused
+          if (ref) u.searchParams.set("ref", ref);
+          return u.toString();
+        }
+
+        const resumeA1 = document.getElementById("resume-link");
+        const resumeA2 = document.getElementById("resume-link-2");
+        const linkedinA = document.getElementById("linkedin-link");
+
+        if (resumeA1) resumeA1.href = buildOutUrl("resume_clicked", RESUME_TO);
+        if (resumeA2) resumeA2.href = buildOutUrl("resume_clicked", RESUME_TO);
+        if (linkedinA) linkedinA.href = buildOutUrl("linkedin_clicked", LINKEDIN_TO);
+
+        // -----------------------------
+        // TIME-ON-PAGE EVENT (/event)
+        // Fires at 30s and 90s once each, only if email exists.
+        // -----------------------------
+        const API_EVENT = "https://api.drewwebbai.com/event";
+        const fired = { 30: false, 90: false };
+        const start = Date.now();
+
+        async function postEvent(seconds) {
+          if (!email) return; // cannot associate without email
+          try {
+            await fetch(API_EVENT, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                email,
+                event: "time_on_page_sec",
+                value: seconds
+              })
+            });
+          } catch (e) {
+            // silent fail by design
+          }
+        }
+
+        setInterval(() => {
+          const elapsed = Math.floor((Date.now() - start) / 1000);
+
+          if (elapsed >= 30 && !fired[30]) { fired[30] = true; postEvent(30); }
+          if (elapsed >= 90 && !fired[90]) { fired[90] = true; postEvent(90); }
+        }, 1000);
 
         function escapeHtml(str) {
           return String(str || '').replace(/[&<>'"]/g, c => ({
