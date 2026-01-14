@@ -6,34 +6,495 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="A live, instrumented Marketing Operations portfolio — personalized and attribution-aware." />
 
+  <!-- Optional: nicer typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --bg:#f6f7fb;--surface:#fff;--text:#0f172a;--muted:rgba(15,23,42,.65);
-      --border:rgba(15,23,42,.1);--accent:#2563eb;--accent-2:#22c55e;
-      --radius:18px;--shadow:0 18px 48px rgba(15,23,42,.1)
+      --bg: #f6f7fb;
+      --surface: #ffffff;
+      --surface-2: #fbfbfe;
+      --text: #0f172a;
+      --muted: rgba(15, 23, 42, .68);
+      --border: rgba(15, 23, 42, .10);
+      --shadow: 0 18px 48px rgba(15, 23, 42, .10);
+      --shadow-soft: 0 10px 30px rgba(15, 23, 42, .08);
+      --accent: #2563eb;
+      --accent-2: #22c55e;
+      --accent-soft: rgba(37, 99, 235, .10);
+      --accent-soft-2: rgba(34, 197, 94, .12);
+      --warn: #b45309;
+      --warn-soft: rgba(180, 83, 9, .12);
+      --radius: 18px;
     }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui}
-    .page{max-width:1100px;margin:0 auto;padding:56px 20px 120px}
-    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
-    .brand{display:flex;gap:10px;font-weight:800}
-    .brand .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
-    .btn{display:inline-flex;gap:8px;padding:10px 14px;border-radius:999px;
-      border:1px solid var(--border);background:#fff;font-weight:600;
-      text-decoration:none;color:var(--text)}
-    .btn.primary{border-color:rgba(37,99,235,.35)}
-    .hero{background:#fff;border:1px solid var(--border);border-radius:var(--radius);
-      box-shadow:var(--shadow);padding:28px}
-    h1{font-size:clamp(34px,4vw,56px);margin:0 0 10px}
-    .subhead{color:var(--muted);line-height:1.6}
-    .paths{display:grid;gap:12px;margin-top:18px}
-    @media(min-width:900px){.paths{grid-template-columns:repeat(3,1fr)}}
-    .path{padding:16px;border:1px solid var(--border);border-radius:16px;background:#fff}
-    footer{margin-top:32px;color:var(--muted);font-size:13px}
+
+    *{ box-sizing: border-box; }
+    html{ scroll-behavior: smooth; }
+    body{
+      margin: 0;
+      background: radial-gradient(1200px 600px at 10% -10%, rgba(37,99,235,.12), transparent 55%),
+                  radial-gradient(1200px 600px at 90% 0%, rgba(34,197,94,.10), transparent 50%),
+                  var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    .page{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 56px 20px 120px;
+    }
+
+    /* Top bar */
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .brand .dot{
+      width: 10px; height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 0 5px rgba(37,99,235,.08);
+    }
+    .top-actions{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+      box-shadow: 0 8px 18px rgba(15,23,42,.06);
+      transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(15,23,42,.10);
+      border-color: rgba(37,99,235,.25);
+    }
+    .btn.primary{
+      border-color: rgba(37,99,235,.35);
+      background: linear-gradient(180deg, #ffffff, rgba(37,99,235,.06));
+    }
+    .btn .icon{
+      width: 10px; height: 10px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    /* Hero card */
+    .hero{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px;
+      overflow: hidden;
+      position: relative;
+    }
+    .hero:before{
+      content:"";
+      position:absolute;
+      inset: -2px;
+      background: radial-gradient(900px 300px at 20% 0%, rgba(37,99,235,.10), transparent 60%),
+                  radial-gradient(900px 300px at 80% 10%, rgba(34,197,94,.10), transparent 55%);
+      pointer-events:none;
+      opacity: .85;
+    }
+    .hero > *{ position: relative; }
+
+    /* hero grid: full-width intro row + 2-col content row */
+    .hero-grid{
+      display:grid;
+      gap: 18px;
+    }
+    @media (min-width: 900px){
+      .hero-grid{
+        grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+        align-items: start;
+      }
+      .hero-grid .hero-span-2{
+        grid-column: 1 / -1; /* full width */
+      }
+    }
+
+    h1{
+      font-size: clamp(34px, 4vw, 56px);
+      line-height: 1.04;
+      margin: 0 0 10px;
+      letter-spacing: -0.04em;
+    }
+    .subhead{
+      font-size: 16px;
+      line-height: 1.65;
+      color: var(--muted);
+      margin: 0 0 12px;
+      max-width: 100ch;
+    }
+    .bio{
+      font-size: 16px;
+      line-height: 1.65;
+      margin: 0;
+      color: rgba(15,23,42,.84);
+      max-width: 100ch;
+    }
+
+    .badges{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.75);
+      color: rgba(15,23,42,.82);
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .badge .mini-dot{
+      width: 8px; height: 8px; border-radius: 999px;
+      background: rgba(15,23,42,.35);
+    }
+    .badge.live .mini-dot{ background: var(--accent-2); box-shadow: 0 0 0 4px rgba(34,197,94,.16); }
+    .badge.attr .mini-dot{ background: var(--accent); box-shadow: 0 0 0 4px rgba(37,99,235,.14); }
+
+    /* About-you panel */
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.80));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow-soft);
+      padding: 16px;
+    }
+    .panel-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .panel-title h3{
+      margin: 0;
+      font-size: 14px;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+      color: rgba(15,23,42,.72);
+    }
+    .panel-hint{
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0 0 10px;
+      line-height: 1.5;
+    }
+    .chips{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0 0;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(37,99,235,.20);
+      background: var(--accent-soft);
+      color: rgba(15,23,42,.85);
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .chip .k{
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      color: rgba(37,99,235,.85);
+      text-transform: uppercase;
+    }
+    .chip.guest{
+      border-color: rgba(15,23,42,.14);
+      background: rgba(15,23,42,.04);
+      color: rgba(15,23,42,.55);
+    }
+    .chip.mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-weight: 700;
+    }
+    .panel-cta{
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .panel-cta a{
+      color: rgba(37,99,235,.95);
+      text-decoration: none;
+      font-weight: 700;
+      border-bottom: 1px dotted rgba(37,99,235,.45);
+    }
+    .panel-cta a:hover{ border-bottom-style: solid; }
+
+    /* Sections */
+    .section{
+      margin-top: 26px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow-soft);
+    }
+    .section-header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .section h2{
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: -0.02em;
+    }
+    .section p{
+      margin: 8px 0 0;
+      line-height: 1.7;
+      color: rgba(15,23,42,.82);
+      max-width: 85ch;
+    }
+    .muted{ color: var(--muted); }
+
+    /* Path cards */
+    .paths{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    @media (min-width: 900px){
+      .paths{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    .path{
+      border-radius: 18px;
+      border: 1px solid rgba(15,23,42,.10);
+      background: linear-gradient(180deg, #ffffff, #fbfbfe);
+      padding: 16px;
+      cursor: pointer;
+      text-align: left;
+      box-shadow: 0 10px 22px rgba(15,23,42,.06);
+      transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .path:before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background: radial-gradient(700px 200px at 20% 0%, rgba(37,99,235,.12), transparent 60%);
+      opacity: 0;
+      transition: opacity .16s ease;
+      pointer-events: none;
+    }
+    .path:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 18px 36px rgba(15,23,42,.10);
+      border-color: rgba(37,99,235,.25);
+    }
+    .path:hover:before{ opacity: 1; }
+    .path > *{ position: relative; }
+    .path .kicker{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(37,99,235,.9);
+      margin-bottom: 10px;
+    }
+    .path .kicker .dot{
+      width: 10px; height: 10px; border-radius: 999px;
+      background: rgba(37,99,235,.9);
+      box-shadow: 0 0 0 4px rgba(37,99,235,.12);
+    }
+    .path h3{
+      margin: 0 0 6px;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+    }
+    .path p{
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.6;
+      color: rgba(15,23,42,.72);
+    }
+    .path .hint{
+      margin-top: 10px;
+      font-size: 12px;
+      color: rgba(15,23,42,.60);
+      font-weight: 600;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+
+    /* Feature list */
+    .feature-grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    @media (min-width: 900px){
+      .feature-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    .feature{
+      border: 1px solid rgba(15,23,42,.10);
+      background: var(--surface-2);
+      border-radius: 16px;
+      padding: 14px 14px;
+      transition: transform .14s ease, box-shadow .14s ease;
+    }
+    .feature:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 16px 30px rgba(15,23,42,.08);
+    }
+    .feature .title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .feature .title strong{
+      font-size: 14px;
+      letter-spacing: -0.01em;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .02em;
+      border: 1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.8);
+      color: rgba(15,23,42,.70);
+      white-space: nowrap;
+    }
+    .pill.green{ border-color: rgba(34,197,94,.25); background: var(--accent-soft-2); color: rgba(15,23,42,.78); }
+    .pill.blue{ border-color: rgba(37,99,235,.22); background: var(--accent-soft); color: rgba(15,23,42,.78); }
+    .pill.warn{ border-color: rgba(180,83,9,.22); background: var(--warn-soft); color: rgba(15,23,42,.78); }
+
+    /* Cost table */
+    table{
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+    th, td{
+      text-align: left;
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(15,23,42,.10);
+      vertical-align: top;
+    }
+    th{
+      font-size: 12px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: rgba(15,23,42,.55);
+      font-weight: 800;
+    }
+    td{
+      color: rgba(15,23,42,.78);
+      line-height: 1.55;
+    }
+
+    /* “Living site” dividers */
+    .divider{
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(15,23,42,.12), transparent);
+      margin: 22px 0;
+    }
+
+    /* Footer */
+    .footer{
+      margin-top: 18px;
+      font-size: 13px;
+      color: var(--muted);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .footer a{
+      color: rgba(37,99,235,.95);
+      text-decoration: none;
+      font-weight: 700;
+      border-bottom: 1px dotted rgba(37,99,235,.45);
+    }
+    .footer a:hover{ border-bottom-style: solid; }
+
+    /* NEW: hidden "deep dive" container */
+    .deep-dive{
+      margin-top: 14px;
+      display: none;
+    }
+    .deep-dive.is-open{
+      display:block;
+    }
+    .deep-dive .divider{ margin: 18px 0; }
+
+    /* NEW: little chevron */
+    .chev{
+      width: 10px;
+      height: 10px;
+      border-right: 2px solid rgba(15,23,42,.55);
+      border-bottom: 2px solid rgba(15,23,42,.55);
+      transform: rotate(-45deg);
+      transition: transform .16s ease;
+      margin-left: 8px;
+      flex: 0 0 auto;
+    }
+    .path[aria-expanded="true"] .chev{
+      transform: rotate(45deg);
+    }
   </style>
 </head>
 
@@ -47,85 +508,526 @@
       </div>
 
       <div class="top-actions">
-        <a id="resumeLink" class="btn primary" target="_blank" rel="noopener">
-          View resume (PDF)
+        <a class="btn primary" href="/Drew-Webb-Resume.pdf" target="_blank" rel="noopener">
+          <span class="icon"></span> View resume (PDF)
         </a>
-        <a id="linkedinLink" class="btn" target="_blank" rel="noopener">
-          LinkedIn
-        </a>
+        <a class="btn" href="/index.html" title="Start over / re-personalize">Start over</a>
       </div>
     </div>
 
+    <!-- HERO -->
     <section class="hero">
-      <h1 id="hello">Welcome</h1>
-      <p id="context" class="subhead"></p>
+      <div class="hero-grid">
 
-      <div class="paths">
-        <div class="path">
-          <strong>Why this page exists</strong>
-          <p class="subhead">
-            This is a live Marketing Ops demo: attribution, personalization, scoring,
-            and follow-up — happening in real time.
+        <!-- FULL-WIDTH TOP INTRO -->
+        <div class="hero-span-2">
+          <!-- IDs REQUIRED for personalization -->
+          <div id="hello"><h1>Welcome</h1></div>
+
+          <p class="bio">
+            I’m Drew Webb — a senior Marketing Operations &amp; Growth leader who designs systems that connect
+            data, automation, and real business outcomes.
           </p>
+
+          <p id="context" class="subhead"></p>
+
+          <div class="badges" id="live-badges">
+            <span class="badge live"><span class="mini-dot"></span> Live demo</span>
+            <span class="badge attr"><span class="mini-dot"></span> Attribution-aware</span>
+          </div>
+
+          <div class="divider"></div>
         </div>
 
-        <div class="path">
-          <strong>What’s being tracked</strong>
-          <p class="subhead">
-            Resume views, LinkedIn clicks, and engagement time — routed server-side,
-            not blocked by browsers.
+        <!-- LEFT: WHAT YOU'RE GETTING -->
+        <div>
+          <div class="section-header" style="margin-bottom:6px;">
+            <h2 style="font-size:16px; margin:0;">What you’re getting on this page</h2>
+          </div>
+          <p class="muted" style="margin-top:6px;">
+            A short, guided walkthrough that shows what you’d look for in a Marketing Ops leader —
+            happening in real time: personalization, attribution, capture, and follow-up.
           </p>
+
+          <div class="feature-grid">
+            <div class="feature">
+              <div class="title">
+                <strong>Personalization (subtle, but real)</strong>
+                <span class="pill blue">Rendered live</span>
+              </div>
+              <div class="muted">
+                The page adapts based on what you submitted — and “guest mode” shows what you’re skipping.
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="title">
+                <strong>Attribution signal</strong>
+                <span class="pill green">Captured</span>
+              </div>
+              <div class="muted">
+                If you arrived via a tracked link, that label is carried forward so follow-ups can be measured.
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="title">
+                <strong>Lifecycle follow-up</strong>
+                <span class="pill warn">In progress</span>
+              </div>
+              <div class="muted">
+                If you provided an email, you’ll receive a brief follow-up (content will evolve).
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="title">
+                <strong>Observability</strong>
+                <span class="pill blue">Private</span>
+              </div>
+              <div class="muted">
+                A private dashboard tracks engagement and routing without exposing visitor data publicly.
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="path">
-          <strong>Why it matters</strong>
-          <p class="subhead">
-            This is how I think about systems: clean signals, low noise,
-            and decisions you can trust.
+        <!-- RIGHT: ABOUT YOU -->
+        <aside class="panel" aria-label="About you panel">
+          <div class="panel-title">
+            <h3>About you</h3>
+            <span class="pill blue" id="about-you-status">Personalized</span>
+          </div>
+
+          <p class="panel-hint" id="about-you-hint">
+            This is a live proof point: the same data you entered can be captured, stored, and used to personalize a journey —
+            while still respecting privacy and keeping it subtle.
           </p>
-        </div>
+
+          <!-- ID REQUIRED for personalization tags -->
+          <div id="tags" class="chips"></div>
+
+          <div class="panel-cta" id="about-you-cta">
+            Tip: arriving through <span class="chip mono"><span class="k">ref</span><span id="ref-chip">direct</span></span> enables clean attribution without messy UTMs.
+          </div>
+        </aside>
+
       </div>
+
+      <!-- “Choose your path” -->
+      <div class="divider"></div>
+
+      <div class="section-header">
+        <h2>Choose your path</h2>
+        <p class="muted" style="margin:0; max-width: 60ch;">
+          Hover for a preview. Click to open.
+        </p>
+      </div>
+
+      <div class="paths" role="navigation" aria-label="Open sections">
+        <button class="path" type="button" data-toggle="about" aria-expanded="false">
+          <div class="kicker"><span class="dot"></span> About me</div>
+          <h3>How I work &amp; what I build</h3>
+          <p>Problem-solving style, outcomes, and a resume-like view — framed around systems and execution.</p>
+          <div class="hint"><span>Click to open</span><span class="chev" aria-hidden="true"></span></div>
+        </button>
+
+        <button class="path" type="button" data-toggle="stacks" aria-expanded="false">
+          <div class="kicker"><span class="dot"></span> Tech stacks</div>
+          <h3>First-hand operator experience</h3>
+          <p>Martech + data + lifecycle + attribution — and how I connect them to measurable growth.</p>
+          <div class="hint"><span>Click to open</span><span class="chev" aria-hidden="true"></span></div>
+        </button>
+
+        <button class="path" type="button" data-toggle="behind" aria-expanded="false">
+          <div class="kicker"><span class="dot"></span> Behind the curtain</div>
+          <h3>How this site works</h3>
+          <p>A transparent walkthrough of what’s running right now: routing, capture, logging, and follow-up.</p>
+          <div class="hint"><span>Click to open</span><span class="chev" aria-hidden="true"></span></div>
+        </button>
+      </div>
+
+      <!-- NEW: Deep dives hidden until opened -->
+      <div class="deep-dive" id="deep-about" aria-hidden="true">
+        <div class="divider"></div>
+        <section id="about" class="section" style="margin-top:0;">
+          <div class="section-header">
+            <h2>About me</h2>
+            <span class="pill green">Systems-first operator</span>
+          </div>
+          <p>
+            I’m a Marketing Operations &amp; Growth leader who likes turning messy, multi-tool realities into clean execution:
+            clear signals, automated handoffs, trustworthy reporting, and campaigns that scale without breaking.
+          </p>
+          <p class="muted">
+            I’m usually brought in to: speed up routing and response, fix attribution gaps, make lifecycle programs more relevant,
+            and align teams around a source of truth.
+          </p>
+
+          <div class="divider"></div>
+
+          <div class="feature-grid">
+            <div class="feature">
+              <div class="title">
+                <strong>What I optimize for</strong>
+                <span class="pill blue">Outcomes</span>
+              </div>
+              <div class="muted">
+                Speed-to-lead, conversion lift, cleaner segmentation, and pipeline impact — with instrumentation from day one.
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="title">
+                <strong>How I lead</strong>
+                <span class="pill blue">Cross-functional</span>
+              </div>
+              <div class="muted">
+                Tight feedback loops with Marketing, Sales, Product, Analytics, and RevOps — and a bias for shipping.
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <a class="btn primary" href="/Drew-Webb-Resume.pdf" target="_blank" rel="noopener">
+            <span class="icon"></span> View resume (PDF)
+          </a>
+        </section>
+      </div>
+
+      <div class="deep-dive" id="deep-stacks" aria-hidden="true">
+        <div class="divider"></div>
+        <section id="stacks" class="section" style="margin-top:0;">
+          <div class="section-header">
+            <h2>Tech stacks I’ve run (and how they connect)</h2>
+            <span class="pill blue">Martech • Data • Lifecycle • Attribution</span>
+          </div>
+
+          <p class="muted">
+            This is not a “tool list.” It’s how I think about building an operating system for growth: capture signals, unify identity,
+            activate audiences, measure outcomes, and keep the system observable.
+          </p>
+
+          <div class="feature-grid">
+            <div class="feature">
+              <div class="title">
+                <strong>Martech &amp; CRM orchestration</strong>
+                <span class="pill blue">Execution</span>
+              </div>
+              <div class="muted">
+                Routing, scoring, enrichment, handoffs, QA, and lifecycle triggers that don’t drift over time.
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="title">
+                <strong>Data &amp; identity</strong>
+                <span class="pill blue">Trust</span>
+              </div>
+              <div class="muted">
+                Consistent identifiers, clean event design, and reliable pipelines so personalization and reporting don’t lie.
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="title">
+                <strong>Lifecycle &amp; messaging</strong>
+                <span class="pill green">Retention</span>
+              </div>
+              <div class="muted">
+                Segmentation and journeys that stay relevant — and can be measured beyond vanity engagement.
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="title">
+                <strong>Attribution &amp; measurement</strong>
+                <span class="pill green">Signal</span>
+              </div>
+              <div class="muted">
+                Practical attribution: what can we trust, how do we validate, and how do we iterate without breaking tracking.
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="deep-dive" id="deep-behind" aria-hidden="true">
+        <div class="divider"></div>
+        <section id="behind" class="section" style="margin-top:0;">
+          <div class="section-header">
+            <h2>How this site works</h2>
+            <span class="pill green">Live demo</span>
+          </div>
+
+          <p>
+            This page is a portfolio — but it’s also a working example of the same thinking that powers real marketing ops systems:
+            attribution, capture, personalization, follow-up, and observability.
+          </p>
+
+          <div class="divider"></div>
+
+          <div class="feature-grid">
+            <div class="feature">
+              <div class="title">
+                <strong>Routing &amp; attribution</strong>
+                <span class="pill green">/r/:slug</span>
+              </div>
+              <div class="muted">
+                Tracked links can carry a clean label forward (ex: <span style="font-family: ui-monospace;">ref=draftkings</span>)
+                so engagement and follow-ups can be measured without clutter.
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="title">
+                <strong>Capture &amp; personalization</strong>
+                <span class="pill blue">Form → page</span>
+              </div>
+              <div class="muted">
+                The info you submit is used to tailor this view. Guest mode shows the same journey — with reduced context.
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="title">
+                <strong>Logging &amp; bot filtering</strong>
+                <span class="pill blue">Efficient</span>
+              </div>
+              <div class="muted">
+                Visits can be logged with lightweight rules (and bots can be filtered) so signals stay clean.
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="title">
+                <strong>Observability</strong>
+                <span class="pill blue">Private</span>
+              </div>
+              <div class="muted">
+                A private dashboard (Pulse) is used to inspect traffic and engagement without exposing visitor data publicly.
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="section-header">
+            <h2 style="font-size:16px;">Stack + cost outline</h2>
+            <span class="pill blue">Transparent &amp; impressive</span>
+          </div>
+          <p class="muted" style="margin-top:6px;">
+            Placeholder numbers for now — we’ll refine the exact costs and vendors (domain registrar, etc.) later.
+          </p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Component</th>
+                <th>What it does</th>
+                <th>Est. cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Cloudflare Workers</strong></td>
+                <td>Routing, attribution, logging, and private admin surfaces</td>
+                <td>~$0–$X / mo</td>
+              </tr>
+              <tr>
+                <td><strong>Cloudflare KV</strong></td>
+                <td>Efficient event storage (visit logs)</td>
+                <td>~$0–$X / mo</td>
+              </tr>
+              <tr>
+                <td><strong>Cloudflare D1</strong></td>
+                <td>Slug store + metadata (and future contact store)</td>
+                <td>~$0–$X / mo</td>
+              </tr>
+              <tr>
+                <td><strong>GitHub Pages</strong></td>
+                <td>Static hosting for the site</td>
+                <td>$0</td>
+              </tr>
+              <tr>
+                <td><strong>Email (Resend)</strong></td>
+                <td>Follow-up / lifecycle messaging</td>
+                <td>~$0–$X / mo</td>
+              </tr>
+              <tr>
+                <td><strong>Domain</strong></td>
+                <td>Registrar + renewal</td>
+                <td>~$X / year</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+
     </section>
 
-    <footer>
-      Built as a live Marketing Ops system — not a mockup.
-    </footer>
-
+    <div class="footer">
+      <div>
+        Not you? <a href="/index.html">Start over</a> (or continue as guest)
+      </div>
+      <div class="muted">
+        Built as a live Marketing Ops demo — personalization + attribution + observability.
+      </div>
+    </div>
   </div>
 
-  <!-- 🔗 Tracking + Personalization -->
+  <!-- PERSONALIZATION SCRIPT
+       KEEP IDs: hello, context, tags
+       Adds: guest-mode styling + ref display + optional company/title/linkedin if present
+  -->
   <script>
     (function () {
-      const params = new URLSearchParams(location.search);
-      const email = params.get("email") || "";
+      try {
+        const params = new URLSearchParams(location.search);
 
-      const resumeBase = "https://api.drewwebbai.com/out" +
-        "?event=resume_clicked" +
-        "&to=" + encodeURIComponent("https://drewwebbai.com/resume");
+        // Existing parameters (already used by your flow)
+        const name   = params.get('name') || '';
+        const email  = params.get('email') || '';
+        const guest  = params.get('guest') === '1';
 
-      const linkedinBase = "https://api.drewwebbai.com/out" +
-        "?event=linkedin_clicked" +
-        "&to=" + encodeURIComponent("https://www.linkedin.com/in/drewrwebb/");
+        // Optional extras (safe if not present)
+        const company  = params.get('company') || '';
+        const title    = params.get('title') || '';
+        const linkedin = params.get('linkedin') || '';
 
-      const resumeLink = document.getElementById("resumeLink");
-      const linkedinLink = document.getElementById("linkedinLink");
+        // Attribution label carried forward (if you set /?ref=slug)
+        const ref = params.get('ref') || '';
 
-      resumeLink.href = email ? `${resumeBase}&email=${encodeURIComponent(email)}` : resumeBase;
-      linkedinLink.href = email ? `${linkedinBase}&email=${encodeURIComponent(email)}` : linkedinBase;
+        const hello   = document.getElementById('hello');
+        const context = document.getElementById('context');
+        const tags    = document.getElementById('tags');
 
-      const hello = document.getElementById("hello");
-      const context = document.getElementById("context");
+        const aboutYouStatus = document.getElementById('about-you-status');
+        const aboutYouHint   = document.getElementById('about-you-hint');
+        const aboutYouCta    = document.getElementById('about-you-cta');
+        const refChip        = document.getElementById('ref-chip');
 
-      if (email) {
-        hello.textContent = "Welcome 👋";
-        context.textContent =
-          "You’re viewing a personalized, tracked version of my live Marketing Ops portfolio.";
-      } else {
-        context.textContent =
-          "You’re viewing the guest version of my live Marketing Ops portfolio.";
+        const displayName = (name || email || 'there').trim();
+
+        // Headline: keep it clean (no waving hand)
+        if (hello) {
+          hello.innerHTML = `<h1>Welcome, ${escapeHtml(displayName)}</h1>`;
+        }
+
+        // Context line: subtle, warm, and explains the journey
+        if (context) {
+          if (guest) {
+            context.textContent =
+              "You’re viewing the guest version of my live Marketing Ops portfolio. Fill out the intro form to unlock subtle personalization + cleaner attribution signals.";
+          } else {
+            context.textContent =
+              "Glad you’re here. This page is a live example of how I build Marketing Ops systems — personalization, attribution, capture, and follow-up — happening as you read.";
+          }
+        }
+
+        // Attribution chip (top tip)
+        if (refChip) refChip.textContent = (ref || 'direct');
+
+        // Build “About you” chips (subtle but clear)
+        const chips = [];
+
+        function addChip(key, value, opts = {}) {
+          if (!value) return;
+          const cls = opts.guest ? 'chip guest' : 'chip';
+          const mono = opts.mono ? ' mono' : '';
+          chips.push(`<span class="${cls}${mono}"><span class="k">${escapeHtml(key)}</span><span>${escapeHtml(value)}</span></span>`);
+        }
+
+        if (guest) {
+          if (aboutYouStatus) aboutYouStatus.textContent = "Guest mode";
+          if (aboutYouHint) aboutYouHint.textContent =
+            "Guest mode shows the same journey, but without the personalized context. Fill out the intro form to see the page adapt using real inputs.";
+          if (aboutYouCta) aboutYouCta.innerHTML =
+            `Want the full experience? <a href="/index.html">Introduce yourself</a> (takes ~10 seconds).`;
+
+          addChip('mode', 'guest', { guest: true, mono: true });
+          addChip('personalization', 'limited', { guest: true });
+          addChip('ref', ref || 'direct', { guest: true, mono: true });
+        } else {
+          if (aboutYouStatus) aboutYouStatus.textContent = "Personalized";
+          if (aboutYouHint) aboutYouHint.textContent =
+            "This is intentionally subtle: the same data you entered can be captured, stored, and used to personalize a journey — without making it creepy or loud.";
+          if (aboutYouCta) aboutYouCta.innerHTML =
+            `Attribution label detected: <span class="chip mono"><span class="k">ref</span><span>${escapeHtml(ref || 'direct')}</span></span>`;
+
+          // Show what was provided (and therefore can be stored/used later)
+          addChip('name', name || '(not provided)');
+          if (email) addChip('email', email);
+          if (company) addChip('company', company);
+          if (title) addChip('title', title);
+          if (linkedin) addChip('linkedin', shorten(linkedin));
+
+          // Lifecycle note
+          if (email) addChip('follow-up', 'email queued');
+          else addChip('follow-up', 'skipped (no email)');
+        }
+
+        if (tags) tags.innerHTML = chips.join('');
+
+        // NEW: Toggle deep dives open/closed (no scrolling)
+        const sections = ['about', 'stacks', 'behind'];
+
+        function setOpen(key, open) {
+          const panel = document.getElementById(`deep-${key}`);
+          const btn = document.querySelector(`.path[data-toggle="${key}"]`);
+          if (!panel || !btn) return;
+
+          if (open) {
+            panel.classList.add('is-open');
+            panel.setAttribute('aria-hidden', 'false');
+            btn.setAttribute('aria-expanded', 'true');
+            btn.querySelector('.hint span').textContent = 'Click to close';
+          } else {
+            panel.classList.remove('is-open');
+            panel.setAttribute('aria-hidden', 'true');
+            btn.setAttribute('aria-expanded', 'false');
+            btn.querySelector('.hint span').textContent = 'Click to open';
+          }
+        }
+
+        // default: all closed
+        sections.forEach(k => setOpen(k, false));
+
+        document.querySelectorAll('.path[data-toggle]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const key = btn.getAttribute('data-toggle');
+            const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+            // open clicked one, close others
+            sections.forEach(k => setOpen(k, k === key ? !isExpanded : false));
+            // keep viewport anchored near the cards
+            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          });
+        });
+
+        function escapeHtml(str) {
+          return String(str || '').replace(/[&<>'"]/g, c => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            "'": "&#39;",
+            '"': "&quot;"
+          })[c]);
+        }
+
+        function shorten(url) {
+          const s = String(url || '').trim();
+          if (!s) return '';
+          return s.length > 34 ? (s.slice(0, 30) + "…") : s;
+        }
+      } catch (e) {
+        // Fail-safe content if anything weird happens
+        const hello = document.getElementById('hello');
+        const context = document.getElementById('context');
+        if (hello) hello.innerHTML = `<h1>Welcome</h1>`;
+        if (context) context.textContent = "Here’s a quick overview of my work and how this site demonstrates it live.";
       }
     })();
   </script>
-
 </body>
 </html>
