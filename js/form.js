@@ -8,6 +8,9 @@
   const WELCOME_PATH = "/welcome.html";
   const INDEX_PATH = "/index.html";
 
+  // Try these endpoints in order (prevents the 404 you saw)
+  const POST_ENDPOINTS = ["/send", "/"]; // "/send" first, then fallback to "/"
+
   // Form + UI elements (match your existing IDs)
   const form = document.getElementById("introForm");
   const errorBanner = document.getElementById("serverError"); // your red banner area (if present)
@@ -21,8 +24,7 @@
   const elLinkedIn = document.getElementById("linkedin");
   const elEmail = document.getElementById("email");
 
-  // Cloudflare Turnstile (optional; only used if present)
-  // If your site already handles this elsewhere, no harm — we just try to read it.
+  // Cloudflare Turnstile (optional)
   function getTurnstileToken() {
     const hidden = document.querySelector('input[name="cf-turnstile-response"]');
     return hidden ? hidden.value : "";
@@ -49,37 +51,89 @@
     return new URLSearchParams(location.search).get(key) || "";
   }
 
+  // --- Attribution helpers --------------------------------------------------
+
+  function getRef() {
+    return (qs("ref") || "").trim();
+  }
+
   // If you’re using ?ref=... or /r/:slug sets ref into query, we’ll pass it through.
-  // We also turn it into a portfolioSlug convention you’re already using.
+  // We also normalize it into a portfolioSlug convention.
   function getPortfolioSlug() {
-    // Prefer explicit portfolioSlug if you set one somewhere
-    const direct = qs("portfolioSlug");
+    const direct =
+      (qs("portfolioSlug") || qs("portfolio_slug") || "").trim();
     if (direct) return direct;
 
-    const ref = qs("ref");
+    const ref = getRef();
     if (!ref) return "";
-    // You’ve been using values like recruiter-draftkings; keep it consistent
-    // If ref is already recruiter-draftkings, this returns it unchanged.
     return ref;
   }
 
-  async function postIntro(payload) {
-    const res = await fetch(API_ROOT + "/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+  // Lead source: prefer explicit params; fallback to UTM-ish; else infer from ref/direct
+  function getLeadSource() {
+    const explicit =
+      (qs("leadSource") || qs("lead_source") || "").trim();
+    if (explicit) return explicit;
 
-    const text = await res.text().catch(() => "");
-    if (!res.ok) {
-      throw new Error(`Server error: HTTP ${res.status}${text ? ` — ${text}` : ""}`);
+    const utmSource = (qs("utm_source") || "").trim();
+    const utmMedium = (qs("utm_medium") || "").trim();
+    const utmCampaign = (qs("utm_campaign") || "").trim();
+
+    if (utmSource || utmMedium || utmCampaign) {
+      // Keep it readable, not noisy
+      const parts = [];
+      if (utmSource) parts.push(`utm_source:${utmSource}`);
+      if (utmMedium) parts.push(`utm_medium:${utmMedium}`);
+      if (utmCampaign) parts.push(`utm_campaign:${utmCampaign}`);
+      return parts.join(" | ");
     }
 
-    // Worker returns JSON; but we parse from text so we can display body on weird errors
-    let data = {};
-    try { data = JSON.parse(text); } catch {}
-    return data;
+    // Inference:
+    // - if ref exists, it came from a tracked link (slug routing)
+    // - else direct
+    return getRef() ? "Tracked link" : "Direct";
   }
+
+  // --- API posting ----------------------------------------------------------
+
+  async function postIntro(payload) {
+    let lastErr = null;
+
+    for (const path of POST_ENDPOINTS) {
+      try {
+        const url = API_ROOT + path;
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const text = await res.text().catch(() => "");
+
+        if (!res.ok) {
+          // If this endpoint isn't found, try the next one.
+          if (res.status === 404) {
+            lastErr = new Error(`Server error: HTTP 404 at ${path}${text ? ` — ${text}` : ""}`);
+            continue;
+          }
+          throw new Error(`Server error: HTTP ${res.status}${text ? ` — ${text}` : ""}`);
+        }
+
+        // Worker returns JSON; parse from text so we can show body on weird errors
+        let data = {};
+        try { data = JSON.parse(text); } catch {}
+        return data;
+
+      } catch (e) {
+        lastErr = e;
+        // try next endpoint
+      }
+    }
+
+    throw lastErr || new Error("Server error: unable to submit form");
+  }
+
+  // --- Redirect -------------------------------------------------------------
 
   function redirectToWelcome(payload) {
     const u = new URL(WELCOME_PATH, window.location.origin);
@@ -91,12 +145,18 @@
     if (payload.title) u.searchParams.set("title", payload.title);
     if (payload.linkedin) u.searchParams.set("linkedin", payload.linkedin);
 
-    // Keep attribution/ref if present
-    const ref = qs("ref");
+    // NEW: carry the exact attribution your welcome page expects
+    if (payload.portfolioSlug) u.searchParams.set("portfolioSlug", payload.portfolioSlug);
+    if (payload.leadSource) u.searchParams.set("leadSource", payload.leadSource);
+
+    // Backward compatibility: still carry ref if present
+    const ref = getRef();
     if (ref) u.searchParams.set("ref", ref);
 
     window.location.assign(u.toString());
   }
+
+  // --- Submit handler -------------------------------------------------------
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -109,7 +169,11 @@
       title: (elTitle?.value || "").trim(),
       linkedin: (elLinkedIn?.value || "").trim(),
       email: (elEmail?.value || "").trim(),
+
+      // NEW: attribution fields
       portfolioSlug: getPortfolioSlug(),
+      leadSource: getLeadSource(),
+
       // Optional; only useful if your Worker validates it
       turnstileToken: getTurnstileToken(),
     };
