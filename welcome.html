@@ -885,13 +885,7 @@
     </div>
   </div>
 
-  <!-- PERSONALIZATION + TRACKING SCRIPT
-       KEEP IDs: hello, context, tags
-       Adds:
-         - guest-mode styling + ref display + optional company/title/linkedin if present
-         - tracked Resume + LinkedIn links via /out
-         - time-on-page event fire at 30s and 90s (only if email exists)
-  -->
+  <!-- PERSONALIZATION + TRACKING SCRIPT -->
   <script>
     (function () {
       try {
@@ -907,8 +901,23 @@
         const title    = params.get('title') || '';
         const linkedin = params.get('linkedin') || '';
 
-        // Attribution label carried forward (if you set /?ref=slug)
+        // Attribution / routing params (support multiple naming styles)
         const ref = params.get('ref') || '';
+
+        // Prefer slug + lead source (support both camel + snake + your older ref)
+        const portfolioSlug =
+          params.get('portfolioSlug') ||
+          params.get('portfolio_slug') ||
+          params.get('portfolioSlug'.toLowerCase()) || // harmless fallback
+          '';
+
+        const leadSource =
+          params.get('leadSource') ||
+          params.get('lead_source') ||
+          '';
+
+        const entryPath = (portfolioSlug || ref || 'direct').trim();
+        const sourceLabel = (leadSource || '').trim();
 
         const hello   = document.getElementById('hello');
         const context = document.getElementById('context');
@@ -921,12 +930,12 @@
 
         const displayName = (name || email || 'there').trim();
 
-        // Headline: keep it clean (no waving hand)
+        // Headline
         if (hello) {
           hello.innerHTML = `<h1>Welcome, ${escapeHtml(displayName)}</h1>`;
         }
 
-        // Context line: subtle, warm, and explains the journey
+        // Context line
         if (context) {
           if (guest) {
             context.textContent =
@@ -937,12 +946,11 @@
           }
         }
 
-        // Attribution chip (top tip)
-        if (refChip) refChip.textContent = (ref || 'direct');
+        // Replace old "ref" chip content with entry path (slug-first)
+        if (refChip) refChip.textContent = (entryPath || 'direct');
 
-        // Build “About you” chips (subtle but clear)
+        // Chips builder
         const chips = [];
-
         function addChip(key, value, opts = {}) {
           if (!value) return;
           const cls = opts.guest ? 'chip guest' : 'chip';
@@ -959,20 +967,35 @@
 
           addChip('mode', 'guest', { guest: true, mono: true });
           addChip('personalization', 'limited', { guest: true });
-          addChip('ref', ref || 'direct', { guest: true, mono: true });
+
+          // NEW: show entry path + optional source
+          addChip('path', entryPath || 'direct', { guest: true, mono: true });
+          if (sourceLabel) addChip('source', sourceLabel, { guest: true });
+
         } else {
           if (aboutYouStatus) aboutYouStatus.textContent = "Personalized";
           if (aboutYouHint) aboutYouHint.textContent =
             "This is intentionally subtle: the same data you entered can be captured, stored, and used to personalize a journey — without making it creepy or loud.";
-          if (aboutYouCta) aboutYouCta.innerHTML =
-            `Attribution label detected: <span class="chip mono"><span class="k">ref</span><span>${escapeHtml(ref || 'direct')}</span></span>`;
 
-          // Show what was provided (and therefore can be stored/used later)
+          // NEW: CTA shows path + optional source (no more "ref")
+          if (aboutYouCta) {
+            const sourceLine = sourceLabel
+              ? `&nbsp;&nbsp;<span class="chip mono"><span class="k">source</span><span>${escapeHtml(sourceLabel)}</span></span>`
+              : '';
+            aboutYouCta.innerHTML =
+              `Entry path: <span class="chip mono"><span class="k">path</span><span>${escapeHtml(entryPath || 'direct')}</span></span>${sourceLine}`;
+          }
+
+          // Show what was provided
           addChip('name', name || '(not provided)');
           if (email) addChip('email', email);
           if (company) addChip('company', company);
           if (title) addChip('title', title);
           if (linkedin) addChip('linkedin', shorten(linkedin));
+
+          // NEW: include path + optional source in the chip list too
+          addChip('path', entryPath || 'direct', { mono: true });
+          if (sourceLabel) addChip('source', sourceLabel);
 
           // Lifecycle note
           if (email) addChip('follow-up', 'email queued');
@@ -981,9 +1004,16 @@
 
         if (tags) tags.innerHTML = chips.join('');
 
-        // NEW: Toggle deep dives open/closed (no scrolling)
-        const sections = ['about', 'stacks', 'behind'];
+        // NEW: update the Tip copy so it no longer says "ref"
+        // (we keep the existing HTML structure and only rewrite the text)
+        if (aboutYouCta && aboutYouCta.textContent && aboutYouCta.textContent.trim().startsWith('Tip:')) {
+          const tipSource = sourceLabel ? ` Source: ${escapeHtml(sourceLabel)}.` : '';
+          aboutYouCta.innerHTML =
+            `Tip: entry path <span class="chip mono"><span class="k">path</span><span>${escapeHtml(entryPath || 'direct')}</span></span> enables clean attribution without messy UTMs.${tipSource}`;
+        }
 
+        // Toggle deep dives open/closed
+        const sections = ['about', 'stacks', 'behind'];
         function setOpen(key, open) {
           const panel = document.getElementById(`deep-${key}`);
           const btn = document.querySelector(`.path[data-toggle="${key}"]`);
@@ -1001,17 +1031,12 @@
             btn.querySelector('.hint span').textContent = 'Click to open';
           }
         }
-
-        // default: all closed
         sections.forEach(k => setOpen(k, false));
-
         document.querySelectorAll('.path[data-toggle]').forEach(btn => {
           btn.addEventListener('click', () => {
             const key = btn.getAttribute('data-toggle');
             const isExpanded = btn.getAttribute('aria-expanded') === 'true';
-            // open clicked one, close others
             sections.forEach(k => setOpen(k, k === key ? !isExpanded : false));
-            // keep viewport anchored near the cards
             btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
           });
         });
@@ -1028,8 +1053,14 @@
           u.searchParams.set("event", eventName);
           u.searchParams.set("to", toUrl);
           if (email) u.searchParams.set("email", email);
-          // (optional) carry ref for your own logging later if you want; harmless if unused
+
+          // carry slug + source (more useful than ref)
+          if (entryPath) u.searchParams.set("path", entryPath);
+          if (sourceLabel) u.searchParams.set("source", sourceLabel);
+
+          // harmless backward compatibility if your worker still expects ref
           if (ref) u.searchParams.set("ref", ref);
+
           return u.toString();
         }
 
@@ -1068,7 +1099,6 @@
 
         setInterval(() => {
           const elapsed = Math.floor((Date.now() - start) / 1000);
-
           if (elapsed >= 30 && !fired[30]) { fired[30] = true; postEvent(30); }
           if (elapsed >= 90 && !fired[90]) { fired[90] = true; postEvent(90); }
         }, 1000);
@@ -1089,7 +1119,6 @@
           return s.length > 34 ? (s.slice(0, 30) + "…") : s;
         }
       } catch (e) {
-        // Fail-safe content if anything weird happens
         const hello = document.getElementById('hello');
         const context = document.getElementById('context');
         if (hello) hello.innerHTML = `<h1>Welcome</h1>`;
