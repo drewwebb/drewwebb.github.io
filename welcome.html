@@ -184,7 +184,8 @@
       font-weight: 600;
     }
     .badge .mini-dot{
-      width: 8px; height: 8px; border-radius: 999px;
+      width: 8px; height: 8px;
+      border-radius: 999px;
       background: rgba(15,23,42,.35);
     }
     .badge.live .mini-dot{ background: var(--accent-2); box-shadow: 0 0 0 4px rgba(34,197,94,.16); }
@@ -345,7 +346,8 @@
       margin-bottom: 10px;
     }
     .path .kicker .dot{
-      width: 10px; height: 10px; border-radius: 999px;
+      width: 10px; height: 10px;
+      border-radius: 999px;
       background: rgba(37,99,235,.9);
       box-shadow: 0 0 0 4px rgba(37,99,235,.12);
     }
@@ -614,8 +616,9 @@
           <!-- ID REQUIRED for personalization tags -->
           <div id="tags" class="chips"></div>
 
+          <!-- Will be rewritten by JS (no "ref") -->
           <div class="panel-cta" id="about-you-cta">
-            Tip: arriving through <span class="chip mono"><span class="k">ref</span><span id="ref-chip">direct</span></span> enables clean attribution without messy UTMs.
+            Tip: entry path <span class="chip mono"><span class="k">path</span><span id="path-chip">direct</span></span> enables clean attribution without messy UTMs.
           </div>
         </aside>
 
@@ -654,7 +657,7 @@
         </button>
       </div>
 
-      <!-- NEW: Deep dives hidden until opened -->
+      <!-- Deep dives -->
       <div class="deep-dive" id="deep-about" aria-hidden="true">
         <div class="divider"></div>
         <section id="about" class="section" style="margin-top:0;">
@@ -697,7 +700,6 @@
 
           <div class="divider"></div>
 
-          <!-- UPDATED: JS will rewrite href to /out tracking -->
           <a class="btn primary" id="resume-link-2" href="/resume" target="_blank" rel="noopener">
             <span class="icon"></span> View resume (PDF)
           </a>
@@ -783,7 +785,7 @@
                 <span class="pill green">/r/:slug</span>
               </div>
               <div class="muted">
-                Tracked links can carry a clean label forward (ex: <span style="font-family: ui-monospace;">ref=draftkings</span>)
+                Tracked links can carry a clean label forward (example: <span style="font-family: ui-monospace;">portfolioSlug=draftkings-ethan</span>)
                 so engagement and follow-ups can be measured without clutter.
               </div>
             </div>
@@ -901,23 +903,23 @@
         const title    = params.get('title') || '';
         const linkedin = params.get('linkedin') || '';
 
-        // Attribution / routing params (support multiple naming styles)
-        const ref = params.get('ref') || '';
+        // Back-compat: older "ref"
+        const ref = (params.get('ref') || '').trim();
 
-        // Prefer slug + lead source (support both camel + snake + your older ref)
+        // Prefer slug + lead source (support camel + snake variants)
         const portfolioSlug =
-          params.get('portfolioSlug') ||
-          params.get('portfolio_slug') ||
-          params.get('portfolioSlug'.toLowerCase()) || // harmless fallback
-          '';
+          (params.get('portfolioSlug') ||
+           params.get('portfolio_slug') ||
+           '').trim();
 
         const leadSource =
-          params.get('leadSource') ||
-          params.get('lead_source') ||
-          '';
+          (params.get('leadSource') ||
+           params.get('lead_source') ||
+           '').trim();
 
+        // Entry path = slug-first (falls back to ref, then direct)
         const entryPath = (portfolioSlug || ref || 'direct').trim();
-        const sourceLabel = (leadSource || '').trim();
+        const sourceLabel = leadSource;
 
         const hello   = document.getElementById('hello');
         const context = document.getElementById('context');
@@ -926,7 +928,7 @@
         const aboutYouStatus = document.getElementById('about-you-status');
         const aboutYouHint   = document.getElementById('about-you-hint');
         const aboutYouCta    = document.getElementById('about-you-cta');
-        const refChip        = document.getElementById('ref-chip');
+        const pathChip       = document.getElementById('path-chip');
 
         const displayName = (name || email || 'there').trim();
 
@@ -946,8 +948,8 @@
           }
         }
 
-        // Replace old "ref" chip content with entry path (slug-first)
-        if (refChip) refChip.textContent = (entryPath || 'direct');
+        // Update path chip in the Tip line
+        if (pathChip) pathChip.textContent = (entryPath || 'direct');
 
         // Chips builder
         const chips = [];
@@ -962,28 +964,31 @@
           if (aboutYouStatus) aboutYouStatus.textContent = "Guest mode";
           if (aboutYouHint) aboutYouHint.textContent =
             "Guest mode shows the same journey, but without the personalized context. Fill out the intro form to see the page adapt using real inputs.";
-          if (aboutYouCta) aboutYouCta.innerHTML =
-            `Want the full experience? <a href="/index.html">Introduce yourself</a> (takes ~10 seconds).`;
+
+          // Guest CTA = Tip line + gentle prompt
+          if (aboutYouCta) {
+            const sourcePart = sourceLabel
+              ? ` Source: <span class="chip mono"><span class="k">source</span><span>${escapeHtml(sourceLabel)}</span></span>`
+              : '';
+            aboutYouCta.innerHTML =
+              `Tip: entry path <span class="chip mono"><span class="k">path</span><span>${escapeHtml(entryPath || 'direct')}</span></span> enables clean attribution without messy UTMs.${sourcePart}
+               <br/>Want the full experience? <a href="/index.html">Introduce yourself</a> (takes ~10 seconds).`;
+          }
 
           addChip('mode', 'guest', { guest: true, mono: true });
           addChip('personalization', 'limited', { guest: true });
-
-          // NEW: show entry path + optional source
-          addChip('path', entryPath || 'direct', { guest: true, mono: true });
-          if (sourceLabel) addChip('source', sourceLabel, { guest: true });
 
         } else {
           if (aboutYouStatus) aboutYouStatus.textContent = "Personalized";
           if (aboutYouHint) aboutYouHint.textContent =
             "This is intentionally subtle: the same data you entered can be captured, stored, and used to personalize a journey — without making it creepy or loud.";
 
-          // NEW: CTA shows path + optional source (no more "ref")
+          // Personalized CTA = ONE place where path/source appears (no duplicates)
           if (aboutYouCta) {
-            const sourceLine = sourceLabel
-              ? `&nbsp;&nbsp;<span class="chip mono"><span class="k">source</span><span>${escapeHtml(sourceLabel)}</span></span>`
-              : '';
-            aboutYouCta.innerHTML =
-              `Entry path: <span class="chip mono"><span class="k">path</span><span>${escapeHtml(entryPath || 'direct')}</span></span>${sourceLine}`;
+            const parts = [];
+            parts.push(`Entry path: <span class="chip mono"><span class="k">path</span><span>${escapeHtml(entryPath || 'direct')}</span></span>`);
+            if (sourceLabel) parts.push(`Source: <span class="chip mono"><span class="k">source</span><span>${escapeHtml(sourceLabel)}</span></span>`);
+            aboutYouCta.innerHTML = parts.join(' &nbsp; ');
           }
 
           // Show what was provided
@@ -993,24 +998,12 @@
           if (title) addChip('title', title);
           if (linkedin) addChip('linkedin', shorten(linkedin));
 
-          // NEW: include path + optional source in the chip list too
-          addChip('path', entryPath || 'direct', { mono: true });
-          if (sourceLabel) addChip('source', sourceLabel);
-
           // Lifecycle note
           if (email) addChip('follow-up', 'email queued');
           else addChip('follow-up', 'skipped (no email)');
         }
 
         if (tags) tags.innerHTML = chips.join('');
-
-        // NEW: update the Tip copy so it no longer says "ref"
-        // (we keep the existing HTML structure and only rewrite the text)
-        if (aboutYouCta && aboutYouCta.textContent && aboutYouCta.textContent.trim().startsWith('Tip:')) {
-          const tipSource = sourceLabel ? ` Source: ${escapeHtml(sourceLabel)}.` : '';
-          aboutYouCta.innerHTML =
-            `Tip: entry path <span class="chip mono"><span class="k">path</span><span>${escapeHtml(entryPath || 'direct')}</span></span> enables clean attribution without messy UTMs.${tipSource}`;
-        }
 
         // Toggle deep dives open/closed
         const sections = ['about', 'stacks', 'behind'];
@@ -1052,13 +1045,14 @@
           const u = new URL(API_OUT);
           u.searchParams.set("event", eventName);
           u.searchParams.set("to", toUrl);
+
           if (email) u.searchParams.set("email", email);
 
-          // carry slug + source (more useful than ref)
+          // carry the useful attribution
           if (entryPath) u.searchParams.set("path", entryPath);
           if (sourceLabel) u.searchParams.set("source", sourceLabel);
 
-          // harmless backward compatibility if your worker still expects ref
+          // backward compatibility if worker still reads ref
           if (ref) u.searchParams.set("ref", ref);
 
           return u.toString();
@@ -1081,7 +1075,7 @@
         const start = Date.now();
 
         async function postEvent(seconds) {
-          if (!email) return; // cannot associate without email
+          if (!email) return;
           try {
             await fetch(API_EVENT, {
               method: "POST",
@@ -1092,9 +1086,7 @@
                 value: seconds
               })
             });
-          } catch (e) {
-            // silent fail by design
-          }
+          } catch (e) {}
         }
 
         setInterval(() => {
