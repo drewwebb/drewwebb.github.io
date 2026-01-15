@@ -129,7 +129,7 @@
     }
     .hero > *{ position: relative; }
 
-    /* UPDATED: hero grid now supports full-width intro row + 2-col content row */
+    /* hero grid: full-width intro row + 2-col content row */
     .hero-grid{
       display:grid;
       gap: 18px;
@@ -184,7 +184,8 @@
       font-weight: 600;
     }
     .badge .mini-dot{
-      width: 8px; height: 8px; border-radius: 999px;
+      width: 8px; height: 8px;
+      border-radius: 999px;
       background: rgba(15,23,42,.35);
     }
     .badge.live .mini-dot{ background: var(--accent-2); box-shadow: 0 0 0 4px rgba(34,197,94,.16); }
@@ -345,7 +346,8 @@
       margin-bottom: 10px;
     }
     .path .kicker .dot{
-      width: 10px; height: 10px; border-radius: 999px;
+      width: 10px; height: 10px;
+      border-radius: 999px;
       background: rgba(37,99,235,.9);
       box-shadow: 0 0 0 4px rgba(37,99,235,.12);
     }
@@ -365,6 +367,10 @@
       font-size: 12px;
       color: rgba(15,23,42,.60);
       font-weight: 600;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
     }
 
     /* Feature list */
@@ -466,6 +472,31 @@
       border-bottom: 1px dotted rgba(37,99,235,.45);
     }
     .footer a:hover{ border-bottom-style: solid; }
+
+    /* NEW: hidden "deep dive" container */
+    .deep-dive{
+      margin-top: 14px;
+      display: none;
+    }
+    .deep-dive.is-open{
+      display:block;
+    }
+    .deep-dive .divider{ margin: 18px 0; }
+
+    /* NEW: little chevron */
+    .chev{
+      width: 10px;
+      height: 10px;
+      border-right: 2px solid rgba(15,23,42,.55);
+      border-bottom: 2px solid rgba(15,23,42,.55);
+      transform: rotate(-45deg);
+      transition: transform .16s ease;
+      margin-left: 8px;
+      flex: 0 0 auto;
+    }
+    .path[aria-expanded="true"] .chev{
+      transform: rotate(45deg);
+    }
   </style>
 </head>
 
@@ -479,9 +510,16 @@
       </div>
 
       <div class="top-actions">
-        <a class="btn primary" href="/Drew-Webb-Resume.pdf" target="_blank" rel="noopener">
+        <!-- UPDATED: JS will rewrite href to /out tracking -->
+        <a class="btn primary" id="resume-link" href="/resume" target="_blank" rel="noopener">
           <span class="icon"></span> View resume (PDF)
         </a>
+
+        <!-- NEW: LinkedIn tracked -->
+        <a class="btn" id="linkedin-link" href="https://www.linkedin.com/in/drewrwebb/" target="_blank" rel="noopener">
+          LinkedIn
+        </a>
+
         <a class="btn" href="/index.html" title="Start over / re-personalize">Start over</a>
       </div>
     </div>
@@ -563,7 +601,7 @@
           </div>
         </div>
 
-        <!-- RIGHT: ABOUT YOU (moved next to "what you're getting") -->
+        <!-- RIGHT: ABOUT YOU -->
         <aside class="panel" aria-label="About you panel">
           <div class="panel-title">
             <h3>About you</h3>
@@ -578,8 +616,9 @@
           <!-- ID REQUIRED for personalization tags -->
           <div id="tags" class="chips"></div>
 
+          <!-- Will be rewritten by JS (no "ref") -->
           <div class="panel-cta" id="about-you-cta">
-            Tip: arriving through <span class="chip mono"><span class="k">ref</span><span id="ref-chip">direct</span></span> enables clean attribution without messy UTMs.
+            Tip: entry path <span class="chip mono"><span class="k">path</span><span id="path-chip">direct</span></span> enables clean attribution without messy UTMs.
           </div>
         </aside>
 
@@ -591,243 +630,251 @@
       <div class="section-header">
         <h2>Choose your path</h2>
         <p class="muted" style="margin:0; max-width: 60ch;">
-          Hover for a preview. Click to jump deeper.
+          Hover for a preview. Click to open.
         </p>
       </div>
 
-      <div class="paths" role="navigation" aria-label="Jump to sections">
-        <button class="path" data-target="#about">
+      <div class="paths" role="navigation" aria-label="Open sections">
+        <button class="path" type="button" data-toggle="about" aria-expanded="false">
           <div class="kicker"><span class="dot"></span> About me</div>
           <h3>How I work &amp; what I build</h3>
           <p>Problem-solving style, outcomes, and a resume-like view — framed around systems and execution.</p>
-          <div class="hint">Click to jump ↓</div>
+          <div class="hint"><span>Click to open</span><span class="chev" aria-hidden="true"></span></div>
         </button>
 
-        <button class="path" data-target="#stacks">
+        <button class="path" type="button" data-toggle="stacks" aria-expanded="false">
           <div class="kicker"><span class="dot"></span> Tech stacks</div>
           <h3>First-hand operator experience</h3>
           <p>Martech + data + lifecycle + attribution — and how I connect them to measurable growth.</p>
-          <div class="hint">Click to jump ↓</div>
+          <div class="hint"><span>Click to open</span><span class="chev" aria-hidden="true"></span></div>
         </button>
 
-        <button class="path" data-target="#behind">
+        <button class="path" type="button" data-toggle="behind" aria-expanded="false">
           <div class="kicker"><span class="dot"></span> Behind the curtain</div>
           <h3>How this site works</h3>
           <p>A transparent walkthrough of what’s running right now: routing, capture, logging, and follow-up.</p>
-          <div class="hint">Click to jump ↓</div>
+          <div class="hint"><span>Click to open</span><span class="chev" aria-hidden="true"></span></div>
         </button>
       </div>
-    </section>
 
-    <!-- ABOUT ME -->
-    <section id="about" class="section">
-      <div class="section-header">
-        <h2>About me</h2>
-        <span class="pill green">Systems-first operator</span>
-      </div>
-      <p>
-        I’m a Marketing Operations &amp; Growth leader who likes turning messy, multi-tool realities into clean execution:
-        clear signals, automated handoffs, trustworthy reporting, and campaigns that scale without breaking.
-      </p>
-      <p class="muted">
-        I’m usually brought in to: speed up routing and response, fix attribution gaps, make lifecycle programs more relevant,
-        and align teams around a source of truth.
-      </p>
-
-      <div class="divider"></div>
-
-      <div class="feature-grid">
-        <div class="feature">
-          <div class="title">
-            <strong>What I optimize for</strong>
-            <span class="pill blue">Outcomes</span>
+      <!-- Deep dives -->
+      <div class="deep-dive" id="deep-about" aria-hidden="true">
+        <div class="divider"></div>
+        <section id="about" class="section" style="margin-top:0;">
+          <div class="section-header">
+            <h2>About me</h2>
+            <span class="pill green">Systems-first operator</span>
           </div>
-          <div class="muted">
-            Speed-to-lead, conversion lift, cleaner segmentation, and pipeline impact — with instrumentation from day one.
+          <p>
+            I’m a Marketing Operations &amp; Growth leader who likes turning messy, multi-tool realities into clean execution:
+            clear signals, automated handoffs, trustworthy reporting, and campaigns that scale without breaking.
+          </p>
+          <p class="muted">
+            I’m usually brought in to: speed up routing and response, fix attribution gaps, make lifecycle programs more relevant,
+            and align teams around a source of truth.
+          </p>
+
+          <div class="divider"></div>
+
+          <div class="feature-grid">
+            <div class="feature">
+              <div class="title">
+                <strong>What I optimize for</strong>
+                <span class="pill blue">Outcomes</span>
+              </div>
+              <div class="muted">
+                Speed-to-lead, conversion lift, cleaner segmentation, and pipeline impact — with instrumentation from day one.
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="title">
+                <strong>How I lead</strong>
+                <span class="pill blue">Cross-functional</span>
+              </div>
+              <div class="muted">
+                Tight feedback loops with Marketing, Sales, Product, Analytics, and RevOps — and a bias for shipping.
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div class="feature">
-          <div class="title">
-            <strong>How I lead</strong>
-            <span class="pill blue">Cross-functional</span>
-          </div>
-          <div class="muted">
-            Tight feedback loops with Marketing, Sales, Product, Analytics, and RevOps — and a bias for shipping.
-          </div>
-        </div>
-      </div>
+          <div class="divider"></div>
 
-      <div class="divider"></div>
-
-      <a class="btn primary" href="/Drew-Webb-Resume.pdf" target="_blank" rel="noopener">
-        <span class="icon"></span> View resume (PDF)
-      </a>
-    </section>
-
-    <!-- TECH STACKS -->
-    <section id="stacks" class="section">
-      <div class="section-header">
-        <h2>Tech stacks I’ve run (and how they connect)</h2>
-        <span class="pill blue">Martech • Data • Lifecycle • Attribution</span>
+          <a class="btn primary" id="resume-link-2" href="/resume" target="_blank" rel="noopener">
+            <span class="icon"></span> View resume (PDF)
+          </a>
+        </section>
       </div>
 
-      <p class="muted">
-        This is not a “tool list.” It’s how I think about building an operating system for growth: capture signals, unify identity,
-        activate audiences, measure outcomes, and keep the system observable.
-      </p>
+      <div class="deep-dive" id="deep-stacks" aria-hidden="true">
+        <div class="divider"></div>
+        <section id="stacks" class="section" style="margin-top:0;">
+          <div class="section-header">
+            <h2>Tech stacks I’ve run (and how they connect)</h2>
+            <span class="pill blue">Martech • Data • Lifecycle • Attribution</span>
+          </div>
 
-      <div class="feature-grid">
-        <div class="feature">
-          <div class="title">
-            <strong>Martech &amp; CRM orchestration</strong>
-            <span class="pill blue">Execution</span>
-          </div>
-          <div class="muted">
-            Routing, scoring, enrichment, handoffs, QA, and lifecycle triggers that don’t drift over time.
-          </div>
-        </div>
+          <p class="muted">
+            This is not a “tool list.” It’s how I think about building an operating system for growth: capture signals, unify identity,
+            activate audiences, measure outcomes, and keep the system observable.
+          </p>
 
-        <div class="feature">
-          <div class="title">
-            <strong>Data &amp; identity</strong>
-            <span class="pill blue">Trust</span>
-          </div>
-          <div class="muted">
-            Consistent identifiers, clean event design, and reliable pipelines so personalization and reporting don’t lie.
-          </div>
-        </div>
+          <div class="feature-grid">
+            <div class="feature">
+              <div class="title">
+                <strong>Martech &amp; CRM orchestration</strong>
+                <span class="pill blue">Execution</span>
+              </div>
+              <div class="muted">
+                Routing, scoring, enrichment, handoffs, QA, and lifecycle triggers that don’t drift over time.
+              </div>
+            </div>
 
-        <div class="feature">
-          <div class="title">
-            <strong>Lifecycle &amp; messaging</strong>
-            <span class="pill green">Retention</span>
-          </div>
-          <div class="muted">
-            Segmentation and journeys that stay relevant — and can be measured beyond vanity engagement.
-          </div>
-        </div>
+            <div class="feature">
+              <div class="title">
+                <strong>Data &amp; identity</strong>
+                <span class="pill blue">Trust</span>
+              </div>
+              <div class="muted">
+                Consistent identifiers, clean event design, and reliable pipelines so personalization and reporting don’t lie.
+              </div>
+            </div>
 
-        <div class="feature">
-          <div class="title">
-            <strong>Attribution &amp; measurement</strong>
-            <span class="pill green">Signal</span>
-          </div>
-          <div class="muted">
-            Practical attribution: what can we trust, how do we validate, and how do we iterate without breaking tracking.
-          </div>
-        </div>
-      </div>
-    </section>
+            <div class="feature">
+              <div class="title">
+                <strong>Lifecycle &amp; messaging</strong>
+                <span class="pill green">Retention</span>
+              </div>
+              <div class="muted">
+                Segmentation and journeys that stay relevant — and can be measured beyond vanity engagement.
+              </div>
+            </div>
 
-    <!-- HOW THIS SITE WORKS -->
-    <section id="behind" class="section">
-      <div class="section-header">
-        <h2>How this site works</h2>
-        <span class="pill green">Live demo</span>
-      </div>
-
-      <p>
-        This page is a portfolio — but it’s also a working example of the same thinking that powers real marketing ops systems:
-        attribution, capture, personalization, follow-up, and observability.
-      </p>
-
-      <div class="divider"></div>
-
-      <div class="feature-grid">
-        <div class="feature">
-          <div class="title">
-            <strong>Routing &amp; attribution</strong>
-            <span class="pill green">/r/:slug</span>
+            <div class="feature">
+              <div class="title">
+                <strong>Attribution &amp; measurement</strong>
+                <span class="pill green">Signal</span>
+              </div>
+              <div class="muted">
+                Practical attribution: what can we trust, how do we validate, and how do we iterate without breaking tracking.
+              </div>
+            </div>
           </div>
-          <div class="muted">
-            Tracked links can carry a clean label forward (ex: <span style="font-family: ui-monospace;">ref=draftkings</span>)
-            so engagement and follow-ups can be measured without clutter.
-          </div>
-        </div>
-
-        <div class="feature">
-          <div class="title">
-            <strong>Capture &amp; personalization</strong>
-            <span class="pill blue">Form → page</span>
-          </div>
-          <div class="muted">
-            The info you submit is used to tailor this view. Guest mode shows the same journey — with reduced context.
-          </div>
-        </div>
-
-        <div class="feature">
-          <div class="title">
-            <strong>Logging &amp; bot filtering</strong>
-            <span class="pill blue">Efficient</span>
-          </div>
-          <div class="muted">
-            Visits can be logged with lightweight rules (and bots can be filtered) so signals stay clean.
-          </div>
-        </div>
-
-        <div class="feature">
-          <div class="title">
-            <strong>Observability</strong>
-            <span class="pill blue">Private</span>
-          </div>
-          <div class="muted">
-            A private dashboard (Pulse) is used to inspect traffic and engagement without exposing visitor data publicly.
-          </div>
-        </div>
+        </section>
       </div>
 
-      <div class="divider"></div>
+      <div class="deep-dive" id="deep-behind" aria-hidden="true">
+        <div class="divider"></div>
+        <section id="behind" class="section" style="margin-top:0;">
+          <div class="section-header">
+            <h2>How this site works</h2>
+            <span class="pill green">Live demo</span>
+          </div>
 
-      <div class="section-header">
-        <h2 style="font-size:16px;">Stack + cost outline</h2>
-        <span class="pill blue">Transparent &amp; impressive</span>
+          <p>
+            This page is a portfolio — but it’s also a working example of the same thinking that powers real marketing ops systems:
+            attribution, capture, personalization, follow-up, and observability.
+          </p>
+
+          <div class="divider"></div>
+
+          <div class="feature-grid">
+            <div class="feature">
+              <div class="title">
+                <strong>Routing &amp; attribution</strong>
+                <span class="pill green">/r/:slug</span>
+              </div>
+              <div class="muted">
+                Tracked links can carry a clean label forward (example: <span style="font-family: ui-monospace;">portfolioSlug=draftkings-ethan</span>)
+                so engagement and follow-ups can be measured without clutter.
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="title">
+                <strong>Capture &amp; personalization</strong>
+                <span class="pill blue">Form → page</span>
+              </div>
+              <div class="muted">
+                The info you submit is used to tailor this view. Guest mode shows the same journey — with reduced context.
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="title">
+                <strong>Logging &amp; bot filtering</strong>
+                <span class="pill blue">Efficient</span>
+              </div>
+              <div class="muted">
+                Visits can be logged with lightweight rules (and bots can be filtered) so signals stay clean.
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="title">
+                <strong>Observability</strong>
+                <span class="pill blue">Private</span>
+              </div>
+              <div class="muted">
+                A private dashboard (Pulse) is used to inspect traffic and engagement without exposing visitor data publicly.
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="section-header">
+            <h2 style="font-size:16px;">Stack + cost outline</h2>
+            <span class="pill blue">Transparent &amp; impressive</span>
+          </div>
+          <p class="muted" style="margin-top:6px;">
+            Placeholder numbers for now — we’ll refine the exact costs and vendors (domain registrar, etc.) later.
+          </p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Component</th>
+                <th>What it does</th>
+                <th>Est. cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Cloudflare Workers</strong></td>
+                <td>Routing, attribution, logging, and private admin surfaces</td>
+                <td>~$0–$X / mo</td>
+              </tr>
+              <tr>
+                <td><strong>Cloudflare KV</strong></td>
+                <td>Efficient event storage (visit logs)</td>
+                <td>~$0–$X / mo</td>
+              </tr>
+              <tr>
+                <td><strong>Cloudflare D1</strong></td>
+                <td>Slug store + metadata (and future contact store)</td>
+                <td>~$0–$X / mo</td>
+              </tr>
+              <tr>
+                <td><strong>GitHub Pages</strong></td>
+                <td>Static hosting for the site</td>
+                <td>$0</td>
+              </tr>
+              <tr>
+                <td><strong>Email (Resend)</strong></td>
+                <td>Follow-up / lifecycle messaging</td>
+                <td>~$0–$X / mo</td>
+              </tr>
+              <tr>
+                <td><strong>Domain</strong></td>
+                <td>Registrar + renewal</td>
+                <td>~$X / year</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
       </div>
-      <p class="muted" style="margin-top:6px;">
-        Placeholder numbers for now — we’ll refine the exact costs and vendors (domain registrar, etc.) later.
-      </p>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Component</th>
-            <th>What it does</th>
-            <th>Est. cost</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Cloudflare Workers</strong></td>
-            <td>Routing, attribution, logging, and private admin surfaces</td>
-            <td>~$0–$X / mo</td>
-          </tr>
-          <tr>
-            <td><strong>Cloudflare KV</strong></td>
-            <td>Efficient event storage (visit logs)</td>
-            <td>~$0–$X / mo</td>
-          </tr>
-          <tr>
-            <td><strong>Cloudflare D1</strong></td>
-            <td>Slug store + metadata (and future contact store)</td>
-            <td>~$0–$X / mo</td>
-          </tr>
-          <tr>
-            <td><strong>GitHub Pages</strong></td>
-            <td>Static hosting for the site</td>
-            <td>$0</td>
-          </tr>
-          <tr>
-            <td><strong>Email (Resend)</strong></td>
-            <td>Follow-up / lifecycle messaging</td>
-            <td>~$0–$X / mo</td>
-          </tr>
-          <tr>
-            <td><strong>Domain</strong></td>
-            <td>Registrar + renewal</td>
-            <td>~$X / year</td>
-          </tr>
-        </tbody>
-      </table>
     </section>
 
     <div class="footer">
@@ -840,10 +887,7 @@
     </div>
   </div>
 
-  <!-- PERSONALIZATION SCRIPT
-       KEEP IDs: hello, context, tags
-       Adds: guest-mode styling + ref display + optional company/title/linkedin if present
-  -->
+  <!-- PERSONALIZATION + TRACKING SCRIPT -->
   <script>
     (function () {
       try {
@@ -859,8 +903,23 @@
         const title    = params.get('title') || '';
         const linkedin = params.get('linkedin') || '';
 
-        // Attribution label carried forward (if you set /?ref=slug)
-        const ref = params.get('ref') || '';
+        // Back-compat: older "ref"
+        const ref = (params.get('ref') || '').trim();
+
+        // Prefer slug + lead source (support camel + snake variants)
+        const portfolioSlug =
+          (params.get('portfolioSlug') ||
+           params.get('portfolio_slug') ||
+           '').trim();
+
+        const leadSource =
+          (params.get('leadSource') ||
+           params.get('lead_source') ||
+           '').trim();
+
+        // Entry path = slug-first (falls back to ref, then direct)
+        const entryPath = (portfolioSlug || ref || 'direct').trim();
+        const sourceLabel = leadSource;
 
         const hello   = document.getElementById('hello');
         const context = document.getElementById('context');
@@ -869,16 +928,19 @@
         const aboutYouStatus = document.getElementById('about-you-status');
         const aboutYouHint   = document.getElementById('about-you-hint');
         const aboutYouCta    = document.getElementById('about-you-cta');
-        const refChip        = document.getElementById('ref-chip');
+        const pathChip       = document.getElementById('path-chip');
 
         const displayName = (name || email || 'there').trim();
 
-        // Headline: keep it clean (no waving hand)
+        // Make path look clean in the UI (no "ref direct", no mega-long slug)
+        const prettyEntryPath = prettyPath(entryPath);
+
+        // Headline
         if (hello) {
           hello.innerHTML = `<h1>Welcome, ${escapeHtml(displayName)}</h1>`;
         }
 
-        // Context line: subtle, warm, and explains the journey
+        // Context line
         if (context) {
           if (guest) {
             context.textContent =
@@ -889,12 +951,11 @@
           }
         }
 
-        // Attribution chip
-        if (refChip) refChip.textContent = (ref || 'direct');
+        // Update path chip in the Tip line
+        if (pathChip) pathChip.textContent = (prettyEntryPath || 'direct');
 
-        // Build “About you” chips (subtle but clear)
+        // Chips builder
         const chips = [];
-
         function addChip(key, value, opts = {}) {
           if (!value) return;
           const cls = opts.guest ? 'chip guest' : 'chip';
@@ -903,53 +964,139 @@
         }
 
         if (guest) {
-          // Greyed-out microcopy for guests
           if (aboutYouStatus) aboutYouStatus.textContent = "Guest mode";
           if (aboutYouHint) aboutYouHint.textContent =
             "Guest mode shows the same journey, but without the personalized context. Fill out the intro form to see the page adapt using real inputs.";
-          if (aboutYouCta) aboutYouCta.innerHTML =
-            `Want the full experience? <a href="/index.html">Introduce yourself</a> (takes ~10 seconds).`;
+
+          // Guest CTA = Tip line + gentle prompt
+          if (aboutYouCta) {
+            const sourcePart = sourceLabel
+              ? ` Source: <span class="chip mono"><span class="k">source</span><span>${escapeHtml(sourceLabel)}</span></span>`
+              : '';
+            aboutYouCta.innerHTML =
+              `Tip: entry path <span class="chip mono"><span class="k">path</span><span>${escapeHtml(prettyEntryPath || 'direct')}</span></span> enables clean attribution without messy UTMs.${sourcePart}
+               <br/>Want the full experience? <a href="/index.html">Introduce yourself</a> (takes ~10 seconds).`;
+          }
 
           addChip('mode', 'guest', { guest: true, mono: true });
           addChip('personalization', 'limited', { guest: true });
-          addChip('ref', ref || 'direct', { guest: true, mono: true });
+
         } else {
           if (aboutYouStatus) aboutYouStatus.textContent = "Personalized";
           if (aboutYouHint) aboutYouHint.textContent =
             "This is intentionally subtle: the same data you entered can be captured, stored, and used to personalize a journey — without making it creepy or loud.";
-          if (aboutYouCta) aboutYouCta.innerHTML =
-            `Attribution label detected: <span class="chip mono"><span class="k">ref</span><span>${escapeHtml(ref || 'direct')}</span></span>`;
 
-          // Show what was provided (and therefore can be stored/used later)
-          addChip('name', name || '(not provided)', { mono: false });
-          if (email) addChip('email', email, { mono: false });
-          if (company) addChip('company', company, { mono: false });
-          if (title) addChip('title', title, { mono: false });
-          if (linkedin) addChip('linkedin', shorten(linkedin), { mono: false });
-
-          // NOTE: removed duplicate ref chip here (keeps the bottom "Attribution label detected")
-          // addChip('ref', ref || 'direct', { mono: true });
-
-          // Lifecycle note (matches your intent)
-          // Keep it calm and not over-promising.
-          if (email) {
-            addChip('follow-up', 'email queued', { mono: false });
-          } else {
-            addChip('follow-up', 'skipped (no email)', { mono: false });
+          // Personalized CTA = ONE place where path/source appears (no duplicates)
+          if (aboutYouCta) {
+            const parts = [];
+            parts.push(`Entry path: <span class="chip mono"><span class="k">path</span><span>${escapeHtml(prettyEntryPath || 'direct')}</span></span>`);
+            if (sourceLabel) parts.push(`Source: <span class="chip mono"><span class="k">source</span><span>${escapeHtml(sourceLabel)}</span></span>`);
+            aboutYouCta.innerHTML = parts.join(' &nbsp; ');
           }
+
+          // Show what was provided
+          addChip('name', name || '(not provided)');
+          if (email) addChip('email', email);
+          if (company) addChip('company', company);
+          if (title) addChip('title', title);
+          if (linkedin) addChip('linkedin', formatLinkedIn(linkedin));
+
+          // Lifecycle note
+          if (email) addChip('follow-up', 'email queued');
+          else addChip('follow-up', 'skipped (no email)');
         }
 
         if (tags) tags.innerHTML = chips.join('');
 
-        // Path card click -> scroll to section
-        document.querySelectorAll('.path[data-target]').forEach(btn => {
+        // Toggle deep dives open/closed
+        const sections = ['about', 'stacks', 'behind'];
+        function setOpen(key, open) {
+          const panel = document.getElementById(`deep-${key}`);
+          const btn = document.querySelector(`.path[data-toggle="${key}"]`);
+          if (!panel || !btn) return;
+
+          if (open) {
+            panel.classList.add('is-open');
+            panel.setAttribute('aria-hidden', 'false');
+            btn.setAttribute('aria-expanded', 'true');
+            btn.querySelector('.hint span').textContent = 'Click to close';
+          } else {
+            panel.classList.remove('is-open');
+            panel.setAttribute('aria-hidden', 'true');
+            btn.setAttribute('aria-expanded', 'false');
+            btn.querySelector('.hint span').textContent = 'Click to open';
+          }
+        }
+        sections.forEach(k => setOpen(k, false));
+        document.querySelectorAll('.path[data-toggle]').forEach(btn => {
           btn.addEventListener('click', () => {
-            const target = btn.getAttribute('data-target');
-            const el = document.querySelector(target);
-            if (!el) return;
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const key = btn.getAttribute('data-toggle');
+            const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+            sections.forEach(k => setOpen(k, k === key ? !isExpanded : false));
+            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
           });
         });
+
+        // -----------------------------
+        // TRACKED OUTBOUND LINKS (/out)
+        // -----------------------------
+        const API_OUT = "https://api.drewwebbai.com/out";
+        const RESUME_TO = "https://drewwebbai.com/resume";
+        const LINKEDIN_TO = "https://www.linkedin.com/in/drewrwebb/";
+
+        function buildOutUrl(eventName, toUrl) {
+          const u = new URL(API_OUT);
+          u.searchParams.set("event", eventName);
+          u.searchParams.set("to", toUrl);
+
+          if (email) u.searchParams.set("email", email);
+
+          // carry the useful attribution
+          if (entryPath) u.searchParams.set("path", entryPath);
+          if (sourceLabel) u.searchParams.set("source", sourceLabel);
+
+          // backward compatibility if worker still reads ref
+          if (ref) u.searchParams.set("ref", ref);
+
+          return u.toString();
+        }
+
+        const resumeA1 = document.getElementById("resume-link");
+        const resumeA2 = document.getElementById("resume-link-2");
+        const linkedinA = document.getElementById("linkedin-link");
+
+        if (resumeA1) resumeA1.href = buildOutUrl("resume_clicked", RESUME_TO);
+        if (resumeA2) resumeA2.href = buildOutUrl("resume_clicked", RESUME_TO);
+        if (linkedinA) linkedinA.href = buildOutUrl("linkedin_clicked", LINKEDIN_TO);
+
+        // -----------------------------
+        // TIME-ON-PAGE EVENT (/event)
+        // Fires at 30s and 90s once each, only if email exists.
+        // -----------------------------
+        const API_EVENT = "https://api.drewwebbai.com/event";
+        const fired = { 30: false, 90: false };
+        const start = Date.now();
+
+        async function postEvent(seconds) {
+          if (!email) return;
+          try {
+            await fetch(API_EVENT, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                email,
+                event: "time_on_page_sec",
+                value: seconds
+              })
+            });
+          } catch (e) {}
+        }
+
+        setInterval(() => {
+          const elapsed = Math.floor((Date.now() - start) / 1000);
+          if (elapsed >= 30 && !fired[30]) { fired[30] = true; postEvent(30); }
+          if (elapsed >= 90 && !fired[90]) { fired[90] = true; postEvent(90); }
+        }, 1000);
 
         function escapeHtml(str) {
           return String(str || '').replace(/[&<>'"]/g, c => ({
@@ -961,14 +1108,61 @@
           })[c]);
         }
 
-        function shorten(url) {
-          const s = String(url || '').trim();
+        // NEW: show /in/handle instead of an ugly full URL
+        function formatLinkedIn(raw) {
+          const s = String(raw || '').trim();
           if (!s) return '';
-          // avoid huge pills
-          return s.length > 34 ? (s.slice(0, 30) + "…") : s;
+          let u;
+          try {
+            u = new URL(s.startsWith("http") ? s : ("https://" + s));
+          } catch {
+            // if it's not a URL, just shorten safely
+            return safeShorten(s, 48);
+          }
+
+          const host = (u.hostname || "").toLowerCase();
+          const path = (u.pathname || "").replace(/\/+$/, "");
+          // If it's linkedin, prefer "/in/whatever"
+          if (host.includes("linkedin.com")) {
+            const m = path.match(/\/in\/([^\/?#]+)/i);
+            if (m && m[1]) return `/in/${m[1]}`;
+            // fallback: show just pathname
+            return path || "linkedin.com";
+          }
+
+          // Non-linkedin: show host + short path
+          const combined = (u.hostname || "") + (path ? path : "");
+          return safeShorten(combined, 48);
         }
+
+        // NEW: make slug/path readable on the page
+        function prettyPath(p) {
+          const s = String(p || '').trim();
+          if (!s) return 'direct';
+          if (s.toLowerCase() === 'direct') return 'direct';
+
+          // If it's a URL, just show hostname
+          if (/^https?:\/\//i.test(s)) {
+            try {
+              const u = new URL(s);
+              return u.hostname;
+            } catch {}
+          }
+
+          // Slug: keep it short and clean
+          // Example: recruiter-draftkings-ethan -> recruiter-draftkings…
+          if (s.length <= 22) return s;
+          return s.slice(0, 20) + "…";
+        }
+
+        function safeShorten(str, maxLen) {
+          const s = String(str || '').trim();
+          if (!s) return '';
+          if (s.length <= maxLen) return s;
+          return s.slice(0, Math.max(0, maxLen - 1)) + "…";
+        }
+
       } catch (e) {
-        // Fail-safe content if anything weird happens
         const hello = document.getElementById('hello');
         const context = document.getElementById('context');
         if (hello) hello.innerHTML = `<h1>Welcome</h1>`;
