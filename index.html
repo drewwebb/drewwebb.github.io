@@ -5,6 +5,12 @@
   <title>Drew Webb — Quick intro</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Introduce yourself and get a personalized tour of my work." />
+
+  <!-- FAVICON (drop your files in place later) -->
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
   <style>
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; padding: 24px; background:#0b0c10; color:#eaeaea; }
     .card { max-width: 680px; margin: 0 auto; background:#14161a; border-radius:16px; padding:24px; box-shadow: 0 6px 30px rgba(0,0,0,.4); }
@@ -24,15 +30,18 @@
     .success { background:#122a18; color:#b8ffcc; padding:10px 12px; border-radius:10px; display:none; }
   </style>
 </head>
+
 <body>
   <div class="card">
     <h1>Quick intro</h1>
     <p class="lead">Tell me who you are and I’ll tailor the portfolio just for you.</p>
 
-    <div id="msg-error" class="error"></div>
+    <!-- UPDATED IDs to match js/form.js -->
+    <div id="serverError" class="error"></div>
     <div id="msg-success" class="success"></div>
 
-    <form id="lead-form" novalidate>
+    <!-- UPDATED form id to match js/form.js -->
+    <form id="introForm" novalidate>
       <div class="row">
         <div>
           <label for="firstName">First name</label>
@@ -73,9 +82,13 @@
       </div>
 
       <div class="actions">
-        <button id="submitBtn" type="submit">Continue →</button>
-        <a href="/welcome.html?guest=1" class="note">Continue as guest</a>
+        <!-- UPDATED button id to match js/form.js -->
+        <button id="continueBtn" type="submit">Continue →</button>
+
+        <!-- Guest link gets rewritten to preserve attribution params -->
+        <a id="guestLink" href="/welcome.html?guest=1" class="note">Continue as guest</a>
       </div>
+
       <div class="note">Your info is used only to personalize this page—no spam.</div>
     </form>
   </div>
@@ -90,6 +103,34 @@
     function onTurnstileSuccess(token) {
       window.__turnstileToken = token;
     }
+  </script>
+
+  <!-- Preserve attribution params into guest mode -->
+  <script>
+    (function () {
+      try {
+        const guestA = document.getElementById("guestLink");
+        if (!guestA) return;
+
+        // carry through any existing query params (ref, leadSource, portfolioSlug, etc.)
+        const inParams = new URLSearchParams(window.location.search);
+
+        // build guest url
+        const out = new URL("/welcome.html", window.location.origin);
+        out.searchParams.set("guest", "1");
+
+        // Copy everything except "guest" (we force guest=1)
+        for (const [k, v] of inParams.entries()) {
+          if (!k) continue;
+          if (k.toLowerCase() === "guest") continue;
+          out.searchParams.set(k, v);
+        }
+
+        guestA.href = out.toString();
+      } catch (e) {
+        // if anything goes wrong, guest link still works
+      }
+    })();
   </script>
 
   <!-- Your form logic (external) -->
