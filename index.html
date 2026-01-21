@@ -188,10 +188,69 @@
       }
     }
 
+    /* Right-side panel should feel anchored, not floating */
+    .side{ position: relative; }
+    .side-card{
+      padding: 18px;
+      background: rgba(255,255,255,.05);
+    }
+    @media (min-width: 940px){
+      .side-card{
+        position: sticky;
+        top: 18px;
+      }
+    }
+
+    .signal-metrics{
+      display:grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .metric{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+    }
+    .metric .k{
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(233,238,252,.60);
+    }
+    .metric .v{
+      font-weight: 900;
+      color: rgba(233,238,252,.86);
+    }
+    .metric .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
     /* Form */
     .form-box{
       padding: 16px;
     }
+
+    /* Form collapse after submit */
+    .form-collapse{
+      overflow: hidden;
+      transition: max-height .55s ease, opacity .45s ease, transform .45s ease;
+      max-height: 900px;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .form-collapse.is-gone{
+      max-height: 0px;
+      opacity: 0;
+      transform: translateY(-8px);
+      pointer-events:none;
+    }
+
     .form-title{
       display:flex;
       align-items:center;
@@ -393,6 +452,17 @@
     .mono{
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-weight: 800;
+    }
+
+    /* Reveal blocks fade in */
+    .reveal-block{
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .4s ease, transform .4s ease;
+    }
+    .reveal-block.is-in{
+      opacity: 1;
+      transform: translateY(0);
     }
 
     /* Steps list */
@@ -642,7 +712,8 @@
               <div id="msg-error" class="msg error"></div>
               <div id="msg-success" class="msg success"></div>
 
-              <div class="form-box" aria-label="Intro form">
+              <!-- Collapsible form container (so it can fade away after submit) -->
+              <div class="form-box form-collapse" id="formCollapse" aria-label="Intro form">
                 <form id="lead-form" novalidate>
                   <div class="row two">
                     <div>
@@ -858,9 +929,9 @@
           </div><!-- /fog-wrap -->
         </div>
 
-        <!-- Right: small “status / attribution” panel -->
-        <div>
-          <div class="card" style="padding: 18px; background: rgba(255,255,255,.05);">
+        <!-- Right: live telemetry panel -->
+        <div class="side">
+          <div class="card side-card">
             <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
               <div style="font-weight:900; letter-spacing:.08em; text-transform:uppercase; font-size:12px; color: rgba(233,238,252,.78);">
                 Session signals
@@ -877,6 +948,22 @@
               <!-- populated by JS (path/source) -->
               <span class="chip guest"><span class="k">path</span><span class="mono">direct</span></span>
               <span class="chip guest"><span class="k">source</span><span class="mono">Direct</span></span>
+            </div>
+
+            <!-- NEW: extra live metrics -->
+            <div class="signal-metrics" id="signal-metrics">
+              <div class="metric">
+                <div class="k">mode</div>
+                <div class="v" id="sig-mode">capturing</div>
+              </div>
+              <div class="metric">
+                <div class="k">time</div>
+                <div class="v mono" id="sig-time">0s</div>
+              </div>
+              <div class="metric">
+                <div class="k">clicks</div>
+                <div class="v mono" id="sig-clicks">0</div>
+              </div>
             </div>
 
             <div class="note" style="margin-top:10px;">
