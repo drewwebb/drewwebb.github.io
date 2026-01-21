@@ -35,7 +35,16 @@
   const chips = document.getElementById("chips");
 
   const statusText = document.getElementById("status-text");
+
+  // Right panel: chips + metrics
   const signalChips = document.getElementById("signal-chips");
+  const signalPill = document.getElementById("signal-pill");
+  const sigMode = document.getElementById("sig-mode");
+  const sigTime = document.getElementById("sig-time");
+  const sigClicks = document.getElementById("sig-clicks");
+
+  // Collapsible form container (index.html added this)
+  const formCollapse = document.getElementById("formCollapse");
 
   const stepsWrap = document.getElementById("steps");
   const stepEls = stepsWrap ? Array.from(stepsWrap.querySelectorAll(".step")) : [];
@@ -51,6 +60,45 @@
   // Top links (we convert clicks to tracked events)
   const resumeLink = document.getElementById("resume-link");
   const linkedinLink = document.getElementById("linkedin-link");
+
+  // -------------------------
+  // Local telemetry (visual)
+  // -------------------------
+  const telemetry = {
+    start: Date.now(),
+    clicks: 0,
+    timer: null,
+    state: null, // latest state (so we can render consistently)
+  };
+
+  function formatElapsed(sec) {
+    // keep it simple: 0s, 12s, 1m 05s
+    if (sec < 60) return `${sec}s`;
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}m ${String(s).padStart(2, "0")}s`;
+  }
+
+  function bumpClicks() {
+    telemetry.clicks += 1;
+    if (sigClicks) sigClicks.textContent = String(telemetry.clicks);
+  }
+
+  function setModeLabel(label) {
+    if (sigMode) sigMode.textContent = label;
+  }
+
+  function setSignalPill(label) {
+    if (signalPill) signalPill.textContent = label;
+  }
+
+  function startTelemetryClock() {
+    if (telemetry.timer) return;
+    telemetry.timer = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - telemetry.start) / 1000);
+      if (sigTime) sigTime.textContent = formatElapsed(elapsed);
+    }, 1000);
+  }
 
   // -------------------------
   // Helpers
@@ -71,7 +119,9 @@
   }
 
   function readCookie(name) {
-    const m = document.cookie.match(new RegExp("(^|; )" + name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&") + "=([^;]*)"));
+    const m = document.cookie.match(
+      new RegExp("(^|; )" + name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&") + "=([^;]*)")
+    );
     return m ? decodeURIComponent(m[2]) : "";
   }
 
@@ -118,6 +168,16 @@
     }
   }
 
+  function escapeHtml(str) {
+    return String(str || "").replace(/[&<>'"]/g, c => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "'": "&#39;",
+      '"': "&quot;"
+    })[c]);
+  }
+
   function buildChips(state) {
     const out = [];
 
@@ -151,19 +211,14 @@
     return out.join("");
   }
 
-  function escapeHtml(str) {
-    return String(str || "").replace(/[&<>'"]/g, c => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      "'": "&#39;",
-      '"': "&quot;"
-    })[c]);
+  // -------------------------
+  // Reveal sequencing (visual)
+  // -------------------------
+  function collapseForm() {
+    if (!formCollapse) return;
+    formCollapse.classList.add("is-gone");
   }
 
-  // -------------------------
-  // Reveal logic
-  // -------------------------
   function animateSteps(isGuest) {
     // 3 steps: tweak copy depending on guest vs personalized
     const step1 = document.getElementById("step-1");
@@ -182,11 +237,58 @@
 
     // stagger in
     stepEls.forEach((el, i) => {
-      setTimeout(() => el.classList.add("is-in"), 180 + i * 220);
+      setTimeout(() => el.classList.add("is-in"), 240 + i * 220);
     });
   }
 
+  function stageReveal() {
+    // Make the “unveiling” feel intentional:
+    // 1) chips appear, 2) steps animate, 3) path cards appear (subtle)
+    if (chips) {
+      chips.classList.remove("reveal-block", "is-in"); // in case
+      chips.classList.add("reveal-block");
+      setTimeout(() => chips.classList.add("is-in"), 140);
+    }
+
+    setTimeout(() => {
+      animateSteps(!!telemetry.state?.guest);
+    }, 220);
+
+    setTimeout(() => {
+      document.querySelectorAll(".paths .path").forEach((p, i) => {
+        p.classList.add("reveal-block");
+        setTimeout(() => p.classList.add("is-in"), 80 + i * 90);
+      });
+    }, 520);
+  }
+
+  function renderRightPanel(state) {
+    // chips
+    if (signalChips) {
+      signalChips.innerHTML =
+        `<span class="chip guest"><span class="k">path</span><span class="mono">${escapeHtml(state.entryPath || "direct")}</span></span>` +
+        `<span class="chip guest"><span class="k">source</span><span class="mono">${escapeHtml(state.leadSource || "Direct")}</span></span>`;
+    }
+
+    // mode labels
+    if (state.guest) {
+      setModeLabel("guest");
+      setSignalPill("Guest");
+    } else if (state.email) {
+      setModeLabel("live");
+      setSignalPill("Live");
+    } else {
+      setModeLabel("capturing");
+      setSignalPill("Capturing");
+    }
+
+    // clicks/time get updated by telemetry clock/click handler
+    if (sigClicks) sigClicks.textContent = String(telemetry.clicks);
+  }
+
   function reveal(state) {
+    telemetry.state = state;
+
     // Clear fog + show experience
     if (fog) fog.classList.add("is-cleared");
     if (experience) experience.classList.add("is-on");
@@ -211,15 +313,14 @@
 
     if (chips) chips.innerHTML = buildChips(state);
 
-    // Session signals panel on the right
-    if (signalChips) {
-      signalChips.innerHTML =
-        `<span class="chip guest"><span class="k">path</span><span class="mono">${escapeHtml(state.entryPath || "direct")}</span></span>` +
-        `<span class="chip guest"><span class="k">source</span><span class="mono">${escapeHtml(state.leadSource || "Direct")}</span></span>`;
-    }
+    // Right panel gets updated with the “final” state
+    renderRightPanel(state);
 
-    // Steps animate
-    animateSteps(state.guest);
+    // Collapse form after we show the “Captured...” message (or guest click)
+    setTimeout(() => collapseForm(), 260);
+
+    // Sequenced unveiling
+    stageReveal();
 
     // Deep dive toggles (single open)
     const sections = ["about", "stacks", "behind"];
@@ -245,6 +346,7 @@
     sections.forEach(k => setOpen(k, false));
     document.querySelectorAll(".path[data-toggle]").forEach(b => {
       b.addEventListener("click", () => {
+        bumpClicks(); // visual metric only
         const key = b.getAttribute("data-toggle");
         const isExpanded = b.getAttribute("aria-expanded") === "true";
         sections.forEach(k => setOpen(k, k === key ? !isExpanded : false));
@@ -275,18 +377,16 @@
     // We track only if we have an email (so it can attach to HubSpot contact)
     function onClick(a, eventName, toUrl) {
       if (!a) return;
-      a.addEventListener("click", (e) => {
-        // open in new tab regardless
-        // (keep default behavior for normal anchors; we just fire event)
+      a.addEventListener("click", () => {
+        bumpClicks(); // visual metric always
+
         if (state.email) {
           postEvent({ email: state.email, event: eventName });
         }
-        // ensure the actual destination is correct (resume route already pretty)
         if (toUrl) a.href = toUrl;
       });
     }
 
-    // Your resume link is a route on drewwebbai.com (pretty). Keep it.
     onClick(resumeLink, "resume_clicked", RESUME_TO);
     onClick(linkedinLink, "linkedin_clicked", LINKEDIN_TO);
   }
@@ -363,6 +463,10 @@
       return;
     }
 
+    // visual-only: show we’re “live” now
+    setModeLabel("submitting");
+    setSignalPill("Submitting");
+
     const payload = {
       firstName: (elFirst?.value || "").trim(),
       lastName: (elLast?.value || "").trim(),
@@ -393,10 +497,14 @@
       startTimeOnPage(state);
 
       if (statusText) statusText.textContent = "Live";
+      setModeLabel("live");
+      setSignalPill("Live");
     } catch (err) {
       setMsg(msgError, err?.message || "Unexpected error");
       if (statusText) statusText.textContent = "Ready";
       if (btn) btn.disabled = false;
+      setModeLabel("capturing");
+      setSignalPill("Capturing");
     }
   }
 
@@ -411,6 +519,8 @@
     reveal({ ...state, email: "" });
     wireOutboundTracking({ ...state, email: "" }); // no event posts without email
     if (statusText) statusText.textContent = "Guest mode";
+    setModeLabel("guest");
+    setSignalPill("Guest");
   }
 
   // Init: show session signals immediately (without needing submit)
@@ -418,16 +528,30 @@
     const entryPath = getEntryPath();
     const leadSource = getLeadSourceLabel();
 
-    if (signalChips) {
-      signalChips.innerHTML =
-        `<span class="chip guest"><span class="k">path</span><span class="mono">${escapeHtml(entryPath)}</span></span>` +
-        `<span class="chip guest"><span class="k">source</span><span class="mono">${escapeHtml(leadSource)}</span></span>`;
-    }
+    const state = {
+      guest: false,
+      name: "",
+      email: "",
+      company: "",
+      title: "",
+      linkedin: "",
+      entryPath,
+      leadSource,
+    };
+
+    renderRightPanel(state);
   }
 
   // Hook up
   if (form) form.addEventListener("submit", handleSubmit);
   if (guestBtn) guestBtn.addEventListener("click", handleGuest);
+
+  // Start local telemetry clock immediately (visual)
+  startTelemetryClock();
+
+  // Count basic engagement (visual only):
+  // - any click anywhere bumps "clicks"
+  document.addEventListener("click", () => bumpClicks(), { passive: true });
 
   initSignalsPreview();
 })();
