@@ -21,9 +21,9 @@
       --text: #e9eefc;
       --muted: rgba(233, 238, 252, .70);
 
-      --accent: #60a5fa;        /* baby blue-ish */
-      --accent-2: #22c55e;      /* green */
-      --warn: #f59e0b;          /* amber */
+      --accent: #60a5fa;
+      --accent-2: #22c55e;
+      --warn: #f59e0b;
       --danger: #f97373;
 
       --shadow: 0 18px 48px rgba(0,0,0,.45);
@@ -134,9 +134,7 @@
     .card > *{ position: relative; }
 
     /* Hero */
-    .hero{
-      padding: 26px;
-    }
+    .hero{ padding: 26px; }
     h1{
       font-size: clamp(34px, 4vw, 54px);
       line-height: 1.06;
@@ -167,7 +165,6 @@
         radial-gradient(900px 280px at 75% 30%, rgba(255,255,255,.10), transparent 60%),
         radial-gradient(900px 240px at 45% 80%, rgba(255,255,255,.12), transparent 60%),
         linear-gradient(180deg, rgba(2,6,23,.22), rgba(2,6,23,.38));
-      filter: blur(0px);
       opacity: .92;
       transition: opacity .8s ease, transform .8s ease;
       pointer-events:none;
@@ -177,10 +174,7 @@
       transform: translateY(-8px);
     }
 
-    .grid{
-      display:grid;
-      gap: 16px;
-    }
+    .grid{ display:grid; gap: 16px; }
     @media (min-width: 940px){
       .grid-2{
         grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
@@ -188,83 +182,15 @@
       }
     }
 
-    /* Right-side panel should feel anchored, not floating */
-    .side{ position: relative; }
-    .side-card{
-      padding: 18px;
-      background: rgba(255,255,255,.05);
-    }
-    @media (min-width: 940px){
-      .side-card{
-        position: sticky;
-        top: 18px;
-      }
-    }
-
-    .signal-metrics{
-      display:grid;
-      gap: 10px;
-      margin-top: 12px;
-    }
-    .metric{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-    }
-    .metric .k{
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: rgba(233,238,252,.60);
-    }
-    .metric .v{
-      font-weight: 900;
-      color: rgba(233,238,252,.86);
-    }
-    .metric .mono{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    /* Right telemetry sticky */
+    .sticky{
+      position: sticky;
+      top: 18px;
+      align-self: start;
     }
 
     /* Form */
-    .form-box{
-      padding: 16px;
-    }
-
-    /* Form collapse after submit */
-    .form-collapse{
-      overflow: hidden;
-      transition: max-height .55s ease, opacity .45s ease, transform .45s ease;
-      max-height: 900px;
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .form-collapse.is-gone{
-      max-height: 0px;
-      opacity: 0;
-      transform: translateY(-8px);
-      pointer-events:none;
-    }
-
-    .form-title{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom: 10px;
-    }
-    .form-title h2{
-      margin:0;
-      font-size: 14px;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      color: rgba(233,238,252,.78);
-    }
+    .form-box{ padding: 16px; }
     .pill{
       display:inline-flex;
       align-items:center;
@@ -366,10 +292,23 @@
       line-height: 1.55;
     }
 
-    /* Reveal area */
-    .reveal{
-      padding: 18px;
+    /* Smooth form hide */
+    #form-area{
+      transition: opacity .35s ease, transform .35s ease, max-height .45s ease;
+      max-height: 1200px;
+      opacity: 1;
+      transform: translateY(0);
+      overflow: hidden;
     }
+    #form-area.is-gone{
+      opacity: 0;
+      transform: translateY(-6px);
+      max-height: 0px;
+      pointer-events: none;
+    }
+
+    /* Reveal area */
+    .reveal{ padding: 18px; }
     .reveal-head{
       display:flex;
       align-items:flex-start;
@@ -454,23 +393,8 @@
       font-weight: 800;
     }
 
-    /* Reveal blocks fade in */
-    .reveal-block{
-      opacity: 0;
-      transform: translateY(8px);
-      transition: opacity .4s ease, transform .4s ease;
-    }
-    .reveal-block.is-in{
-      opacity: 1;
-      transform: translateY(0);
-    }
-
     /* Steps list */
-    .steps{
-      display:grid;
-      gap: 10px;
-      margin-top: 10px;
-    }
+    .steps{ display:grid; gap: 10px; margin-top: 10px; }
     .step{
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.04);
@@ -484,10 +408,7 @@
       transform: translateY(8px);
       transition: opacity .35s ease, transform .35s ease;
     }
-    .step.is-in{
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .step.is-in{ opacity: 1; transform: translateY(0); }
     .step .num{
       width: 24px; height: 24px;
       border-radius: 999px;
@@ -586,10 +507,7 @@
     .path[aria-expanded="true"] .chev{ transform: rotate(45deg); }
 
     /* Deep dives */
-    .deep{
-      margin-top: 12px;
-      display:none;
-    }
+    .deep{ margin-top: 12px; display:none; }
     .deep.is-open{ display:block; }
     .section{
       border: 1px solid rgba(255,255,255,.10);
@@ -647,8 +565,60 @@
     }
 
     /* hide/reveal states */
-    #experience { display:none; }
-    #experience.is-on { display:block; }
+    #experience { display:none; opacity:0; transform: translateY(6px); transition: opacity .45s ease, transform .45s ease; }
+    #experience.is-on { display:block; opacity:1; transform: translateY(0); }
+
+    /* telemetry rows */
+    .telemetry{
+      margin-top: 10px;
+      display:grid;
+      gap: 10px;
+    }
+    .trow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+    }
+    .tkey{
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(233,238,252,.65);
+      font-weight: 900;
+    }
+    .tval{
+      font-size: 13px;
+      color: rgba(233,238,252,.88);
+      font-weight: 850;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    .recent{
+      margin-top: 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      padding: 10px 12px;
+    }
+    .recent-title{
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(233,238,252,.65);
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+    .recent ul{
+      margin:0;
+      padding-left: 18px;
+      color: rgba(233,238,252,.82);
+      font-size: 13px;
+      line-height: 1.5;
+    }
   </style>
 </head>
 
@@ -712,62 +682,64 @@
               <div id="msg-error" class="msg error"></div>
               <div id="msg-success" class="msg success"></div>
 
-              <!-- Collapsible form container (so it can fade away after submit) -->
-              <div class="form-box form-collapse" id="formCollapse" aria-label="Intro form">
-                <form id="lead-form" novalidate>
-                  <div class="row two">
-                    <div>
-                      <label for="firstName">First name</label>
-                      <input id="firstName" name="firstName" autocomplete="given-name" />
+              <!-- Form area (this fades away after submit/guest) -->
+              <div id="form-area">
+                <div class="form-box" aria-label="Intro form">
+                  <form id="lead-form" novalidate>
+                    <div class="row two">
+                      <div>
+                        <label for="firstName">First name</label>
+                        <input id="firstName" name="firstName" autocomplete="given-name" />
+                      </div>
+                      <div>
+                        <label for="lastName">Last name</label>
+                        <input id="lastName" name="lastName" autocomplete="family-name" />
+                      </div>
                     </div>
-                    <div>
-                      <label for="lastName">Last name</label>
-                      <input id="lastName" name="lastName" autocomplete="family-name" />
-                    </div>
-                  </div>
 
-                  <div class="row two">
-                    <div>
-                      <label for="company">Company</label>
-                      <input id="company" name="company" autocomplete="organization" />
+                    <div class="row two">
+                      <div>
+                        <label for="company">Company</label>
+                        <input id="company" name="company" autocomplete="organization" />
+                      </div>
+                      <div>
+                        <label for="title">Title</label>
+                        <input id="title" name="title" autocomplete="organization-title" />
+                      </div>
                     </div>
-                    <div>
-                      <label for="title">Title</label>
-                      <input id="title" name="title" autocomplete="organization-title" />
+
+                    <div class="row">
+                      <div>
+                        <label for="linkedin">LinkedIn URL</label>
+                        <input id="linkedin" name="linkedin" placeholder="https://www.linkedin.com/in/your-id/" />
+                      </div>
+                      <div>
+                        <label for="email">Work email (required for follow-up + full demo)</label>
+                        <input id="email" type="email" name="email" required autocomplete="email" />
+                      </div>
                     </div>
-                  </div>
 
-                  <div class="row">
-                    <div>
-                      <label for="linkedin">LinkedIn URL</label>
-                      <input id="linkedin" name="linkedin" placeholder="https://www.linkedin.com/in/your-id/" />
+                    <!-- Turnstile widget -->
+                    <div
+                      class="cf-turnstile"
+                      data-sitekey="0x4AAAAAABsD3RaVvPQfjsNv"
+                      data-callback="onTurnstileSuccess">
                     </div>
-                    <div>
-                      <label for="email">Work email (required for follow-up + full demo)</label>
-                      <input id="email" type="email" name="email" required autocomplete="email" />
+
+                    <div class="actions">
+                      <button id="submitBtn" type="submit">Start the live walkthrough →</button>
+                      <a class="link" id="guestBtn" href="#" role="button">Continue as guest</a>
                     </div>
-                  </div>
 
-                  <!-- Turnstile widget -->
-                  <div
-                    class="cf-turnstile"
-                    data-sitekey="0x4AAAAAABsD3RaVvPQfjsNv"
-                    data-callback="onTurnstileSuccess">
-                  </div>
+                    <div class="note">
+                      Your info is used only to personalize this experience and demonstrate CRM hygiene (dedupe + first-touch attribution).
+                      No spam.
+                    </div>
+                  </form>
+                </div>
 
-                  <div class="actions">
-                    <button id="submitBtn" type="submit">Start the live walkthrough →</button>
-                    <a class="link" id="guestBtn" href="#" role="button">Continue as guest</a>
-                  </div>
-
-                  <div class="note">
-                    Your info is used only to personalize this experience and demonstrate CRM hygiene (dedupe + first-touch attribution).
-                    No spam.
-                  </div>
-                </form>
+                <div class="divider"></div>
               </div>
-
-              <div class="divider"></div>
 
               <!-- EXPERIENCE (hidden until submit/guest) -->
               <div id="experience" aria-live="polite">
@@ -929,12 +901,12 @@
           </div><!-- /fog-wrap -->
         </div>
 
-        <!-- Right: live telemetry panel -->
-        <div class="side">
-          <div class="card side-card">
+        <!-- Right: sticky telemetry panel -->
+        <div class="sticky">
+          <div class="card" style="padding: 18px; background: rgba(255,255,255,.05);">
             <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
               <div style="font-weight:900; letter-spacing:.08em; text-transform:uppercase; font-size:12px; color: rgba(233,238,252,.78);">
-                Session signals
+                Live telemetry
               </div>
               <span class="pill" style="border-color: rgba(255,255,255,.14); background: rgba(255,255,255,.06);">
                 <span class="dot" style="background: var(--accent); box-shadow:0 0 0 4px rgba(96,165,250,.18);"></span>
@@ -945,32 +917,38 @@
             <div class="divider"></div>
 
             <div class="chips" id="signal-chips">
-              <!-- populated by JS (path/source) -->
               <span class="chip guest"><span class="k">path</span><span class="mono">direct</span></span>
               <span class="chip guest"><span class="k">source</span><span class="mono">Direct</span></span>
             </div>
 
-            <!-- NEW: extra live metrics -->
-            <div class="signal-metrics" id="signal-metrics">
-              <div class="metric">
-                <div class="k">mode</div>
-                <div class="v" id="sig-mode">capturing</div>
+            <div class="telemetry">
+              <div class="trow">
+                <div class="tkey">identity</div>
+                <div class="tval" id="t-mode">anonymous</div>
               </div>
-              <div class="metric">
-                <div class="k">time</div>
-                <div class="v mono" id="sig-time">0s</div>
+              <div class="trow">
+                <div class="tkey">time</div>
+                <div class="tval" id="t-time">0s</div>
               </div>
-              <div class="metric">
-                <div class="k">clicks</div>
-                <div class="v mono" id="sig-clicks">0</div>
+              <div class="trow">
+                <div class="tkey">actions</div>
+                <div class="tval" id="t-actions">0</div>
               </div>
             </div>
 
+            <div class="recent">
+              <div class="recent-title">recent actions</div>
+              <ul id="t-recent">
+                <li>Waiting for a meaningful interaction…</li>
+              </ul>
+            </div>
+
             <div class="note" style="margin-top:10px;">
-              Tip: entry path is carried from your tracked link (<span class="mono">/r/:slug</span>) — no UTMs needed.
+              Anonymous signals are captured first. After submit, events can be attached to the CRM profile (deanonymized).
             </div>
           </div>
         </div>
+
       </div>
     </div>
 
