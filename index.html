@@ -1,4 +1,4 @@
-<!doctype html>
+<!doctype html> 
 <html lang="en">
 <head>
   <link rel="icon" href="/favicon.ico?v=3" sizes="any">
@@ -472,7 +472,15 @@
     }
 
     /* Telemetry */
-    .telemetry-sticky{ position: sticky; top: 18px; }
+    /* UPDATED: sticky that reliably works in CSS Grid + viewport safe */
+    .telemetry-sticky{
+      position: sticky;
+      top: 18px;
+      align-self: start;
+      max-height: calc(100vh - 36px);
+      overflow: auto;
+    }
+
     .telemetry-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
     .telemetry-title{
       font-weight:900; letter-spacing:.08em; text-transform:uppercase;
@@ -754,7 +762,8 @@
         </div>
 
         <!-- RIGHT: TELEMETRY -->
-        <div>
+        <!-- UPDATED: add align-self:start so the grid item doesn't stretch, helps sticky behavior -->
+        <div style="align-self: start;">
           <div class="telemetry-sticky">
             <div class="card" style="padding: 18px; background: rgba(255,255,255,.05);">
               <div class="telemetry-head">
