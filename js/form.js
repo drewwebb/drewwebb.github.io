@@ -1,18 +1,24 @@
 /* js/form.js
-   Fixes:
-   1) sticky panel works (handled by index.html removing overflow clipping)
-   2) no double-counting (bind listeners once; use currentState)
-   3) move CRM/identity chips to right panel ("CRM upserted data")
-   4) FAQ opens in new tab (handled by index.html target=_blank)
-   5) identity labels: anonymous -> guest -> identified
+   Single-page reveal (Option B telemetry):
+   - Slug attribution (from URL or cookies)
+   - Submit -> POST to API -> reveal experience
+   - Guest -> reveal experience (no API call)
+   - Track ONLY valuable interactions:
+       * outbound link clicks (resume/linkedin/faq)
+       * choose-your-path opens
+   - Time-on-page:
+       * UI time always
+       * POST events only if email exists (30s + 90s)
 */
 
 (() => {
   const API_ROOT = "https://api.drewwebbai.com";
   const API_EVENT = API_ROOT + "/event";
 
+  // Targets
   const RESUME_TO = "https://drewwebbai.com/resume";
   const LINKEDIN_TO = "https://www.linkedin.com/in/drewrwebb/";
+  const FAQ_TO = "https://drewwebbai.com/faq.html";
 
   // Form + UI
   const form = document.getElementById("lead-form");
@@ -20,34 +26,29 @@
   const guestBtn = document.getElementById("guestBtn");
 
   const msgError = document.getElementById("msg-error");
-  const msgSuccess = document.getElementById("msg-success");
 
   const fog = document.getElementById("fog");
   const experience = document.getElementById("experience");
-  const formArea = document.getElementById("form-area");
 
   const heroTitle = document.getElementById("hero-title");
   const heroSub = document.getElementById("hero-sub");
 
   const hello = document.getElementById("hello");
   const context = document.getElementById("context");
-  const chips = document.getElementById("chips"); // main-body chips (now session-only)
+  const chips = document.getElementById("chips");
 
   const statusText = document.getElementById("status-text");
-
-  // Right telemetry
   const signalPill = document.getElementById("signal-pill");
   const signalChips = document.getElementById("signal-chips");
-  const tMode = document.getElementById("t-mode");
-  const tTime = document.getElementById("t-time");
-  const tActions = document.getElementById("t-actions");
-  const tRecent = document.getElementById("t-recent");
 
-  // CRM box
-  const crmBox = document.getElementById("crm-box");
-  const crmChips = document.getElementById("crm-chips");
+  const telemetryIdentity = document.getElementById("telemetry-identity");
+  const telemetryTime = document.getElementById("telemetry-time");
+  const telemetryClicks = document.getElementById("telemetry-clicks");
+  const telemetryActions = document.getElementById("telemetry-actions");
+  const telemetryCrm = document.getElementById("telemetry-crm");
 
-  // Steps
+  const introBlock = document.getElementById("intro-block");
+
   const stepsWrap = document.getElementById("steps");
   const stepEls = stepsWrap ? Array.from(stepsWrap.querySelectorAll(".step")) : [];
 
@@ -59,11 +60,17 @@
   const elLinkedIn = document.getElementById("linkedin");
   const elEmail = document.getElementById("email");
 
-  // Links
+  // Top links (tracked)
   const resumeLink = document.getElementById("resume-link");
   const linkedinLink = document.getElementById("linkedin-link");
   const faqLink = document.getElementById("faq-link");
-  const startOverLink = document.getElementById("start-over");
+
+  // State
+  let wired = false;              // prevent double-binding listeners
+  let startTs = Date.now();
+  let uiTimer = null;
+  let interactions = 0;
+  const recentActions = [];
 
   // -------------------------
   // Helpers
@@ -90,23 +97,11 @@
     return m ? decodeURIComponent(m[2]) : "";
   }
 
-  function escapeHtml(str) {
-    return String(str || "").replace(/[&<>'"]/g, c => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      "'": "&#39;",
-      '"': "&quot;"
-    })[c]);
-  }
-
-  function formatElapsed(sec) {
-    if (sec < 60) return `${sec}s`;
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    return `${m}m ${String(s).padStart(2, "0")}s`;
-  }
-
+  // We support:
+  // - portfolioSlug (preferred)
+  // - ref (older)
+  // - portfolio_slug cookie (set by /r/:slug)
+  // - first_ref cookie (set by /r/:slug?ref=)
   function getEntryPath() {
     const fromQuery = (qs("portfolioSlug") || qs("portfolio_slug") || qs("ref") || "").trim();
     if (fromQuery) return fromQuery;
@@ -126,6 +121,16 @@
     return window.__turnstileToken || "";
   }
 
+  function escapeHtml(str) {
+    return String(str || "").replace(/[&<>'"]/g, c => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "'": "&#39;",
+      '"': "&quot;"
+    })[c]);
+  }
+
   function shortenLinkedIn(url) {
     const s = String(url || "").trim();
     if (!s) return "";
@@ -142,119 +147,199 @@
     }
   }
 
-  // -------------------------
-  // State
-  // -------------------------
-  const sessionStart = Date.now();
+  function addAction(text) {
+    const t = String(text || "").trim();
+    if (!t) return;
 
-  // ✅ Single source of truth to prevent double listeners
-  const currentState = {
-    guest: false,
-    name: "",
-    email: "",
-    company: "",
-    title: "",
-    linkedin: "",
-    entryPath: getEntryPath(),
-    leadSource: getLeadSourceLabel(),
-  };
+    // prevent accidental duplicates like "FAQ clicked" twice on same interaction
+    const last = recentActions[0] || "";
+    if (last === t) return;
 
-  const telemetry = {
-    identity: "anonymous", // anonymous | guest | identified
-    actions: 0,
-    recent: []
-  };
+    recentActions.unshift(t);
+    if (recentActions.length > 6) recentActions.length = 6;
 
-  function setIdentity(next) {
-    telemetry.identity = next;
-    if (tMode) tMode.textContent = next;
-
-    if (signalPill) {
-      // pill is more “status” than “identity”
-      signalPill.textContent = next === "identified" ? "Identified" : "Capturing";
+    if (telemetryActions) {
+      telemetryActions.innerHTML = recentActions.map(x => `<li>${escapeHtml(x)}</li>`).join("");
     }
   }
 
-  function pushRecent(label) {
-    telemetry.recent.unshift(label);
-    telemetry.recent = telemetry.recent.slice(0, 5);
-
-    if (!tRecent) return;
-    tRecent.innerHTML = telemetry.recent.length
-      ? telemetry.recent.map(x => `<li>${escapeHtml(x)}</li>`).join("")
-      : `<li>Waiting for a meaningful interaction…</li>`;
+  function setInteractions(n) {
+    interactions = n;
+    if (telemetryClicks) telemetryClicks.textContent = String(interactions);
   }
 
-  function incAction(label) {
-    telemetry.actions += 1;
-    if (tActions) tActions.textContent = String(telemetry.actions);
-    pushRecent(label);
+  function bumpInteractions(label) {
+    setInteractions(interactions + 1);
+    addAction(label);
   }
 
-  function updateSignalChips() {
-    if (!signalChips) return;
-    signalChips.innerHTML =
-      `<span class="chip guest"><span class="k">path</span><span class="mono">${escapeHtml(currentState.entryPath || "direct")}</span></span>` +
-      `<span class="chip guest"><span class="k">source</span><span class="mono">${escapeHtml(currentState.leadSource || "Direct")}</span></span>`;
+  function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}m ${String(s).padStart(2, "0")}s`;
   }
 
-  function renderMainBodyChips() {
-    // ✅ Session-only under welcome; CRM data moved to right panel
-    if (!chips) return;
+  function startUiTimer() {
+    if (uiTimer) return;
+    uiTimer = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTs) / 1000);
+      if (telemetryTime) telemetryTime.textContent = formatTime(elapsed);
+    }, 500);
+  }
 
+  function buildIdentityChips(state) {
     const out = [];
-    function chip(key, value, opts = {}) {
-      if (!value) return;
-      const cls = opts.guest ? "chip guest" : "chip";
-      const mono = opts.mono ? " mono" : "";
-      out.push(`<span class="${cls}${mono}"><span class="k">${escapeHtml(key)}</span><span>${escapeHtml(value)}</span></span>`);
-    }
 
-    if (currentState.guest) {
-      chip("mode", "guest", { guest: true, mono: true });
-      chip("path", currentState.entryPath, { guest: true, mono: true });
-      chip("source", currentState.leadSource, { guest: true, mono: true });
-      chip("personalization", "limited", { guest: true });
-    } else {
-      chip("path", currentState.entryPath, { mono: true });
-      chip("source", currentState.leadSource, { mono: true });
-      chip("follow-up", currentState.email ? "email queued" : "skipped (no email)");
-    }
-
-    chips.innerHTML = out.join("");
-  }
-
-  function renderCrmUpsertedData() {
-    if (!crmBox || !crmChips) return;
-
-    // show only when we actually have an identity
-    if (!currentState.email && currentState.guest) {
-      crmBox.style.display = "none";
-      crmChips.innerHTML = "";
-      return;
-    }
-
-    if (!currentState.email) {
-      crmBox.style.display = "none";
-      crmChips.innerHTML = "";
-      return;
-    }
-
-    crmBox.style.display = "block";
-
-    const rows = [];
     function chip(key, value) {
       if (!value) return;
-      rows.push(`<span class="chip"><span class="k">${escapeHtml(key)}</span><span>${escapeHtml(value)}</span></span>`);
+      out.push(
+        `<span class="chip"><span class="k">${escapeHtml(key)}</span><span>${escapeHtml(value)}</span></span>`
+      );
     }
 
-    chip("name", currentState.name || "(not provided)");
-    chip("email", currentState.email);
-    chip("company", currentState.company);
-    chip("title", currentState.title);
-    chip("linkedin", shortenLinkedIn(currentState.linkedin));
+    // Identity-only chips (NO path/source here)
+    if (state.guest) {
+      chip("mode", "guest");
+      chip("personalization", "limited");
+    } else {
+      chip("name", state.name || "(not provided)");
+      chip("email", state.email || "");
+      chip("company", state.company || "");
+      chip("title", state.title || "");
+      chip("linkedin", state.linkedin ? shortenLinkedIn(state.linkedin) : "");
+    }
 
-    crmChips.innerHTML = rows.join("");
+    return out.join("");
+  }
+
+  function buildCrmTelemetry(state) {
+    if (!telemetryCrm) return;
+
+    if (state.guest) {
+      telemetryCrm.innerHTML =
+        `<span class="chip guest"><span class="k">status</span><span>Guest mode (no CRM upsert)</span></span>`;
+      return;
+    }
+
+    const items = [];
+    function tchip(k, v) {
+      if (!v) return;
+      items.push(
+        `<span class="chip guest"><span class="k">${escapeHtml(k)}</span><span>${escapeHtml(v)}</span></span>`
+      );
+    }
+
+    tchip("email", state.email);
+    tchip("name", state.name || "(not provided)");
+    tchip("company", state.company);
+    tchip("title", state.title);
+    if (state.linkedin) tchip("linkedin", shortenLinkedIn(state.linkedin));
+
+    // If user provided email, show upsert status
+    tchip("crm", "upserted");
+    tchip("follow-up", "queued");
+
+    telemetryCrm.innerHTML = items.length ? items.join("") : `<span class="chip guest"><span class="k">status</span><span>Submitted</span></span>`;
+  }
+
+  // -------------------------
+  // Telemetry: attribution preview
+  // -------------------------
+  function initSignalsPreview() {
+    const entryPath = getEntryPath();
+    const leadSource = getLeadSourceLabel();
+
+    if (signalChips) {
+      signalChips.innerHTML =
+        `<span class="chip guest"><span class="k">path</span><span class="mono">${escapeHtml(entryPath)}</span></span>` +
+        `<span class="chip guest"><span class="k">source</span><span class="mono">${escapeHtml(leadSource)}</span></span>`;
+    }
+
+    if (telemetryIdentity) telemetryIdentity.textContent = "Anonymous";
+    if (signalPill) signalPill.textContent = "Capturing";
+
+    addAction("Page loaded");
+    startUiTimer();
+  }
+
+  // -------------------------
+  // Reveal logic
+  // -------------------------
+  function animateSteps(state) {
+    const s1 = document.getElementById("step-1");
+    const s2 = document.getElementById("step-2");
+    const s3 = document.getElementById("step-3");
+    const s4 = document.getElementById("step-4");
+    const s5 = document.getElementById("step-5");
+
+    if (state.guest) {
+      if (s1) s1.textContent = "Attribution is captured (entry path + first-touch preserved).";
+      if (s2) s2.textContent = "Guest mode selected (no CRM upsert, identity stays anonymous).";
+      if (s3) s3.textContent = "You can still explore the system design and telemetry while browsing.";
+      if (s4) s4.textContent = "Telemetry logs meaningful actions (links + section opens).";
+      if (s5) s5.textContent = "This can be expanded with enrichment + routing rules in production.";
+    } else {
+      if (s1) s1.textContent = "Visited via an attributed path (entry path + source captured).";
+      if (s2) s2.textContent = "Submitted form, profile was upserted in CRM (deduped by email).";
+      if (s3) s3.textContent = "First-touch attribution is preserved (not overwritten on future visits).";
+      if (s4) s4.textContent = "Automation is triggered (follow-up email queued + engagement scoring).";
+      if (s5) s5.textContent = "Telemetry logs meaningful interactions while you explore (links + sections).";
+    }
+
+    // reset + stagger in
+    stepEls.forEach(el => el.classList.remove("is-in"));
+    stepEls.forEach((el, i) => setTimeout(() => el.classList.add("is-in"), 140 + i * 200));
+  }
+
+  function hideIntroBlock() {
+    if (!introBlock) return;
+    introBlock.classList.add("is-hidden");
+  }
+
+  function reveal(state) {
+    // Subtle fog transition
+    if (fog) fog.classList.add("is-cleared");
+    if (experience) experience.classList.add("is-on");
+
+    // Remove intro block (form + helper text) AFTER successful submit or guest
+    hideIntroBlock();
+
+    // Update hero copy
+    if (statusText) statusText.textContent = state.guest ? "Guest mode" : "Live";
+    if (heroTitle) heroTitle.textContent = state.guest ? "Guest walkthrough" : "Personalized walkthrough";
+    if (heroSub) {
+      heroSub.textContent = state.guest
+        ? "You’re viewing the guest version of the live system. Attribution is visible, but CRM capture and follow-up are skipped."
+        : "Nice to meet you. This page adapts to what you submitted — and logs signals in real systems while you browse.";
+    }
+
+    const displayName = (state.name || state.email || "there").trim();
+    if (hello) hello.textContent = `Welcome, ${displayName}`;
+
+    if (context) {
+      context.textContent = state.guest
+        ? "You’re in guest mode. For full proof (CRM upsert + follow-up), enter a work email next time."
+        : "This is intentionally subtle: personalization, attribution, capture, and follow-up are happening as you read.";
+    }
+
+    // Main chips: identity only (no path/source here anymore)
+    if (chips) chips.innerHTML = buildIdentityChips(state);
+
+    // Telemetry identity + CRM panel
+    if (telemetryIdentity) telemetryIdentity.textContent = state.guest ? "Anonymous (guest)" : "Identified";
+    if (signalPill) signalPill.textContent = state.guest ? "Guest" : "Live";
+
+    if (state.guest) {
+      addAction("Guest mode selected");
+      buildCrmTelemetry({ ...state, guest: true });
+    } else {
+      addAction("Form submitted");
+      buildCrmTelemetry(state);
+    }
+
+    animateSteps(state);
+
+    // IMPORTANT: no auto-scroll anymore
   }
 
   // -------------------------
@@ -270,147 +355,101 @@
     } catch {}
   }
 
-  function trackIfIdentified(eventName, extra = {}) {
-    if (currentState.email) {
-      postEvent({ email: currentState.email, event: eventName, ...extra });
-    }
-  }
+  // Only valuable interactions:
+  // - resume / linkedin / faq
+  // - choose-your-path opens
+  function wireValuableTracking(state) {
+    if (wired) return;
+    wired = true;
 
-  // -------------------------
-  // Reveal logic
-  // -------------------------
-  function animateSteps(isGuest) {
-    const step1 = document.getElementById("step-1");
-    const step2 = document.getElementById("step-2");
-    const step3 = document.getElementById("step-3");
-
-    if (isGuest) {
-      if (step1) step1.textContent = "Attribution is captured (entry path + first-touch preserved).";
-      if (step2) step2.textContent = "Guest mode: CRM capture is skipped (no email).";
-      if (step3) step3.textContent = "You can still explore the system and how it’s designed.";
-    } else {
-      if (step1) step1.textContent = "Attribution is captured (entry path + first-touch preserved).";
-      if (step2) step2.textContent = "A CRM profile is created or updated (deduped by email).";
-      if (step3) step3.textContent = "Automation is triggered (email + engagement scoring).";
+    function trackIfIdentified(eventName, extra = {}) {
+      bumpInteractions(eventName.replace(/_/g, " "));
+      if (state.email) {
+        postEvent({ email: state.email, event: eventName, ...extra });
+      }
     }
 
-    stepEls.forEach(el => el.classList.remove("is-in"));
-    stepEls.forEach((el, i) => setTimeout(() => el.classList.add("is-in"), 160 + i * 220));
-  }
+    function onOutbound(a, eventName, toUrl) {
+      if (!a) return;
 
-  function hideFormArea() {
-    if (!formArea) return;
-    formArea.classList.add("is-gone");
-  }
+      // enforce destination (and avoid drifting href)
+      if (toUrl) a.href = toUrl;
 
-  function reveal() {
-    if (fog) fog.classList.add("is-cleared");
-    if (experience) experience.classList.add("is-on");
-    hideFormArea();
-
-    if (statusText) statusText.textContent = currentState.guest ? "Guest mode" : "Live";
-    if (heroTitle) heroTitle.textContent = currentState.guest ? "Guest walkthrough" : "Personalized walkthrough";
-    if (heroSub) {
-      heroSub.textContent = currentState.guest
-        ? "You’re viewing the guest version of the live system. You can still see attribution + structure — personalization and CRM capture are limited."
-        : "Nice to meet you. This page now adapts to what you submitted — and logs signals in real systems while you browse.";
+      a.addEventListener("click", () => {
+        trackIfIdentified(eventName);
+      }, { passive: true });
     }
 
-    const displayName = (currentState.name || currentState.email || "there").trim();
-    if (hello) hello.textContent = `Welcome, ${displayName}`;
+    onOutbound(resumeLink, "resume_clicked", RESUME_TO);
+    onOutbound(linkedinLink, "linkedin_clicked", LINKEDIN_TO);
+    onOutbound(faqLink, "faq_clicked", FAQ_TO);
 
-    if (context) {
-      context.textContent = currentState.guest
-        ? "You’re in guest mode. Want the full proof? Enter a work email above to trigger CRM capture + automated follow-up."
-        : "This is intentionally subtle: personalization, attribution, capture, and follow-up are happening as you read.";
-    }
-
-    updateSignalChips();
-    renderMainBodyChips();
-    renderCrmUpsertedData();
-
-    setIdentity(currentState.guest ? "guest" : (currentState.email ? "identified" : "anonymous"));
-
-    animateSteps(currentState.guest);
-    // ✅ No auto-scroll
-  }
-
-  // -------------------------
-  // Bind meaningful interactions ONCE
-  // -------------------------
-  function bindOnce(el, key, fn) {
-    if (!el) return;
-    const k = `bound_${key}`;
-    if (el.dataset[k] === "1") return;
-    el.dataset[k] = "1";
-    el.addEventListener("click", fn);
-  }
-
-  function wireOutboundTrackingOnce() {
-    bindOnce(resumeLink, "resume", () => {
-      incAction("Resume opened");
-      trackIfIdentified("resume_clicked");
-      resumeLink.href = RESUME_TO;
-    });
-
-    bindOnce(linkedinLink, "linkedin", () => {
-      incAction("LinkedIn opened");
-      trackIfIdentified("linkedin_clicked");
-      linkedinLink.href = LINKEDIN_TO;
-    });
-
-    bindOnce(faqLink, "faq", () => {
-      incAction("FAQ opened");
-      trackIfIdentified("faq_clicked");
-      // opens in new tab via HTML target=_blank
-    });
-
-    bindOnce(startOverLink, "startover", () => {
-      incAction("Start over");
-      trackIfIdentified("start_over_clicked");
-    });
-  }
-
-  function wirePathButtonsOnce() {
+    // Track “Choose your path” opens (only when opening a section)
     const sections = ["about", "stacks", "behind"];
 
     function setOpen(key, open) {
       const panel = document.getElementById(`deep-${key}`);
-      const btn = document.querySelector(`.path[data-toggle="${key}"]`);
-      if (!panel || !btn) return;
+      const b = document.querySelector(`.path[data-toggle="${key}"]`);
+      if (!panel || !b) return;
 
       if (open) {
         panel.classList.add("is-open");
         panel.setAttribute("aria-hidden", "false");
-        btn.setAttribute("aria-expanded", "true");
-        const hint = btn.querySelector(".hint span");
+        b.setAttribute("aria-expanded", "true");
+        const hint = b.querySelector(".hint span");
         if (hint) hint.textContent = "Click to close";
       } else {
         panel.classList.remove("is-open");
         panel.setAttribute("aria-hidden", "true");
-        btn.setAttribute("aria-expanded", "false");
-        const hint = btn.querySelector(".hint span");
+        b.setAttribute("aria-expanded", "false");
+        const hint = b.querySelector(".hint span");
         if (hint) hint.textContent = "Click to open";
       }
     }
 
+    // initialize closed
     sections.forEach(k => setOpen(k, false));
 
     document.querySelectorAll(".path[data-toggle]").forEach(b => {
-      bindOnce(b, `path_${b.getAttribute("data-toggle")}`, () => {
+      if (b.dataset.wired === "1") return;
+      b.dataset.wired = "1";
+
+      b.addEventListener("click", () => {
         const key = b.getAttribute("data-toggle");
         const isExpanded = b.getAttribute("aria-expanded") === "true";
         const willOpen = !isExpanded;
 
         sections.forEach(k => setOpen(k, k === key ? willOpen : false));
 
-        const label = willOpen ? `Opened: ${key}` : `Closed: ${key}`;
-        incAction(label);
-        trackIfIdentified("path_section_toggled", { section: key, open: willOpen });
-
-        b.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      });
+        if (willOpen) {
+          trackIfIdentified("path_section_opened", { section: key });
+          addAction(`Opened section: ${key}`);
+        } else {
+          addAction(`Closed section: ${key}`);
+        }
+      }, { passive: true });
     });
+  }
+
+  function startTimeOnPageServer(state) {
+    if (!state.email) return;
+
+    const fired = { 30: false, 90: false };
+    const start = Date.now();
+
+    const timer = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - start) / 1000);
+
+      if (elapsed >= 30 && !fired[30]) {
+        fired[30] = true;
+        postEvent({ email: state.email, event: "time_on_page_sec", value: 30 });
+      }
+      if (elapsed >= 90 && !fired[90]) {
+        fired[90] = true;
+        postEvent({ email: state.email, event: "time_on_page_sec", value: 90 });
+        clearInterval(timer);
+      }
+    }, 1000);
   }
 
   // -------------------------
@@ -431,30 +470,33 @@
     return data;
   }
 
-  function buildFromInputs() {
+  function buildStateFromInputs({ guest }) {
     const firstName = (elFirst?.value || "").trim();
     const lastName = (elLast?.value || "").trim();
     const name = `${firstName} ${lastName}`.trim();
 
     return {
+      guest: !!guest,
       name,
       email: (elEmail?.value || "").trim(),
       company: (elCompany?.value || "").trim(),
       title: (elTitle?.value || "").trim(),
       linkedin: (elLinkedIn?.value || "").trim(),
+      entryPath: getEntryPath(),
+      leadSource: getLeadSourceLabel(),
     };
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setMsg(msgError, "");
-    setMsg(msgSuccess, "");
+
     if (statusText) statusText.textContent = "Submitting…";
     if (btn) btn.disabled = true;
 
-    const input = buildFromInputs();
+    const state = buildStateFromInputs({ guest: false });
 
-    if (!input.email) {
+    if (!state.email) {
       setMsg(msgError, "Please enter a work email (or use Guest mode).");
       if (statusText) statusText.textContent = "Ready";
       if (btn) btn.disabled = false;
@@ -464,11 +506,15 @@
     const payload = {
       firstName: (elFirst?.value || "").trim(),
       lastName: (elLast?.value || "").trim(),
-      company: input.company,
-      title: input.title,
-      linkedin: input.linkedin,
-      email: input.email,
-      portfolioSlug: currentState.entryPath,
+      company: state.company,
+      title: state.title,
+      linkedin: state.linkedin,
+      email: state.email,
+
+      // IMPORTANT: pass slug/path into your worker to keep attribution consistent
+      portfolioSlug: state.entryPath,
+
+      // optional token (only useful if worker validates it)
       turnstileToken: getTurnstileToken(),
     };
 
@@ -476,19 +522,18 @@
       const data = await postIntro(payload);
       if (data && data.ok === false) throw new Error(data.error || "Something went wrong submitting the form.");
 
-      // update state
-      currentState.guest = false;
-      currentState.name = input.name;
-      currentState.email = input.email;
-      currentState.company = input.company;
-      currentState.title = input.title;
-      currentState.linkedin = input.linkedin;
+      // reveal UI
+      reveal(state);
 
-      setMsg(msgSuccess, "Captured. Clearing the fog…");
-      incAction("Form submitted");
+      // wire tracking ONCE, with identified email
+      wireValuableTracking(state);
 
-      reveal();
+      // server-side time markers
+      startTimeOnPageServer(state);
 
+      // telemetry
+      bumpInteractions("Form submit");
+      addAction("CRM upsert: success");
       if (statusText) statusText.textContent = "Live";
     } catch (err) {
       setMsg(msgError, err?.message || "Unexpected error");
@@ -500,42 +545,25 @@
   function handleGuest(e) {
     e.preventDefault();
     setMsg(msgError, "");
-    setMsg(msgSuccess, "");
 
-    currentState.guest = true;
-    currentState.name = buildFromInputs().name;
-    currentState.email = ""; // remain anonymous
-    currentState.company = "";
-    currentState.title = "";
-    currentState.linkedin = "";
+    const state = buildStateFromInputs({ guest: true });
 
-    incAction("Entered guest mode");
-    reveal();
+    // reveal UI (no API call)
+    reveal({ ...state, email: "" });
 
+    // wire tracking once (no server post without email)
+    wireValuableTracking({ ...state, email: "" });
+
+    // telemetry
+    bumpInteractions("Guest mode");
     if (statusText) statusText.textContent = "Guest mode";
   }
 
   // -------------------------
-  // Init
+  // Boot
   // -------------------------
-  function initTelemetryPreview() {
-    updateSignalChips();
-    setIdentity("anonymous");
-
-    setInterval(() => {
-      const sec = Math.floor((Date.now() - sessionStart) / 1000);
-      if (tTime) tTime.textContent = formatElapsed(sec);
-    }, 1000);
-
-    renderMainBodyChips();
-  }
-
   if (form) form.addEventListener("submit", handleSubmit);
   if (guestBtn) guestBtn.addEventListener("click", handleGuest);
 
-  // bind once (prevents double-counting)
-  wireOutboundTrackingOnce();
-  wirePathButtonsOnce();
-
-  initTelemetryPreview();
+  initSignalsPreview();
 })();
