@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="A live, instrumented Marketing Operations portfolio — personalization, attribution, capture, and follow-up happening in real time." />
 
+  <!-- Optional: nicer typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -20,9 +21,9 @@
       --text: #e9eefc;
       --muted: rgba(233, 238, 252, .70);
 
-      --accent: #60a5fa;
-      --accent-2: #22c55e;
-      --warn: #f59e0b;
+      --accent: #60a5fa;        /* baby blue-ish */
+      --accent-2: #22c55e;      /* green */
+      --warn: #f59e0b;          /* amber */
       --danger: #f97373;
 
       --shadow: 0 18px 48px rgba(0,0,0,.45);
@@ -132,11 +133,10 @@
     }
     .card > *{ position: relative; }
 
-    /* ✅ Sticky fix: remove clipping on the hero card so sticky can work */
-    .no-clip{ overflow: visible; }
-
     /* Hero */
-    .hero{ padding: 26px; }
+    .hero{
+      padding: 26px;
+    }
     h1{
       font-size: clamp(34px, 4vw, 54px);
       line-height: 1.06;
@@ -151,7 +151,7 @@
       font-size: 16px;
     }
 
-    /* Fog */
+    /* “Fog” reveal effect */
     .fog-wrap{
       position: relative;
       border-radius: 16px;
@@ -167,6 +167,7 @@
         radial-gradient(900px 280px at 75% 30%, rgba(255,255,255,.10), transparent 60%),
         radial-gradient(900px 240px at 45% 80%, rgba(255,255,255,.12), transparent 60%),
         linear-gradient(180deg, rgba(2,6,23,.22), rgba(2,6,23,.38));
+      filter: blur(0px);
       opacity: .92;
       transition: opacity .8s ease, transform .8s ease;
       pointer-events:none;
@@ -176,7 +177,10 @@
       transform: translateY(-8px);
     }
 
-    .grid{ display:grid; gap: 16px; }
+    .grid{
+      display:grid;
+      gap: 16px;
+    }
     @media (min-width: 940px){
       .grid-2{
         grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
@@ -184,15 +188,23 @@
       }
     }
 
-    /* Sticky telemetry */
-    .sticky{
-      position: sticky;
-      top: 18px;
-      align-self: start;
-    }
-
     /* Form */
-    .form-box{ padding: 16px; }
+    .form-box{
+      padding: 16px;
+    }
+    .reveal-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap:wrap;
+      margin-bottom: 10px;
+    }
+    .reveal-head h2{
+      margin:0;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+    }
     .pill{
       display:inline-flex;
       align-items:center;
@@ -254,11 +266,6 @@
       background: rgba(249,115,115,.08);
       color: rgba(255,220,220,.92);
     }
-    .msg.success{
-      border-color: rgba(34,197,94,.35);
-      background: rgba(34,197,94,.08);
-      color: rgba(220,255,235,.92);
-    }
 
     .actions{
       display:flex;
@@ -294,36 +301,6 @@
       line-height: 1.55;
     }
 
-    /* Smooth form hide */
-    #form-area{
-      transition: opacity .35s ease, transform .35s ease, max-height .45s ease;
-      max-height: 1200px;
-      opacity: 1;
-      transform: translateY(0);
-      overflow: hidden;
-    }
-    #form-area.is-gone{
-      opacity: 0;
-      transform: translateY(-6px);
-      max-height: 0px;
-      pointer-events: none;
-    }
-
-    /* Reveal area */
-    .reveal{ padding: 18px; }
-    .reveal-head{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap: 12px;
-      flex-wrap:wrap;
-      margin-bottom: 10px;
-    }
-    .reveal-head h2{
-      margin:0;
-      font-size: 18px;
-      letter-spacing: -0.02em;
-    }
     .muted{ color: var(--muted); }
 
     .badges{
@@ -396,7 +373,11 @@
     }
 
     /* Steps list */
-    .steps{ display:grid; gap: 10px; margin-top: 10px; }
+    .steps{
+      display:grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
     .step{
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.04);
@@ -410,7 +391,10 @@
       transform: translateY(8px);
       transition: opacity .35s ease, transform .35s ease;
     }
-    .step.is-in{ opacity: 1; transform: translateY(0); }
+    .step.is-in{
+      opacity: 1;
+      transform: translateY(0);
+    }
     .step .num{
       width: 24px; height: 24px;
       border-radius: 999px;
@@ -430,7 +414,7 @@
       color: rgba(233,238,252,.84);
     }
 
-    /* Paths */
+    /* “Choose your path” */
     .paths{
       display:grid;
       grid-template-columns: 1fr;
@@ -509,7 +493,10 @@
     .path[aria-expanded="true"] .chev{ transform: rotate(45deg); }
 
     /* Deep dives */
-    .deep{ margin-top: 12px; display:none; }
+    .deep{
+      margin-top: 12px;
+      display:none;
+    }
     .deep.is-open{ display:block; }
     .section{
       border: 1px solid rgba(255,255,255,.10);
@@ -567,60 +554,76 @@
     }
 
     /* hide/reveal states */
-    #experience { display:none; opacity:0; transform: translateY(6px); transition: opacity .45s ease, transform .45s ease; }
-    #experience.is-on { display:block; opacity:1; transform: translateY(0); }
+    #experience { display:none; }
+    #experience.is-on { display:block; }
 
-    /* telemetry rows */
-    .telemetry{
-      margin-top: 10px;
-      display:grid;
-      gap: 10px;
+    /* Intro block hide animation */
+    #intro-block{
+      overflow:hidden;
+      transition: opacity .35s ease, transform .35s ease, max-height .45s ease, margin .35s ease, padding .35s ease;
+      max-height: 1200px;
     }
-    .trow{
+    #intro-block.is-hidden{
+      opacity: 0;
+      transform: translateY(-6px);
+      max-height: 0px;
+      margin: 0;
+      padding: 0;
+      pointer-events:none;
+    }
+
+    /* Telemetry (sticky) */
+    .telemetry-sticky{
+      position: sticky;
+      top: 18px;
+    }
+    .telemetry-head{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap: 12px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
+      gap:12px;
     }
-    .tkey{
-      font-size: 12px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: rgba(233,238,252,.65);
-      font-weight: 900;
+    .telemetry-title{
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-size:12px;
+      color: rgba(233,238,252,.78);
     }
-    .tval{
-      font-size: 13px;
-      color: rgba(233,238,252,.88);
-      font-weight: 850;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    }
-    .panel-box{
+    .telemetry-rows{
+      display:grid;
+      gap: 10px;
       margin-top: 10px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
-      padding: 10px 12px;
     }
-    .panel-title{
+    .trow{
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius: 14px;
+      padding: 10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .trow .k{
       font-size: 12px;
       letter-spacing: .08em;
       text-transform: uppercase;
-      color: rgba(233,238,252,.65);
+      color: rgba(233,238,252,.62);
       font-weight: 900;
-      margin-bottom: 8px;
     }
-    .panel-box ul{
-      margin:0;
+    .trow .v{
+      font-weight: 850;
+      color: rgba(233,238,252,.88);
+    }
+    .actions-list{
+      margin: 0;
       padding-left: 18px;
-      color: rgba(233,238,252,.82);
+      color: rgba(233,238,252,.78);
+      line-height: 1.55;
       font-size: 13px;
-      line-height: 1.5;
     }
+    .actions-list li{ margin: 6px 0; }
   </style>
 </head>
 
@@ -642,16 +645,18 @@
           LinkedIn
         </a>
 
-        <!-- ✅ Open FAQ in a new tab -->
-        <a class="btn" id="faq-link" href="/faq.html" target="_blank" rel="noopener" title="FAQ">FAQ</a>
+        <a class="btn" id="faq-link" href="/faq.html" target="_blank" rel="noopener" title="FAQ">
+          FAQ
+        </a>
 
         <a class="btn" id="start-over" href="/" title="Start over / re-personalize">Start over</a>
       </div>
     </div>
 
-    <div class="card hero no-clip">
+    <!-- HERO + FORM + REVEAL -->
+    <div class="card hero">
       <div class="grid grid-2">
-        <!-- Left -->
+        <!-- Left: story -->
         <div>
           <h1 id="hero-title">A live Marketing Ops demo</h1>
           <p class="subhead" id="hero-sub">
@@ -669,22 +674,24 @@
 
           <div class="fog-wrap">
             <div class="fog" id="fog"></div>
-            <div class="reveal">
-              <div class="reveal-head">
-                <div>
-                  <h2 id="reveal-title">Want the personalized walkthrough?</h2>
-                  <div class="muted" id="reveal-sub" style="margin-top:6px; line-height:1.6;">
-                    Fill this out and the page “clears” to reveal a tailored path. If you’d rather not, guest mode still shows the system —
-                    just with less context.
+
+            <div class="reveal" id="reveal-wrap">
+
+              <!-- INTRO (HIDES AFTER SUBMIT) -->
+              <div id="intro-block">
+                <div class="reveal-head">
+                  <div>
+                    <h2 id="reveal-title">Want the personalized walkthrough?</h2>
+                    <div class="muted" id="reveal-sub" style="margin-top:6px; line-height:1.6;">
+                      Fill this out and the page “clears” to reveal a tailored path. If you’d rather not, guest mode still shows the system —
+                      just with less context.
+                    </div>
                   </div>
+                  <span class="pill" id="status-pill"><span class="dot"></span><span id="status-text">Ready</span></span>
                 </div>
-                <span class="pill" id="status-pill"><span class="dot"></span><span id="status-text">Ready</span></span>
-              </div>
 
-              <div id="msg-error" class="msg error"></div>
-              <div id="msg-success" class="msg success"></div>
+                <div id="msg-error" class="msg error"></div>
 
-              <div id="form-area">
                 <div class="form-box" aria-label="Intro form">
                   <form id="lead-form" novalidate>
                     <div class="row two">
@@ -720,6 +727,7 @@
                       </div>
                     </div>
 
+                    <!-- Turnstile widget -->
                     <div
                       class="cf-turnstile"
                       data-sitekey="0x4AAAAAABsD3RaVvPQfjsNv"
@@ -739,8 +747,9 @@
                 </div>
 
                 <div class="divider"></div>
-              </div>
+              </div><!-- /intro-block -->
 
+              <!-- EXPERIENCE (hidden until submit/guest) -->
               <div id="experience" aria-live="polite">
                 <div class="reveal-head">
                   <div>
@@ -749,27 +758,35 @@
                   </div>
                 </div>
 
-                <!-- ✅ Keep main-body chips session-only now -->
+                <!-- ONLY identity chips (no path/source here anymore) -->
                 <div class="chips" id="chips"></div>
 
                 <div class="divider"></div>
 
-                <div class="muted" style="font-weight:800; letter-spacing:.03em; text-transform:uppercase; font-size:12px;">
-                  What just happened (live)
+                <div class="muted" style="font-weight:900; letter-spacing:.06em; text-transform:uppercase; font-size:12px;">
+                  What’s happening live
                 </div>
 
                 <div class="steps" id="steps">
                   <div class="step" data-step="1">
                     <div class="num">1</div>
-                    <div class="txt" id="step-1">Attribution is captured (entry path + first-touch preserved).</div>
+                    <div class="txt" id="step-1"></div>
                   </div>
                   <div class="step" data-step="2">
                     <div class="num">2</div>
-                    <div class="txt" id="step-2">A CRM profile is created or updated (deduped by email).</div>
+                    <div class="txt" id="step-2"></div>
                   </div>
                   <div class="step" data-step="3">
                     <div class="num">3</div>
-                    <div class="txt" id="step-3">Automation is triggered (email + engagement scoring).</div>
+                    <div class="txt" id="step-3"></div>
+                  </div>
+                  <div class="step" data-step="4">
+                    <div class="num">4</div>
+                    <div class="txt" id="step-4"></div>
+                  </div>
+                  <div class="step" data-step="5">
+                    <div class="num">5</div>
+                    <div class="txt" id="step-5"></div>
                   </div>
                 </div>
 
@@ -778,7 +795,7 @@
                 <div class="reveal-head">
                   <h2 style="margin:0; font-size:18px;">Choose your path</h2>
                   <div class="muted" style="max-width: 62ch; line-height:1.6;">
-                    Click one section at a time. This keeps the page clean — and lets the “proof” reveal progressively.
+                    Click one section at a time. This keeps the page clean — and lets the proof reveal progressively.
                   </div>
                 </div>
 
@@ -845,6 +862,54 @@
                     <p class="muted">
                       CRM hygiene: dedupe is enforced by email (single source of truth). First-touch fields (like entry path/source) are preserved and not overwritten.
                     </p>
+
+                    <div class="divider"></div>
+
+                    <div class="muted" style="font-weight:900; letter-spacing:.06em; text-transform:uppercase; font-size:12px;">
+                      Stack + cost outline
+                    </div>
+
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Component</th>
+                          <th>What it does</th>
+                          <th>Est. cost</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><strong>Cloudflare Workers</strong></td>
+                          <td>Routing, attribution, event capture, admin surfaces</td>
+                          <td>~$0–$X / mo</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Cloudflare D1</strong></td>
+                          <td>Slug storage + visit logs for Pulse</td>
+                          <td>~$0–$X / mo</td>
+                        </tr>
+                        <tr>
+                          <td><strong>GitHub Pages</strong></td>
+                          <td>Static hosting for the site</td>
+                          <td>$0</td>
+                        </tr>
+                        <tr>
+                          <td><strong>HubSpot (Free)</strong></td>
+                          <td>CRM + properties + views/dashboards</td>
+                          <td>$0</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Resend</strong></td>
+                          <td>Automated follow-up email</td>
+                          <td>~$0–$X / mo</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Domain</strong></td>
+                          <td>Registrar + renewal</td>
+                          <td>~$X / year</td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </section>
                 </div>
 
@@ -853,59 +918,62 @@
           </div><!-- /fog-wrap -->
         </div>
 
-        <!-- Right sticky panel -->
-        <div class="sticky">
-          <div class="card" style="padding: 18px; background: rgba(255,255,255,.05);">
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
-              <div style="font-weight:900; letter-spacing:.08em; text-transform:uppercase; font-size:12px; color: rgba(233,238,252,.78);">
-                Live telemetry
+        <!-- Right: LIVE TELEMETRY (sticky) -->
+        <div>
+          <div class="telemetry-sticky">
+            <div class="card" style="padding: 18px; background: rgba(255,255,255,.05);">
+              <div class="telemetry-head">
+                <div class="telemetry-title">Live telemetry</div>
+                <span class="pill" style="border-color: rgba(255,255,255,.14); background: rgba(255,255,255,.06);">
+                  <span class="dot" style="background: var(--accent); box-shadow:0 0 0 4px rgba(96,165,250,.18);"></span>
+                  <span id="signal-pill">Capturing</span>
+                </span>
               </div>
-              <span class="pill" style="border-color: rgba(255,255,255,.14); background: rgba(255,255,255,.06);">
-                <span class="dot" style="background: var(--accent); box-shadow:0 0 0 4px rgba(96,165,250,.18);"></span>
-                <span id="signal-pill">Capturing</span>
-              </span>
-            </div>
 
-            <div class="divider"></div>
+              <div class="divider"></div>
 
-            <div class="chips" id="signal-chips">
-              <span class="chip guest"><span class="k">path</span><span class="mono">direct</span></span>
-              <span class="chip guest"><span class="k">source</span><span class="mono">Direct</span></span>
-            </div>
-
-            <div class="telemetry">
-              <div class="trow">
-                <div class="tkey">identity</div>
-                <div class="tval" id="t-mode">anonymous</div>
+              <!-- Attribution -->
+              <div class="chips" id="signal-chips">
+                <span class="chip guest"><span class="k">path</span><span class="mono">direct</span></span>
+                <span class="chip guest"><span class="k">source</span><span class="mono">Direct</span></span>
               </div>
-              <div class="trow">
-                <div class="tkey">time</div>
-                <div class="tval" id="t-time">0s</div>
-              </div>
-              <div class="trow">
-                <div class="tkey">actions</div>
-                <div class="tval" id="t-actions">0</div>
-              </div>
-            </div>
 
-            <!-- ✅ New: CRM Upserted Data lives here -->
-            <div class="panel-box" id="crm-box" style="display:none;">
-              <div class="panel-title">CRM upserted data</div>
-              <div class="chips" id="crm-chips"></div>
-              <div class="note" style="margin-top:8px;">
-                After submit, these fields are stored and used for dedupe + automation.
+              <div class="telemetry-rows" style="margin-top:12px;">
+                <div class="trow">
+                  <div class="k">Identity</div>
+                  <div class="v" id="telemetry-identity">Anonymous</div>
+                </div>
+                <div class="trow">
+                  <div class="k">Time</div>
+                  <div class="v" id="telemetry-time">0m 00s</div>
+                </div>
+                <div class="trow">
+                  <div class="k">Interactions</div>
+                  <div class="v" id="telemetry-clicks">0</div>
+                </div>
               </div>
-            </div>
 
-            <div class="panel-box">
-              <div class="panel-title">recent actions</div>
-              <ul id="t-recent">
-                <li>Waiting for a meaningful interaction…</li>
+              <div class="divider"></div>
+
+              <div class="muted" style="font-weight:900; letter-spacing:.06em; text-transform:uppercase; font-size:12px;">
+                Recent actions
+              </div>
+              <ul class="actions-list" id="telemetry-actions">
+                <li>Page loaded</li>
               </ul>
-            </div>
 
-            <div class="note" style="margin-top:10px;">
-              Anonymous signals are captured first. After submit, events can be attached to the CRM profile (identified).
+              <div class="divider"></div>
+
+              <div class="muted" style="font-weight:900; letter-spacing:.06em; text-transform:uppercase; font-size:12px;">
+                CRM upserted data
+              </div>
+              <div class="chips" id="telemetry-crm" style="margin-top:10px;">
+                <span class="chip guest"><span class="k">status</span><span>Not submitted</span></span>
+              </div>
+
+              <div class="note" style="margin-top:10px;">
+                Tip: entry path is carried from your tracked link (<span class="mono">/r/:slug</span>) — no UTMs needed.
+              </div>
             </div>
           </div>
         </div>
@@ -924,8 +992,10 @@
 
   </div>
 
+  <!-- Turnstile JS -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
+  <!-- Turnstile callback (GLOBAL) -->
   <script>
     window.__turnstileToken = null;
     function onTurnstileSuccess(token) {
@@ -933,6 +1003,7 @@
     }
   </script>
 
-  <script src="/js/form.js?v=7" defer></script>
+  <!-- Your form logic -->
+  <script src="/js/form.js?v=6" defer></script>
 </body>
 </html>
