@@ -1,26 +1,21 @@
 /* js/form.js
-   Single-page reveal (Option B telemetry):
-   - Slug attribution (from URL or cookies)
-   - Submit -> POST to API -> reveal experience
-   - Guest -> reveal experience (no API call)
-   - Track ONLY valuable interactions:
-       * outbound link clicks (resume/linkedin/faq)
-       * choose-your-path opens
-   - Time-on-page:
-       * UI time always
-       * POST events only if email exists (30s + 90s)
+   Option B telemetry:
+   - Attribution shown immediately (path/source)
+   - Submit -> upsert -> reveal
+   - Guest -> reveal (no API)
+   - Track valuable interactions only (outbound links + choose-your-path opens)
+   - UI timer starts on load (display only)
+   - Server time markers only after submit (30s + 90s) and only if email exists
 */
 
 (() => {
   const API_ROOT = "https://api.drewwebbai.com";
   const API_EVENT = API_ROOT + "/event";
 
-  // Targets
   const RESUME_TO = "https://drewwebbai.com/resume";
   const LINKEDIN_TO = "https://www.linkedin.com/in/drewrwebb/";
   const FAQ_TO = "https://drewwebbai.com/faq.html";
 
-  // Form + UI
   const form = document.getElementById("lead-form");
   const btn = document.getElementById("submitBtn");
   const guestBtn = document.getElementById("guestBtn");
@@ -35,7 +30,6 @@
 
   const hello = document.getElementById("hello");
   const context = document.getElementById("context");
-  const chips = document.getElementById("chips");
 
   const statusText = document.getElementById("status-text");
   const signalPill = document.getElementById("signal-pill");
@@ -52,7 +46,6 @@
   const stepsWrap = document.getElementById("steps");
   const stepEls = stepsWrap ? Array.from(stepsWrap.querySelectorAll(".step")) : [];
 
-  // Inputs
   const elFirst = document.getElementById("firstName");
   const elLast = document.getElementById("lastName");
   const elCompany = document.getElementById("company");
@@ -60,21 +53,16 @@
   const elLinkedIn = document.getElementById("linkedin");
   const elEmail = document.getElementById("email");
 
-  // Top links (tracked)
   const resumeLink = document.getElementById("resume-link");
   const linkedinLink = document.getElementById("linkedin-link");
   const faqLink = document.getElementById("faq-link");
 
-  // State
-  let wired = false;              // prevent double-binding listeners
+  let wired = false;
   let startTs = Date.now();
   let uiTimer = null;
   let interactions = 0;
   const recentActions = [];
 
-  // -------------------------
-  // Helpers
-  // -------------------------
   function setMsg(el, text) {
     if (!el) return;
     if (!text) {
@@ -97,11 +85,6 @@
     return m ? decodeURIComponent(m[2]) : "";
   }
 
-  // We support:
-  // - portfolioSlug (preferred)
-  // - ref (older)
-  // - portfolio_slug cookie (set by /r/:slug)
-  // - first_ref cookie (set by /r/:slug?ref=)
   function getEntryPath() {
     const fromQuery = (qs("portfolioSlug") || qs("portfolio_slug") || qs("ref") || "").trim();
     if (fromQuery) return fromQuery;
@@ -150,8 +133,6 @@
   function addAction(text) {
     const t = String(text || "").trim();
     if (!t) return;
-
-    // prevent accidental duplicates like "FAQ clicked" twice on same interaction
     const last = recentActions[0] || "";
     if (last === t) return;
 
@@ -187,64 +168,6 @@
     }, 500);
   }
 
-  function buildIdentityChips(state) {
-    const out = [];
-
-    function chip(key, value) {
-      if (!value) return;
-      out.push(
-        `<span class="chip"><span class="k">${escapeHtml(key)}</span><span>${escapeHtml(value)}</span></span>`
-      );
-    }
-
-    // Identity-only chips (NO path/source here)
-    if (state.guest) {
-      chip("mode", "guest");
-      chip("personalization", "limited");
-    } else {
-      chip("name", state.name || "(not provided)");
-      chip("email", state.email || "");
-      chip("company", state.company || "");
-      chip("title", state.title || "");
-      chip("linkedin", state.linkedin ? shortenLinkedIn(state.linkedin) : "");
-    }
-
-    return out.join("");
-  }
-
-  function buildCrmTelemetry(state) {
-    if (!telemetryCrm) return;
-
-    if (state.guest) {
-      telemetryCrm.innerHTML =
-        `<span class="chip guest"><span class="k">status</span><span>Guest mode (no CRM upsert)</span></span>`;
-      return;
-    }
-
-    const items = [];
-    function tchip(k, v) {
-      if (!v) return;
-      items.push(
-        `<span class="chip guest"><span class="k">${escapeHtml(k)}</span><span>${escapeHtml(v)}</span></span>`
-      );
-    }
-
-    tchip("email", state.email);
-    tchip("name", state.name || "(not provided)");
-    tchip("company", state.company);
-    tchip("title", state.title);
-    if (state.linkedin) tchip("linkedin", shortenLinkedIn(state.linkedin));
-
-    // If user provided email, show upsert status
-    tchip("crm", "upserted");
-    tchip("follow-up", "queued");
-
-    telemetryCrm.innerHTML = items.length ? items.join("") : `<span class="chip guest"><span class="k">status</span><span>Submitted</span></span>`;
-  }
-
-  // -------------------------
-  // Telemetry: attribution preview
-  // -------------------------
   function initSignalsPreview() {
     const entryPath = getEntryPath();
     const leadSource = getLeadSourceLabel();
@@ -259,12 +182,25 @@
     if (signalPill) signalPill.textContent = "Capturing";
 
     addAction("Page loaded");
+
+    // UI timer starts on load (display only).
+    // If you ever want it to start AFTER submit instead:
+    // comment out startUiTimer() here, and call resetUiTimer() inside reveal().
     startUiTimer();
   }
 
-  // -------------------------
-  // Reveal logic
-  // -------------------------
+  function resetUiTimer() {
+    startTs = Date.now();
+    if (uiTimer) clearInterval(uiTimer);
+    uiTimer = null;
+    startUiTimer();
+  }
+
+  function hideIntroBlock() {
+    if (!introBlock) return;
+    introBlock.classList.add("is-hidden");
+  }
+
   function animateSteps(state) {
     const s1 = document.getElementById("step-1");
     const s2 = document.getElementById("step-2");
@@ -286,25 +222,46 @@
       if (s5) s5.textContent = "Telemetry logs meaningful interactions while you explore (links + sections).";
     }
 
-    // reset + stagger in
     stepEls.forEach(el => el.classList.remove("is-in"));
     stepEls.forEach((el, i) => setTimeout(() => el.classList.add("is-in"), 140 + i * 200));
   }
 
-  function hideIntroBlock() {
-    if (!introBlock) return;
-    introBlock.classList.add("is-hidden");
+  function buildCrmTelemetry(state) {
+    if (!telemetryCrm) return;
+
+    if (state.guest) {
+      telemetryCrm.innerHTML =
+        `<span class="chip guest"><span class="k">status</span><span>Guest mode (no CRM upsert)</span></span>`;
+      return;
+    }
+
+    const items = [];
+    function tchip(k, v) {
+      if (!v) return;
+      items.push(`<span class="chip guest"><span class="k">${escapeHtml(k)}</span><span>${escapeHtml(v)}</span></span>`);
+    }
+
+    tchip("email", state.email);
+    tchip("name", state.name || "(not provided)");
+    tchip("company", state.company);
+    tchip("title", state.title);
+    if (state.linkedin) tchip("linkedin", shortenLinkedIn(state.linkedin));
+
+    tchip("crm", "upserted");
+    tchip("follow-up", "queued");
+
+    telemetryCrm.innerHTML = items.join("");
   }
 
   function reveal(state) {
-    // Subtle fog transition
     if (fog) fog.classList.add("is-cleared");
     if (experience) experience.classList.add("is-on");
 
-    // Remove intro block (form + helper text) AFTER successful submit or guest
     hideIntroBlock();
 
-    // Update hero copy
+    // OPTIONAL: if you want clock to start at submit/guest, uncomment this:
+    // resetUiTimer();
+
     if (statusText) statusText.textContent = state.guest ? "Guest mode" : "Live";
     if (heroTitle) heroTitle.textContent = state.guest ? "Guest walkthrough" : "Personalized walkthrough";
     if (heroSub) {
@@ -322,29 +279,17 @@
         : "This is intentionally subtle: personalization, attribution, capture, and follow-up are happening as you read.";
     }
 
-    // Main chips: identity only (no path/source here anymore)
-    if (chips) chips.innerHTML = buildIdentityChips(state);
-
-    // Telemetry identity + CRM panel
     if (telemetryIdentity) telemetryIdentity.textContent = state.guest ? "Anonymous (guest)" : "Identified";
     if (signalPill) signalPill.textContent = state.guest ? "Guest" : "Live";
 
-    if (state.guest) {
-      addAction("Guest mode selected");
-      buildCrmTelemetry({ ...state, guest: true });
-    } else {
-      addAction("Form submitted");
-      buildCrmTelemetry(state);
-    }
+    buildCrmTelemetry(state);
+
+    if (state.guest) addAction("Guest mode selected");
+    else addAction("Form submitted");
 
     animateSteps(state);
-
-    // IMPORTANT: no auto-scroll anymore
   }
 
-  // -------------------------
-  // Tracking events (server)
-  // -------------------------
   async function postEvent(payload) {
     try {
       await fetch(API_EVENT, {
@@ -355,36 +300,25 @@
     } catch {}
   }
 
-  // Only valuable interactions:
-  // - resume / linkedin / faq
-  // - choose-your-path opens
   function wireValuableTracking(state) {
     if (wired) return;
     wired = true;
 
     function trackIfIdentified(eventName, extra = {}) {
       bumpInteractions(eventName.replace(/_/g, " "));
-      if (state.email) {
-        postEvent({ email: state.email, event: eventName, ...extra });
-      }
+      if (state.email) postEvent({ email: state.email, event: eventName, ...extra });
     }
 
     function onOutbound(a, eventName, toUrl) {
       if (!a) return;
-
-      // enforce destination (and avoid drifting href)
       if (toUrl) a.href = toUrl;
-
-      a.addEventListener("click", () => {
-        trackIfIdentified(eventName);
-      }, { passive: true });
+      a.addEventListener("click", () => trackIfIdentified(eventName), { passive: true });
     }
 
     onOutbound(resumeLink, "resume_clicked", RESUME_TO);
     onOutbound(linkedinLink, "linkedin_clicked", LINKEDIN_TO);
     onOutbound(faqLink, "faq_clicked", FAQ_TO);
 
-    // Track “Choose your path” opens (only when opening a section)
     const sections = ["about", "stacks", "behind"];
 
     function setOpen(key, open) {
@@ -407,7 +341,6 @@
       }
     }
 
-    // initialize closed
     sections.forEach(k => setOpen(k, false));
 
     document.querySelectorAll(".path[data-toggle]").forEach(b => {
@@ -452,9 +385,6 @@
     }, 1000);
   }
 
-  // -------------------------
-  // API submit
-  // -------------------------
   async function postIntro(payload) {
     const res = await fetch(API_ROOT + "/", {
       method: "POST",
@@ -510,11 +440,7 @@
       title: state.title,
       linkedin: state.linkedin,
       email: state.email,
-
-      // IMPORTANT: pass slug/path into your worker to keep attribution consistent
       portfolioSlug: state.entryPath,
-
-      // optional token (only useful if worker validates it)
       turnstileToken: getTurnstileToken(),
     };
 
@@ -522,16 +448,10 @@
       const data = await postIntro(payload);
       if (data && data.ok === false) throw new Error(data.error || "Something went wrong submitting the form.");
 
-      // reveal UI
       reveal(state);
-
-      // wire tracking ONCE, with identified email
       wireValuableTracking(state);
-
-      // server-side time markers
       startTimeOnPageServer(state);
 
-      // telemetry
       bumpInteractions("Form submit");
       addAction("CRM upsert: success");
       if (statusText) statusText.textContent = "Live";
@@ -548,20 +468,13 @@
 
     const state = buildStateFromInputs({ guest: true });
 
-    // reveal UI (no API call)
     reveal({ ...state, email: "" });
-
-    // wire tracking once (no server post without email)
     wireValuableTracking({ ...state, email: "" });
 
-    // telemetry
     bumpInteractions("Guest mode");
     if (statusText) statusText.textContent = "Guest mode";
   }
 
-  // -------------------------
-  // Boot
-  // -------------------------
   if (form) form.addEventListener("submit", handleSubmit);
   if (guestBtn) guestBtn.addEventListener("click", handleGuest);
 
