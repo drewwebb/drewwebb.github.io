@@ -1,12 +1,10 @@
 /* js/form.js
-   Option B (Sticky Telemetry):
-   - Shows anonymous -> guest/live (deanonymized) state
-   - Sticky right panel with:
-       path/source, identity, time, valuable actions
-   - Only tracks meaningful interactions:
-       resume/linkedin/faq/start-over clicks + choose-your-path opens
-   - Submit -> POST to API -> reveal experience (no auto-scroll)
-   - Guest -> reveal experience (no API call)
+   Fixes:
+   1) sticky panel works (handled by index.html removing overflow clipping)
+   2) no double-counting (bind listeners once; use currentState)
+   3) move CRM/identity chips to right panel ("CRM upserted data")
+   4) FAQ opens in new tab (handled by index.html target=_blank)
+   5) identity labels: anonymous -> guest -> identified
 */
 
 (() => {
@@ -33,7 +31,7 @@
 
   const hello = document.getElementById("hello");
   const context = document.getElementById("context");
-  const chips = document.getElementById("chips");
+  const chips = document.getElementById("chips"); // main-body chips (now session-only)
 
   const statusText = document.getElementById("status-text");
 
@@ -44,6 +42,10 @@
   const tTime = document.getElementById("t-time");
   const tActions = document.getElementById("t-actions");
   const tRecent = document.getElementById("t-recent");
+
+  // CRM box
+  const crmBox = document.getElementById("crm-box");
+  const crmChips = document.getElementById("crm-chips");
 
   // Steps
   const stepsWrap = document.getElementById("steps");
@@ -140,40 +142,25 @@
     }
   }
 
-  function buildChips(state) {
-    const out = [];
-    function chip(key, value, opts = {}) {
-      if (!value) return;
-      const cls = opts.guest ? "chip guest" : "chip";
-      const mono = opts.mono ? " mono" : "";
-      out.push(`<span class="${cls}${mono}"><span class="k">${escapeHtml(key)}</span><span>${escapeHtml(value)}</span></span>`);
-    }
-
-    if (state.guest) {
-      chip("mode", "guest", { guest: true, mono: true });
-      chip("path", state.entryPath, { guest: true, mono: true });
-      chip("source", state.leadSource, { guest: true, mono: true });
-      chip("personalization", "limited", { guest: true });
-    } else {
-      chip("name", state.name || "(not provided)");
-      if (state.email) chip("email", state.email);
-      if (state.company) chip("company", state.company);
-      if (state.title) chip("title", state.title);
-      if (state.linkedin) chip("linkedin", shortenLinkedIn(state.linkedin));
-      chip("path", state.entryPath, { mono: true });
-      chip("source", state.leadSource, { mono: true });
-      chip("follow-up", state.email ? "email queued" : "skipped (no email)");
-    }
-
-    return out.join("");
-  }
-
   // -------------------------
-  // Telemetry state (Option B)
+  // State
   // -------------------------
   const sessionStart = Date.now();
+
+  // ✅ Single source of truth to prevent double listeners
+  const currentState = {
+    guest: false,
+    name: "",
+    email: "",
+    company: "",
+    title: "",
+    linkedin: "",
+    entryPath: getEntryPath(),
+    leadSource: getLeadSourceLabel(),
+  };
+
   const telemetry = {
-    identity: "anonymous", // anonymous | guest | live
+    identity: "anonymous", // anonymous | guest | identified
     actions: 0,
     recent: []
   };
@@ -181,14 +168,16 @@
   function setIdentity(next) {
     telemetry.identity = next;
     if (tMode) tMode.textContent = next;
+
     if (signalPill) {
-      signalPill.textContent = next === "live" ? "Live" : "Capturing";
+      // pill is more “status” than “identity”
+      signalPill.textContent = next === "identified" ? "Identified" : "Capturing";
     }
   }
 
   function pushRecent(label) {
     telemetry.recent.unshift(label);
-    telemetry.recent = telemetry.recent.slice(0, 4);
+    telemetry.recent = telemetry.recent.slice(0, 5);
 
     if (!tRecent) return;
     tRecent.innerHTML = telemetry.recent.length
@@ -202,23 +191,70 @@
     pushRecent(label);
   }
 
-  function initTelemetryPreview() {
-    const entryPath = getEntryPath();
-    const leadSource = getLeadSourceLabel();
+  function updateSignalChips() {
+    if (!signalChips) return;
+    signalChips.innerHTML =
+      `<span class="chip guest"><span class="k">path</span><span class="mono">${escapeHtml(currentState.entryPath || "direct")}</span></span>` +
+      `<span class="chip guest"><span class="k">source</span><span class="mono">${escapeHtml(currentState.leadSource || "Direct")}</span></span>`;
+  }
 
-    if (signalChips) {
-      signalChips.innerHTML =
-        `<span class="chip guest"><span class="k">path</span><span class="mono">${escapeHtml(entryPath)}</span></span>` +
-        `<span class="chip guest"><span class="k">source</span><span class="mono">${escapeHtml(leadSource)}</span></span>`;
+  function renderMainBodyChips() {
+    // ✅ Session-only under welcome; CRM data moved to right panel
+    if (!chips) return;
+
+    const out = [];
+    function chip(key, value, opts = {}) {
+      if (!value) return;
+      const cls = opts.guest ? "chip guest" : "chip";
+      const mono = opts.mono ? " mono" : "";
+      out.push(`<span class="${cls}${mono}"><span class="k">${escapeHtml(key)}</span><span>${escapeHtml(value)}</span></span>`);
     }
 
-    setIdentity("anonymous");
+    if (currentState.guest) {
+      chip("mode", "guest", { guest: true, mono: true });
+      chip("path", currentState.entryPath, { guest: true, mono: true });
+      chip("source", currentState.leadSource, { guest: true, mono: true });
+      chip("personalization", "limited", { guest: true });
+    } else {
+      chip("path", currentState.entryPath, { mono: true });
+      chip("source", currentState.leadSource, { mono: true });
+      chip("follow-up", currentState.email ? "email queued" : "skipped (no email)");
+    }
 
-    // timer (UI only)
-    setInterval(() => {
-      const sec = Math.floor((Date.now() - sessionStart) / 1000);
-      if (tTime) tTime.textContent = formatElapsed(sec);
-    }, 1000);
+    chips.innerHTML = out.join("");
+  }
+
+  function renderCrmUpsertedData() {
+    if (!crmBox || !crmChips) return;
+
+    // show only when we actually have an identity
+    if (!currentState.email && currentState.guest) {
+      crmBox.style.display = "none";
+      crmChips.innerHTML = "";
+      return;
+    }
+
+    if (!currentState.email) {
+      crmBox.style.display = "none";
+      crmChips.innerHTML = "";
+      return;
+    }
+
+    crmBox.style.display = "block";
+
+    const rows = [];
+    function chip(key, value) {
+      if (!value) return;
+      rows.push(`<span class="chip"><span class="k">${escapeHtml(key)}</span><span>${escapeHtml(value)}</span></span>`);
+    }
+
+    chip("name", currentState.name || "(not provided)");
+    chip("email", currentState.email);
+    chip("company", currentState.company);
+    chip("title", currentState.title);
+    chip("linkedin", shortenLinkedIn(currentState.linkedin));
+
+    crmChips.innerHTML = rows.join("");
   }
 
   // -------------------------
@@ -234,10 +270,9 @@
     } catch {}
   }
 
-  function trackIfIdentified(state, eventName, extra = {}) {
-    // only attach server events if we have an email (aka deanonymized)
-    if (state && state.email) {
-      postEvent({ email: state.email, event: eventName, ...extra });
+  function trackIfIdentified(eventName, extra = {}) {
+    if (currentState.email) {
+      postEvent({ email: currentState.email, event: eventName, ...extra });
     }
   }
 
@@ -259,7 +294,6 @@
       if (step3) step3.textContent = "Automation is triggered (email + engagement scoring).";
     }
 
-    // reset then stagger in
     stepEls.forEach(el => el.classList.remove("is-in"));
     stepEls.forEach((el, i) => setTimeout(() => el.classList.add("is-in"), 160 + i * 220));
   }
@@ -269,72 +303,75 @@
     formArea.classList.add("is-gone");
   }
 
-  function reveal(state) {
-    // Clear fog + show experience
+  function reveal() {
     if (fog) fog.classList.add("is-cleared");
     if (experience) experience.classList.add("is-on");
-
-    // Hide form smoothly (this is the “fog clears” moment)
     hideFormArea();
 
-    // Copy
-    if (statusText) statusText.textContent = state.guest ? "Guest mode" : "Live";
-    if (heroTitle) heroTitle.textContent = state.guest ? "Guest walkthrough" : "Personalized walkthrough";
+    if (statusText) statusText.textContent = currentState.guest ? "Guest mode" : "Live";
+    if (heroTitle) heroTitle.textContent = currentState.guest ? "Guest walkthrough" : "Personalized walkthrough";
     if (heroSub) {
-      heroSub.textContent = state.guest
+      heroSub.textContent = currentState.guest
         ? "You’re viewing the guest version of the live system. You can still see attribution + structure — personalization and CRM capture are limited."
         : "Nice to meet you. This page now adapts to what you submitted — and logs signals in real systems while you browse.";
     }
 
-    const displayName = (state.name || state.email || "there").trim();
+    const displayName = (currentState.name || currentState.email || "there").trim();
     if (hello) hello.textContent = `Welcome, ${displayName}`;
 
     if (context) {
-      context.textContent = state.guest
+      context.textContent = currentState.guest
         ? "You’re in guest mode. Want the full proof? Enter a work email above to trigger CRM capture + automated follow-up."
         : "This is intentionally subtle: personalization, attribution, capture, and follow-up are happening as you read.";
     }
 
-    if (chips) chips.innerHTML = buildChips(state);
+    updateSignalChips();
+    renderMainBodyChips();
+    renderCrmUpsertedData();
 
-    // Right panel stays focused on “session signals + telemetry”
-    if (signalChips) {
-      signalChips.innerHTML =
-        `<span class="chip guest"><span class="k">path</span><span class="mono">${escapeHtml(state.entryPath || "direct")}</span></span>` +
-        `<span class="chip guest"><span class="k">source</span><span class="mono">${escapeHtml(state.leadSource || "Direct")}</span></span>`;
-    }
+    setIdentity(currentState.guest ? "guest" : (currentState.email ? "identified" : "anonymous"));
 
-    // Identity state
-    setIdentity(state.guest ? "guest" : "live");
-
-    // Steps animate
-    animateSteps(state.guest);
-
-    // NO AUTO-SCROLL (removed on purpose)
+    animateSteps(currentState.guest);
+    // ✅ No auto-scroll
   }
 
   // -------------------------
-  // Meaningful interactions wiring
+  // Bind meaningful interactions ONCE
   // -------------------------
-  function wireOutboundTracking(state) {
-    function onClick(a, label, eventName, toUrl) {
-      if (!a) return;
-      a.addEventListener("click", () => {
-        incAction(label);
-        trackIfIdentified(state, eventName);
-        if (toUrl) a.href = toUrl;
-      });
-    }
-
-    onClick(resumeLink, "Resume opened", "resume_clicked", RESUME_TO);
-    onClick(linkedinLink, "LinkedIn opened", "linkedin_clicked", LINKEDIN_TO);
-
-    // optional but useful
-    onClick(faqLink, "FAQ opened", "faq_clicked");
-    onClick(startOverLink, "Start over", "start_over_clicked");
+  function bindOnce(el, key, fn) {
+    if (!el) return;
+    const k = `bound_${key}`;
+    if (el.dataset[k] === "1") return;
+    el.dataset[k] = "1";
+    el.addEventListener("click", fn);
   }
 
-  function wirePathButtons(state) {
+  function wireOutboundTrackingOnce() {
+    bindOnce(resumeLink, "resume", () => {
+      incAction("Resume opened");
+      trackIfIdentified("resume_clicked");
+      resumeLink.href = RESUME_TO;
+    });
+
+    bindOnce(linkedinLink, "linkedin", () => {
+      incAction("LinkedIn opened");
+      trackIfIdentified("linkedin_clicked");
+      linkedinLink.href = LINKEDIN_TO;
+    });
+
+    bindOnce(faqLink, "faq", () => {
+      incAction("FAQ opened");
+      trackIfIdentified("faq_clicked");
+      // opens in new tab via HTML target=_blank
+    });
+
+    bindOnce(startOverLink, "startover", () => {
+      incAction("Start over");
+      trackIfIdentified("start_over_clicked");
+    });
+  }
+
+  function wirePathButtonsOnce() {
     const sections = ["about", "stacks", "behind"];
 
     function setOpen(key, open) {
@@ -360,19 +397,17 @@
     sections.forEach(k => setOpen(k, false));
 
     document.querySelectorAll(".path[data-toggle]").forEach(b => {
-      b.addEventListener("click", () => {
+      bindOnce(b, `path_${b.getAttribute("data-toggle")}`, () => {
         const key = b.getAttribute("data-toggle");
         const isExpanded = b.getAttribute("aria-expanded") === "true";
         const willOpen = !isExpanded;
 
         sections.forEach(k => setOpen(k, k === key ? willOpen : false));
 
-        // Meaningful telemetry: section open/close
         const label = willOpen ? `Opened: ${key}` : `Closed: ${key}`;
         incAction(label);
-        trackIfIdentified(state, "path_section_toggled", { section: key, open: willOpen });
+        trackIfIdentified("path_section_toggled", { section: key, open: willOpen });
 
-        // keep the “feel” but not a full page jump
         b.scrollIntoView({ behavior: "smooth", block: "nearest" });
       });
     });
@@ -396,20 +431,17 @@
     return data;
   }
 
-  function buildStateFromInputs({ guest }) {
+  function buildFromInputs() {
     const firstName = (elFirst?.value || "").trim();
     const lastName = (elLast?.value || "").trim();
     const name = `${firstName} ${lastName}`.trim();
 
     return {
-      guest: !!guest,
       name,
       email: (elEmail?.value || "").trim(),
       company: (elCompany?.value || "").trim(),
       title: (elTitle?.value || "").trim(),
       linkedin: (elLinkedIn?.value || "").trim(),
-      entryPath: getEntryPath(),
-      leadSource: getLeadSourceLabel(),
     };
   }
 
@@ -420,9 +452,9 @@
     if (statusText) statusText.textContent = "Submitting…";
     if (btn) btn.disabled = true;
 
-    const state = buildStateFromInputs({ guest: false });
+    const input = buildFromInputs();
 
-    if (!state.email) {
+    if (!input.email) {
       setMsg(msgError, "Please enter a work email (or use Guest mode).");
       if (statusText) statusText.textContent = "Ready";
       if (btn) btn.disabled = false;
@@ -432,11 +464,11 @@
     const payload = {
       firstName: (elFirst?.value || "").trim(),
       lastName: (elLast?.value || "").trim(),
-      company: state.company,
-      title: state.title,
-      linkedin: state.linkedin,
-      email: state.email,
-      portfolioSlug: state.entryPath,
+      company: input.company,
+      title: input.title,
+      linkedin: input.linkedin,
+      email: input.email,
+      portfolioSlug: currentState.entryPath,
       turnstileToken: getTurnstileToken(),
     };
 
@@ -444,13 +476,18 @@
       const data = await postIntro(payload);
       if (data && data.ok === false) throw new Error(data.error || "Something went wrong submitting the form.");
 
+      // update state
+      currentState.guest = false;
+      currentState.name = input.name;
+      currentState.email = input.email;
+      currentState.company = input.company;
+      currentState.title = input.title;
+      currentState.linkedin = input.linkedin;
+
       setMsg(msgSuccess, "Captured. Clearing the fog…");
       incAction("Form submitted");
-      // Once identified, we can post server-side events
-      reveal(state);
 
-      wireOutboundTracking(state);
-      wirePathButtons(state);
+      reveal();
 
       if (statusText) statusText.textContent = "Live";
     } catch (err) {
@@ -464,14 +501,16 @@
     e.preventDefault();
     setMsg(msgError, "");
     setMsg(msgSuccess, "");
-    const state = buildStateFromInputs({ guest: true });
+
+    currentState.guest = true;
+    currentState.name = buildFromInputs().name;
+    currentState.email = ""; // remain anonymous
+    currentState.company = "";
+    currentState.title = "";
+    currentState.linkedin = "";
 
     incAction("Entered guest mode");
-    reveal({ ...state, email: "" });
-
-    // In guest mode we still want local telemetry + UI interactions
-    wireOutboundTracking({ ...state, email: "" });
-    wirePathButtons({ ...state, email: "" });
+    reveal();
 
     if (statusText) statusText.textContent = "Guest mode";
   }
@@ -479,12 +518,24 @@
   // -------------------------
   // Init
   // -------------------------
+  function initTelemetryPreview() {
+    updateSignalChips();
+    setIdentity("anonymous");
+
+    setInterval(() => {
+      const sec = Math.floor((Date.now() - sessionStart) / 1000);
+      if (tTime) tTime.textContent = formatElapsed(sec);
+    }, 1000);
+
+    renderMainBodyChips();
+  }
+
   if (form) form.addEventListener("submit", handleSubmit);
   if (guestBtn) guestBtn.addEventListener("click", handleGuest);
 
-  initTelemetryPreview();
+  // bind once (prevents double-counting)
+  wireOutboundTrackingOnce();
+  wirePathButtonsOnce();
 
-  // Before submit/guest, we can still record meaningful topbar clicks locally (telemetry),
-  // but not post server events since there’s no email yet.
-  wireOutboundTracking({ email: "" });
+  initTelemetryPreview();
 })();
