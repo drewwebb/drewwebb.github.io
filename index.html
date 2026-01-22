@@ -7,7 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="A live, instrumented Marketing Operations portfolio — personalization, attribution, capture, and follow-up happening in real time." />
 
-  <!-- Optional: nicer typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -133,6 +132,9 @@
     }
     .card > *{ position: relative; }
 
+    /* ✅ Sticky fix: remove clipping on the hero card so sticky can work */
+    .no-clip{ overflow: visible; }
+
     /* Hero */
     .hero{ padding: 26px; }
     h1{
@@ -149,7 +151,7 @@
       font-size: 16px;
     }
 
-    /* “Fog” reveal effect */
+    /* Fog */
     .fog-wrap{
       position: relative;
       border-radius: 16px;
@@ -182,7 +184,7 @@
       }
     }
 
-    /* Right telemetry sticky */
+    /* Sticky telemetry */
     .sticky{
       position: sticky;
       top: 18px;
@@ -428,7 +430,7 @@
       color: rgba(233,238,252,.84);
     }
 
-    /* “Choose your path” */
+    /* Paths */
     .paths{
       display:grid;
       grid-template-columns: 1fr;
@@ -597,14 +599,14 @@
       font-weight: 850;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
-    .recent{
+    .panel-box{
       margin-top: 10px;
       border-radius: 14px;
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.04);
       padding: 10px 12px;
     }
-    .recent-title{
+    .panel-title{
       font-size: 12px;
       letter-spacing: .08em;
       text-transform: uppercase;
@@ -612,7 +614,7 @@
       font-weight: 900;
       margin-bottom: 8px;
     }
-    .recent ul{
+    .panel-box ul{
       margin:0;
       padding-left: 18px;
       color: rgba(233,238,252,.82);
@@ -640,16 +642,16 @@
           LinkedIn
         </a>
 
-        <a class="btn" id="faq-link" href="/faq.html" title="FAQ">FAQ</a>
+        <!-- ✅ Open FAQ in a new tab -->
+        <a class="btn" id="faq-link" href="/faq.html" target="_blank" rel="noopener" title="FAQ">FAQ</a>
 
         <a class="btn" id="start-over" href="/" title="Start over / re-personalize">Start over</a>
       </div>
     </div>
 
-    <!-- HERO + FORM + REVEAL -->
-    <div class="card hero">
+    <div class="card hero no-clip">
       <div class="grid grid-2">
-        <!-- Left: story -->
+        <!-- Left -->
         <div>
           <h1 id="hero-title">A live Marketing Ops demo</h1>
           <p class="subhead" id="hero-sub">
@@ -682,7 +684,6 @@
               <div id="msg-error" class="msg error"></div>
               <div id="msg-success" class="msg success"></div>
 
-              <!-- Form area (this fades away after submit/guest) -->
               <div id="form-area">
                 <div class="form-box" aria-label="Intro form">
                   <form id="lead-form" novalidate>
@@ -719,7 +720,6 @@
                       </div>
                     </div>
 
-                    <!-- Turnstile widget -->
                     <div
                       class="cf-turnstile"
                       data-sitekey="0x4AAAAAABsD3RaVvPQfjsNv"
@@ -741,7 +741,6 @@
                 <div class="divider"></div>
               </div>
 
-              <!-- EXPERIENCE (hidden until submit/guest) -->
               <div id="experience" aria-live="polite">
                 <div class="reveal-head">
                   <div>
@@ -750,6 +749,7 @@
                   </div>
                 </div>
 
+                <!-- ✅ Keep main-body chips session-only now -->
                 <div class="chips" id="chips"></div>
 
                 <div class="divider"></div>
@@ -845,54 +845,6 @@
                     <p class="muted">
                       CRM hygiene: dedupe is enforced by email (single source of truth). First-touch fields (like entry path/source) are preserved and not overwritten.
                     </p>
-
-                    <div class="divider"></div>
-
-                    <div class="muted" style="font-weight:900; letter-spacing:.06em; text-transform:uppercase; font-size:12px;">
-                      Stack + cost outline
-                    </div>
-
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Component</th>
-                          <th>What it does</th>
-                          <th>Est. cost</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td><strong>Cloudflare Workers</strong></td>
-                          <td>Routing, attribution, event capture, admin surfaces</td>
-                          <td>~$0–$X / mo</td>
-                        </tr>
-                        <tr>
-                          <td><strong>Cloudflare D1</strong></td>
-                          <td>Slug storage + visit logs for Pulse</td>
-                          <td>~$0–$X / mo</td>
-                        </tr>
-                        <tr>
-                          <td><strong>GitHub Pages</strong></td>
-                          <td>Static hosting for the site</td>
-                          <td>$0</td>
-                        </tr>
-                        <tr>
-                          <td><strong>HubSpot (Free)</strong></td>
-                          <td>CRM + properties + views/dashboards</td>
-                          <td>$0</td>
-                        </tr>
-                        <tr>
-                          <td><strong>Resend</strong></td>
-                          <td>Automated follow-up email</td>
-                          <td>~$0–$X / mo</td>
-                        </tr>
-                        <tr>
-                          <td><strong>Domain</strong></td>
-                          <td>Registrar + renewal</td>
-                          <td>~$X / year</td>
-                        </tr>
-                      </tbody>
-                    </table>
                   </section>
                 </div>
 
@@ -901,7 +853,7 @@
           </div><!-- /fog-wrap -->
         </div>
 
-        <!-- Right: sticky telemetry panel -->
+        <!-- Right sticky panel -->
         <div class="sticky">
           <div class="card" style="padding: 18px; background: rgba(255,255,255,.05);">
             <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
@@ -936,15 +888,24 @@
               </div>
             </div>
 
-            <div class="recent">
-              <div class="recent-title">recent actions</div>
+            <!-- ✅ New: CRM Upserted Data lives here -->
+            <div class="panel-box" id="crm-box" style="display:none;">
+              <div class="panel-title">CRM upserted data</div>
+              <div class="chips" id="crm-chips"></div>
+              <div class="note" style="margin-top:8px;">
+                After submit, these fields are stored and used for dedupe + automation.
+              </div>
+            </div>
+
+            <div class="panel-box">
+              <div class="panel-title">recent actions</div>
               <ul id="t-recent">
                 <li>Waiting for a meaningful interaction…</li>
               </ul>
             </div>
 
             <div class="note" style="margin-top:10px;">
-              Anonymous signals are captured first. After submit, events can be attached to the CRM profile (deanonymized).
+              Anonymous signals are captured first. After submit, events can be attached to the CRM profile (identified).
             </div>
           </div>
         </div>
@@ -963,10 +924,8 @@
 
   </div>
 
-  <!-- Turnstile JS -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
-  <!-- Turnstile callback (GLOBAL) -->
   <script>
     window.__turnstileToken = null;
     function onTurnstileSuccess(token) {
@@ -974,7 +933,6 @@
     }
   </script>
 
-  <!-- Your form logic -->
-  <script src="/js/form.js?v=6" defer></script>
+  <script src="/js/form.js?v=7" defer></script>
 </body>
 </html>
