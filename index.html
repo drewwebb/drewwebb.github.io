@@ -471,16 +471,7 @@
       pointer-events:none;
     }
 
-    /* Telemetry */
-    /* FIXED: sticky without scrollbars */
-    .telemetry-sticky{
-      position: sticky;
-      top: 18px;
-      align-self: start;
-      max-height: none;
-      overflow: visible;
-    }
-
+    /* Telemetry styles */
     .telemetry-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
     .telemetry-title{
       font-weight:900; letter-spacing:.08em; text-transform:uppercase;
@@ -542,14 +533,13 @@
       font-weight: 800;
     }
 
-    /* CRITICAL: allow sticky to work by preventing overflow/transform traps on ancestors */
-    .page,
-    .hero,
-    .grid,
-    .grid-2,
-    .card{
-      overflow: visible !important;
-      transform: none !important;
+    /* ✅ KEY FIX: make the GRID ITEM sticky (most reliable in CSS Grid) */
+    @media (min-width: 940px){
+      .telemetry-col{
+        position: sticky;
+        top: 18px;
+        align-self: start;
+      }
     }
   </style>
 </head>
@@ -770,51 +760,50 @@
         </div>
 
         <!-- RIGHT: TELEMETRY -->
-        <div style="align-self: start;">
-          <div class="telemetry-sticky">
-            <div class="card" style="padding: 18px; background: rgba(255,255,255,.05);">
-              <div class="telemetry-head">
-                <div class="telemetry-title">Live telemetry</div>
-                <span class="pill" style="border-color: rgba(255,255,255,.14); background: rgba(255,255,255,.06);">
-                  <span class="dot" style="background: var(--accent); box-shadow:0 0 0 4px rgba(96,165,250,.18);"></span>
-                  <span id="signal-pill">Capturing</span>
-                </span>
-              </div>
+        <!-- ✅ Key change: this GRID ITEM is sticky now -->
+        <div class="telemetry-col">
+          <div class="card" style="padding: 18px; background: rgba(255,255,255,.05);">
+            <div class="telemetry-head">
+              <div class="telemetry-title">Live telemetry</div>
+              <span class="pill" style="border-color: rgba(255,255,255,.14); background: rgba(255,255,255,.06);">
+                <span class="dot" style="background: var(--accent); box-shadow:0 0 0 4px rgba(96,165,250,.18);"></span>
+                <span id="signal-pill">Capturing</span>
+              </span>
+            </div>
 
-              <div class="divider"></div>
+            <div class="divider"></div>
 
-              <div class="chips" id="signal-chips">
-                <span class="chip guest"><span class="k">path</span><span class="mono">direct</span></span>
-                <span class="chip guest"><span class="k">source</span><span class="mono">Direct</span></span>
-              </div>
+            <div class="chips" id="signal-chips">
+              <span class="chip guest"><span class="k">path</span><span class="mono">direct</span></span>
+              <span class="chip guest"><span class="k">source</span><span class="mono">Direct</span></span>
+            </div>
 
-              <div class="telemetry-rows" style="margin-top:12px;">
-                <div class="trow"><div class="k">Identity</div><div class="v" id="telemetry-identity">Anonymous</div></div>
-                <div class="trow"><div class="k">Time</div><div class="v" id="telemetry-time">0m 00s</div></div>
-                <div class="trow"><div class="k">Interactions</div><div class="v" id="telemetry-clicks">0</div></div>
-              </div>
+            <div class="telemetry-rows" style="margin-top:12px;">
+              <div class="trow"><div class="k">Identity</div><div class="v" id="telemetry-identity">Anonymous</div></div>
+              <div class="trow"><div class="k">Time</div><div class="v" id="telemetry-time">0m 00s</div></div>
+              <div class="trow"><div class="k">Interactions</div><div class="v" id="telemetry-clicks">0</div></div>
+            </div>
 
-              <div class="divider"></div>
+            <div class="divider"></div>
 
-              <div class="muted" style="font-weight:900; letter-spacing:.06em; text-transform:uppercase; font-size:12px;">
-                Recent actions
-              </div>
-              <ul class="actions-list" id="telemetry-actions">
-                <li>Page loaded</li>
-              </ul>
+            <div class="muted" style="font-weight:900; letter-spacing:.06em; text-transform:uppercase; font-size:12px;">
+              Recent actions
+            </div>
+            <ul class="actions-list" id="telemetry-actions">
+              <li>Page loaded</li>
+            </ul>
 
-              <div class="divider"></div>
+            <div class="divider"></div>
 
-              <div class="muted" style="font-weight:900; letter-spacing:.06em; text-transform:uppercase; font-size:12px;">
-                CRM upserted data
-              </div>
-              <div class="chips" id="telemetry-crm" style="margin-top:10px;">
-                <span class="chip guest"><span class="k">status</span><span>Not submitted</span></span>
-              </div>
+            <div class="muted" style="font-weight:900; letter-spacing:.06em; text-transform:uppercase; font-size:12px;">
+              CRM upserted data
+            </div>
+            <div class="chips" id="telemetry-crm" style="margin-top:10px;">
+              <span class="chip guest"><span class="k">status</span><span>Not submitted</span></span>
+            </div>
 
-              <div class="note" style="margin-top:10px;">
-                Tip: entry path is carried from your tracked link (<span class="mono">/r/:slug</span>) — no UTMs needed.
-              </div>
+            <div class="note" style="margin-top:10px;">
+              Tip: entry path is carried from your tracked link (<span class="mono">/r/:slug</span>) — no UTMs needed.
             </div>
           </div>
         </div>
