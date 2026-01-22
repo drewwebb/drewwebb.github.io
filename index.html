@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="A live, instrumented Marketing Operations portfolio — personalization, attribution, capture, and follow-up happening in real time." />
 
+  <!-- Optional: nicer typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -20,9 +21,9 @@
       --text: #e9eefc;
       --muted: rgba(233, 238, 252, .70);
 
-      --accent: #60a5fa;
-      --accent-2: #22c55e;
-      --warn: #f59e0b;
+      --accent: #60a5fa;        /* baby blue-ish */
+      --accent-2: #22c55e;      /* green */
+      --warn: #f59e0b;          /* amber */
       --danger: #f97373;
 
       --shadow: 0 18px 48px rgba(0,0,0,.45);
@@ -36,7 +37,6 @@
       margin:0;
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color: var(--text);
-      overflow-x: hidden; /* prevents the “mystery horizontal scrollbar” */
       background:
         radial-gradient(1200px 600px at 15% -10%, rgba(96,165,250,.20), transparent 55%),
         radial-gradient(1200px 600px at 85% 0%, rgba(34,197,94,.14), transparent 50%),
@@ -118,7 +118,7 @@
       background: rgba(255,255,255,.06);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      overflow:hidden;
+      overflow: visible; /* IMPORTANT: allows sticky + dropdowns to work */
       position: relative;
     }
     .card:before{
@@ -133,11 +133,10 @@
     }
     .card > *{ position: relative; }
 
-    /* IMPORTANT: allow sticky children */
-    .card.hero{ overflow: visible; }
-
     /* Hero */
-    .hero{ padding: 26px; }
+    .hero{
+      padding: 26px;
+    }
     h1{
       font-size: clamp(34px, 4vw, 54px);
       line-height: 1.06;
@@ -152,13 +151,38 @@
       font-size: 16px;
     }
 
-    /* Fog */
+    .grid{
+      display:grid;
+      gap: 16px;
+    }
+    @media (min-width: 940px){
+      .grid-2{
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+        align-items: start;
+      }
+    }
+
+    /* RIGHT RAIL STICKY (this is the fix) */
+    .telemetry-sticky{
+      position: sticky;
+      top: 18px;
+      align-self: start; /* critical for grid */
+      z-index: 5;
+    }
+    @media (min-width: 940px){
+      .telemetry-sticky{
+        max-height: calc(100vh - 36px);
+        overflow: auto;
+      }
+    }
+
+    /* “Fog” reveal effect (left only) */
     .fog-wrap{
       position: relative;
       border-radius: 16px;
       border: 1px solid rgba(255,255,255,.10);
       background: rgba(255,255,255,.04);
-      overflow:hidden;
+      overflow:hidden; /* OK because telemetry is NOT inside this */
     }
     .fog{
       position:absolute;
@@ -172,67 +196,15 @@
       transition: opacity .8s ease, transform .8s ease;
       pointer-events:none;
     }
-    .fog.is-cleared{ opacity: .12; transform: translateY(-8px); }
-
-    .grid{ display:grid; gap: 16px; }
-    @media (min-width: 940px){
-      .grid-2{
-        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-        align-items: start;
-      }
-    }
-    /* Prevent grid children from forcing horizontal overflow */
-    .grid-2 > *{ min-width: 0; }
-
-    /* Sticky telemetry wrapper */
-    .telemetry-sticky{
-      position: sticky;
-      top: 18px;
-      align-self: start;
-    }
-
-    /* Telemetry card (NO internal scrolling) */
-    .telemetry-card{
-      padding: 18px;
-      background: rgba(255,255,255,.05);
-      overflow: hidden; /* avoids internal scrollbars */
+    .fog.is-cleared{
+      opacity: .12;
+      transform: translateY(-8px);
     }
 
     /* Form */
-    .form-box{ padding: 16px; }
-    .reveal{ padding: 18px; }
-
-    .reveal-head{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap: 12px;
-      flex-wrap:wrap;
-      margin-bottom: 10px;
+    .form-box{
+      padding: 16px;
     }
-    .reveal-head h2{ margin:0; font-size: 18px; letter-spacing: -0.02em; }
-    .muted{ color: var(--muted); }
-
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      font-size: 12px;
-      color: rgba(233,238,252,.78);
-      white-space:nowrap;
-      font-weight: 700;
-    }
-    .pill .dot{
-      width: 8px; height: 8px;
-      border-radius: 999px;
-      background: var(--accent-2);
-      box-shadow: 0 0 0 4px rgba(34,197,94,.18);
-    }
-
     form{ display:grid; gap: 10px; }
     .row{ display:grid; gap: 10px; }
     @media (min-width: 720px){
@@ -314,6 +286,17 @@
       line-height: 1.55;
     }
 
+    /* Reveal area */
+    .reveal{
+      padding: 18px;
+    }
+    .divider{
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+      margin: 16px 0;
+    }
+    .muted{ color: var(--muted); }
+
     .badges{
       display:flex;
       flex-wrap:wrap;
@@ -341,12 +324,7 @@
     .badge.attr .mini-dot{ background: var(--accent); box-shadow: 0 0 0 4px rgba(96,165,250,.18); }
     .badge.auto .mini-dot{ background: var(--warn); box-shadow: 0 0 0 4px rgba(245,158,11,.18); }
 
-    .divider{
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
-      margin: 16px 0;
-    }
-
+    /* Chips */
     .chips{
       display:flex;
       flex-wrap:wrap;
@@ -364,7 +342,6 @@
       color: rgba(233,238,252,.88);
       font-size: 13px;
       font-weight: 750;
-      max-width: 100%;
     }
     .chip .k{
       font-size: 11px;
@@ -372,7 +349,6 @@
       letter-spacing: .06em;
       color: rgba(170,198,255,.95);
       text-transform: uppercase;
-      flex: 0 0 auto;
     }
     .chip.guest{
       border-color: rgba(255,255,255,.16);
@@ -382,6 +358,152 @@
     .mono{
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-weight: 800;
+    }
+
+    /* Steps list */
+    .steps{
+      display:grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .step{
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      border-radius: 16px;
+      padding: 12px 12px;
+      box-shadow: var(--shadow-soft);
+      display:flex;
+      gap: 10px;
+      align-items:flex-start;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .35s ease, transform .35s ease;
+    }
+    .step.is-in{
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .step .num{
+      width: 24px; height: 24px;
+      border-radius: 999px;
+      background: rgba(96,165,250,.18);
+      border: 1px solid rgba(96,165,250,.28);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 900;
+      color: rgba(170,198,255,.95);
+      flex: 0 0 auto;
+      margin-top: 1px;
+    }
+    .step .txt{
+      font-size: 13px;
+      line-height: 1.6;
+      color: rgba(233,238,252,.84);
+    }
+
+    /* “Choose your path” */
+    .paths{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    @media (min-width: 940px){
+      .paths{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    .path{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      padding: 16px;
+      cursor: pointer;
+      text-align: left;
+      box-shadow: 0 12px 26px rgba(0,0,0,.25);
+      transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease, background .16s ease;
+      position: relative;
+      overflow:hidden;
+    }
+    .path:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 18px 36px rgba(0,0,0,.34);
+      border-color: rgba(96,165,250,.35);
+      background: rgba(255,255,255,.06);
+    }
+    .path .kicker{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(170,198,255,.95);
+      margin-bottom: 10px;
+    }
+    .path .kicker .dot{
+      width: 10px; height: 10px;
+      border-radius: 999px;
+      background: rgba(170,198,255,.95);
+      box-shadow: 0 0 0 4px rgba(96,165,250,.18);
+    }
+    .path h3{
+      margin: 0 0 6px;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+    }
+    .path p{
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.6;
+      color: rgba(233,238,252,.72);
+    }
+    .hint{
+      margin-top: 10px;
+      font-size: 12px;
+      color: rgba(233,238,252,.62);
+      font-weight: 750;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .chev{
+      width: 10px;
+      height: 10px;
+      border-right: 2px solid rgba(233,238,252,.65);
+      border-bottom: 2px solid rgba(233,238,252,.65);
+      transform: rotate(-45deg);
+      transition: transform .16s ease;
+      margin-left: 8px;
+      flex: 0 0 auto;
+    }
+    .path[aria-expanded="true"] .chev{ transform: rotate(45deg); }
+
+    /* Deep dives */
+    .deep{
+      margin-top: 12px;
+      display:none;
+    }
+    .deep.is-open{ display:block; }
+    .section{
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow-soft);
+    }
+    .section h3{
+      margin:0 0 6px;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+    }
+    .section p{
+      margin: 8px 0 0;
+      line-height: 1.7;
+      color: rgba(233,238,252,.82);
+      max-width: 92ch;
+      font-size: 14px;
     }
 
     /* hide/reveal states */
@@ -398,6 +520,77 @@
       gap: 12px;
       flex-wrap: wrap;
     }
+
+    /* Telemetry layout helpers */
+    .telemetry-title{
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-size:12px;
+      color: rgba(233,238,252,.78);
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      font-size: 12px;
+      color: rgba(233,238,252,.78);
+      white-space:nowrap;
+      font-weight: 800;
+    }
+    .pill .dot{
+      width: 8px; height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow:0 0 0 4px rgba(96,165,250,.18);
+    }
+
+    .kv{
+      display:grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .kv-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      font-size: 13px;
+      color: rgba(233,238,252,.82);
+    }
+    .kv-row .k{
+      font-size: 11px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: rgba(233,238,252,.60);
+      font-weight: 900;
+    }
+    .kv-row .v{
+      font-weight: 900;
+      color: rgba(233,238,252,.88);
+    }
+    .small-note{
+      margin-top: 10px;
+      color: rgba(233,238,252,.70);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+    .bullets{
+      margin: 10px 0 0;
+      padding-left: 18px;
+      color: rgba(233,238,252,.78);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .bullets li{ margin: 6px 0; }
   </style>
 </head>
 
@@ -419,17 +612,18 @@
           LinkedIn
         </a>
 
-        <!-- open FAQ in new tab so they don't leave -->
+        <!-- FAQ now opens in a new tab -->
         <a class="btn" id="faq-link" href="/faq.html" target="_blank" rel="noopener" title="FAQ">FAQ</a>
 
         <a class="btn" id="start-over" href="/" title="Start over / re-personalize">Start over</a>
       </div>
     </div>
 
+    <!-- HERO + LEFT CONTENT + RIGHT TELEMETRY -->
     <div class="card hero">
       <div class="grid grid-2">
 
-        <!-- LEFT COLUMN -->
+        <!-- LEFT: story + form + reveal -->
         <div>
           <h1 id="hero-title">A live Marketing Ops demo</h1>
           <p class="subhead" id="hero-sub">
@@ -445,26 +639,28 @@
 
           <div class="divider"></div>
 
+          <!-- NOTE: telemetry is NOT inside fog-wrap (so sticky works) -->
           <div class="fog-wrap">
             <div class="fog" id="fog"></div>
+
             <div class="reveal">
-
-              <!-- FORM BLOCK (you can still keep your existing IDs; form.js controls hide/show) -->
-              <div class="reveal-head" id="intro-block">
-                <div>
-                  <h2 id="reveal-title">Want the personalized walkthrough?</h2>
-                  <div class="muted" id="reveal-sub" style="margin-top:6px; line-height:1.6;">
-                    Fill this out and the page clears to reveal a tailored path. If you’d rather not, guest mode still shows the system,
-                    just with less context.
-                  </div>
-                </div>
-                <span class="pill" id="status-pill"><span class="dot"></span><span id="status-text">Ready</span></span>
-              </div>
-
               <div id="msg-error" class="msg error"></div>
               <div id="msg-success" class="msg success"></div>
 
-              <div class="form-box" aria-label="Intro form" id="form-box">
+              <!-- FORM (your JS can hide this on submit) -->
+              <div class="form-box" id="intro-block" aria-label="Intro form">
+                <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:10px;">
+                  <div>
+                    <div style="font-weight:900; letter-spacing:.02em; font-size:16px; margin-bottom:4px;">
+                      Want the personalized walkthrough?
+                    </div>
+                    <div class="muted" style="line-height:1.6;">
+                      Fill this out and the page clears to reveal a tailored path. If you’d rather not, guest mode still shows the system, just with less context.
+                    </div>
+                  </div>
+                  <span class="pill" id="status-pill"><span class="dot"></span><span id="status-text">Ready</span></span>
+                </div>
+
                 <form id="lead-form" novalidate>
                   <div class="row two">
                     <div>
@@ -499,6 +695,7 @@
                     </div>
                   </div>
 
+                  <!-- Turnstile widget -->
                   <div
                     class="cf-turnstile"
                     data-sitekey="0x4AAAAAABsD3RaVvPQfjsNv"
@@ -511,44 +708,56 @@
                   </div>
 
                   <div class="note">
-                    Your info is used only to personalize this experience and demonstrate CRM hygiene (dedupe + first-touch attribution).
-                    No spam.
+                    Your info is used only to personalize this experience and demonstrate CRM hygiene (dedupe + first-touch attribution). No spam.
                   </div>
                 </form>
               </div>
 
-              <div class="divider"></div>
-
-              <!-- EXPERIENCE -->
+              <!-- EXPERIENCE (hidden until submit/guest) -->
               <div id="experience" aria-live="polite">
-                <div class="reveal-head">
-                  <div>
-                    <h2 id="hello">Welcome</h2>
-                    <div class="muted" id="context" style="margin-top:6px; line-height:1.6;"></div>
-                  </div>
+                <div style="margin-top: 10px;">
+                  <h2 id="hello" style="margin:0; font-size: 18px; letter-spacing:-0.02em;">Welcome</h2>
+                  <div class="muted" id="context" style="margin-top:6px; line-height:1.6;"></div>
                 </div>
 
-                <!-- LEFT chips remain for now; your form.js can choose to hide these if you want only telemetry to show details -->
+                <!-- If you later decide to remove these “welcome chips”, your JS can leave this empty -->
                 <div class="chips" id="chips"></div>
 
                 <div class="divider"></div>
 
-                <div class="muted" style="font-weight:800; letter-spacing:.03em; text-transform:uppercase; font-size:12px;">
-                  What just happened (live)
+                <div class="muted" style="font-weight:900; letter-spacing:.06em; text-transform:uppercase; font-size:12px;">
+                  What’s happening live
                 </div>
 
                 <div class="steps" id="steps">
-                  <div class="step" data-step="1"><div class="num">1</div><div class="txt" id="step-1">Visited via an attributed path (entry path + source captured).</div></div>
-                  <div class="step" data-step="2"><div class="num">2</div><div class="txt" id="step-2">Submitted form, profile was upserted in CRM (deduped by email).</div></div>
-                  <div class="step" data-step="3"><div class="num">3</div><div class="txt" id="step-3">Automation is triggered (follow-up email queued + engagement scoring).</div></div>
+                  <div class="step" data-step="1">
+                    <div class="num">1</div>
+                    <div class="txt" id="step-1">Visited via an attributed path (entry path + source captured).</div>
+                  </div>
+                  <div class="step" data-step="2">
+                    <div class="num">2</div>
+                    <div class="txt" id="step-2">Submitted form, profile was upserted in CRM (deduped by email).</div>
+                  </div>
+                  <div class="step" data-step="3">
+                    <div class="num">3</div>
+                    <div class="txt" id="step-3">First-touch attribution is preserved (not overwritten on future visits).</div>
+                  </div>
+                  <div class="step" data-step="4">
+                    <div class="num">4</div>
+                    <div class="txt" id="step-4">Automation is triggered (follow-up queued + engagement scoring).</div>
+                  </div>
+                  <div class="step" data-step="5">
+                    <div class="num">5</div>
+                    <div class="txt" id="step-5">Telemetry logs meaningful interactions while you explore (links + sections).</div>
+                  </div>
                 </div>
 
                 <div class="divider"></div>
 
-                <div class="reveal-head">
+                <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
                   <h2 style="margin:0; font-size:18px;">Choose your path</h2>
                   <div class="muted" style="max-width: 62ch; line-height:1.6;">
-                    Click one section at a time. This keeps the page clean — and lets the “proof” reveal progressively.
+                    Click one section at a time. This keeps the page clean and lets the proof reveal progressively.
                   </div>
                 </div>
 
@@ -575,37 +784,104 @@
                   </button>
                 </div>
 
-                <div class="deep" id="deep-about" aria-hidden="true"></div>
-                <div class="deep" id="deep-stacks" aria-hidden="true"></div>
-                <div class="deep" id="deep-behind" aria-hidden="true"></div>
+                <div class="deep" id="deep-about" aria-hidden="true">
+                  <div class="divider"></div>
+                  <section class="section">
+                    <h3>About me</h3>
+                    <p>
+                      I’m Drew Webb — a senior Marketing Operations &amp; Growth leader who turns messy multi-tool realities into clean execution:
+                      clear signals, automated handoffs, trustworthy reporting, and programs that scale without breaking.
+                    </p>
+                    <p class="muted">
+                      I’m usually brought in to speed up routing and response, fix attribution gaps, make lifecycle programs more relevant,
+                      and align teams around a source of truth — with instrumentation from day one.
+                    </p>
+                  </section>
+                </div>
+
+                <div class="deep" id="deep-stacks" aria-hidden="true">
+                  <div class="divider"></div>
+                  <section class="section">
+                    <h3>Tech stack (and how it connects)</h3>
+                    <p class="muted">
+                      This isn’t a tool list — it’s an operating system mindset: capture signals, unify identity, activate audiences, measure outcomes,
+                      and keep the system observable.
+                    </p>
+                    <p>
+                      If you want, I can also map this to “build vs buy”: I’ve done both, and this site demonstrates I can build when it makes sense.
+                    </p>
+                  </section>
+                </div>
+
+                <div class="deep" id="deep-behind" aria-hidden="true">
+                  <div class="divider"></div>
+                  <section class="section">
+                    <h3>Behind the curtain (live proof)</h3>
+                    <p>
+                      This page is not a mockup. If you entered an email, a contact was created/updated in HubSpot, attributed using a first-touch model,
+                      and scored based on intent signals (time + clicks). Automation can route, enrich, and trigger follow-up based on those signals.
+                    </p>
+                    <p class="muted">
+                      CRM hygiene: dedupe is enforced by email (single source of truth). First-touch fields (like entry path/source) are preserved and not overwritten.
+                    </p>
+                  </section>
+                </div>
 
               </div><!-- /experience -->
-
             </div><!-- /reveal -->
           </div><!-- /fog-wrap -->
         </div>
 
-        <!-- RIGHT COLUMN: sticky telemetry -->
+        <!-- RIGHT: LIVE TELEMETRY (sticky wrapper is OUTSIDE fog-wrap) -->
         <div class="telemetry-sticky">
-          <div class="card telemetry-card">
+          <div class="card" style="padding: 18px; background: rgba(255,255,255,.05);">
             <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
-              <div style="font-weight:900; letter-spacing:.08em; text-transform:uppercase; font-size:12px; color: rgba(233,238,252,.78);">
-                Live telemetry
-              </div>
-              <span class="pill" style="border-color: rgba(255,255,255,.14); background: rgba(255,255,255,.06);">
-                <span class="dot" style="background: var(--accent); box-shadow:0 0 0 4px rgba(96,165,250,.18);"></span>
+              <div class="telemetry-title">Live telemetry</div>
+              <span class="pill">
+                <span class="dot"></span>
                 <span id="signal-pill">Capturing</span>
               </span>
             </div>
 
             <div class="divider"></div>
 
+            <!-- path + source chips (JS updates this) -->
             <div class="chips" id="signal-chips">
               <span class="chip guest"><span class="k">path</span><span class="mono">direct</span></span>
               <span class="chip guest"><span class="k">source</span><span class="mono">Direct</span></span>
             </div>
 
-            <div class="note" style="margin-top:10px;">
+            <div class="kv">
+              <div class="kv-row">
+                <div class="k">Identity</div>
+                <div class="v" id="telemetry-identity">Anonymous</div>
+              </div>
+              <div class="kv-row">
+                <div class="k">Time</div>
+                <div class="v" id="telemetry-time">0m 00s</div>
+              </div>
+              <div class="kv-row">
+                <div class="k">Interactions</div>
+                <div class="v" id="telemetry-interactions">0</div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="telemetry-title" style="margin-bottom:8px;">Recent actions</div>
+            <ul class="bullets" id="recent-actions">
+              <li>Page loaded</li>
+            </ul>
+
+            <div class="divider"></div>
+
+            <div class="telemetry-title" style="margin-bottom:8px;">CRM upserted data</div>
+            <div class="chips" id="crm-upserted">
+              <!-- JS can populate these chips after submit -->
+              <span class="chip guest"><span class="k">crm</span><span class="mono">pending</span></span>
+            </div>
+
+            <div class="small-note">
               Tip: entry path is carried from your tracked link (<span class="mono">/r/:slug</span>) — no UTMs needed.
             </div>
           </div>
@@ -625,13 +901,18 @@
 
   </div>
 
+  <!-- Turnstile JS -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+  <!-- Turnstile callback (GLOBAL) -->
   <script>
     window.__turnstileToken = null;
-    function onTurnstileSuccess(token) { window.__turnstileToken = token; }
+    function onTurnstileSuccess(token) {
+      window.__turnstileToken = token;
+    }
   </script>
 
+  <!-- Your form logic -->
   <script src="/js/form.js?v=5" defer></script>
 </body>
 </html>
-
