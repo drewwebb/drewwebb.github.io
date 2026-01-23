@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/favicon.ico?v=3" sizes="any">
+  <meta charset="utf-8" />
+  <title>Drew Webb — FAQ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="FAQ for Drew Webb’s live Marketing Ops portfolio demo." />
+
+  <!-- Optional: nicer typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg: #050712;
+      --surface: rgba(255,255,255,.06);
+      --surface-2: rgba(255,255,255,.04);
+      --border: rgba(255,255,255,.10);
+      --text: #e9eefc;
+      --muted: rgba(233, 238, 252, .70);
+
+      --accent: #60a5fa;
+      --accent-2: #22c55e;
+      --warn: #f59e0b;
+      --danger: #f97373;
+
+      --shadow: 0 18px 48px rgba(0,0,0,.45);
+      --shadow-soft: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 18px;
+    }
+
+    *{ box-sizing:border-box; }
+    html{ scroll-behavior:smooth; }
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 15% -10%, rgba(96,165,250,.20), transparent 55%),
+        radial-gradient(1200px 600px at 85% 0%, rgba(34,197,94,.14), transparent 50%),
+        radial-gradient(900px 600px at 50% 110%, rgba(245,158,11,.10), transparent 55%),
+        var(--bg);
+    }
+
+    .page{
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 28px 18px 120px;
+    }
+
+    /* Topbar */
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .brand .dot{
+      width: 10px; height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 0 5px rgba(96,165,250,.12);
+    }
+    .top-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 650;
+      box-shadow: 0 10px 22px rgba(0,0,0,.24);
+      transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease, background .14s ease;
+      cursor:pointer;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 16px 30px rgba(0,0,0,.34);
+      border-color: rgba(96,165,250,.35);
+      background: rgba(255,255,255,.09);
+    }
+    .btn.primary{
+      border-color: rgba(96,165,250,.38);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(96,165,250,.10));
+    }
+    .btn .icon{
+      width: 10px; height: 10px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    /* Cards */
+    .card{
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: visible;
+      position: relative;
+    }
+    .card:before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background:
+        radial-gradient(900px 300px at 20% 0%, rgba(96,165,250,.18), transparent 60%),
+        radial-gradient(900px 300px at 80% 10%, rgba(34,197,94,.14), transparent 55%);
+      pointer-events:none;
+      opacity: .95;
+    }
+    .card > *{ position: relative; }
+
+    .hero{
+      padding: 26px;
+    }
+
+    h1{
+      font-size: clamp(30px, 3.6vw, 48px);
+      line-height: 1.08;
+      margin: 0 0 10px;
+      letter-spacing: -0.04em;
+    }
+    .subhead{
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 95ch;
+      font-size: 16px;
+    }
+
+    .divider{
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+      margin: 16px 0;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      font-size: 12px;
+      color: rgba(233,238,252,.78);
+      white-space:nowrap;
+      font-weight: 700;
+    }
+    .pill .dot{
+      width: 8px; height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(96,165,250,.18);
+    }
+
+    /* FAQ accordion (matches your path buttons vibe) */
+    .faq-wrap{
+      display:grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .qbtn{
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius: 18px;
+      padding: 16px;
+      cursor: pointer;
+      text-align: left;
+      box-shadow: 0 12px 26px rgba(0,0,0,.25);
+      transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease, background .16s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .qbtn:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 18px 36px rgba(0,0,0,.34);
+      border-color: rgba(96,165,250,.35);
+      background: rgba(255,255,255,.06);
+    }
+
+    .qhead{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+    }
+
+    .qkicker{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(170,198,255,.95);
+      margin-bottom: 8px;
+    }
+    .qkicker .dot{
+      width: 10px; height: 10px;
+      border-radius: 999px;
+      background: rgba(170,198,255,.95);
+      box-shadow: 0 0 0 4px rgba(96,165,250,.18);
+      flex: 0 0 auto;
+    }
+
+    .qtitle{
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+      line-height: 1.35;
+    }
+    .qmeta{
+      margin-top: 8px;
+      font-size: 12px;
+      color: rgba(233,238,252,.62);
+      font-weight: 750;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+
+    .chev{
+      width: 10px; height: 10px;
+      border-right: 2px solid rgba(233,238,252,.65);
+      border-bottom: 2px solid rgba(233,238,252,.65);
+      transform: rotate(-45deg);
+      transition: transform .16s ease;
+      margin-left: 8px;
+      flex: 0 0 auto;
+      margin-top: 4px;
+    }
+    .qbtn[aria-expanded="true"] .chev{
+      transform: rotate(45deg);
+    }
+
+    .ans{
+      display:none;
+      margin-top: 12px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      padding-top: 12px;
+      color: rgba(233,238,252,.84);
+      line-height: 1.7;
+      font-size: 14px;
+      max-width: 92ch;
+    }
+    .ans.is-open{ display:block; }
+
+    .muted{ color: rgba(233, 238, 252, .70); }
+
+    .footer{
+      margin-top: 18px;
+      font-size: 13px;
+      color: rgba(233,238,252,.70);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .link{
+      color: rgba(170,198,255,.95);
+      text-decoration:none;
+      font-weight: 800;
+      border-bottom: 1px dotted rgba(170,198,255,.55);
+      padding-bottom: 2px;
+    }
+    .link:hover{ border-bottom-style: solid; }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+
+    <div class="topbar">
+      <div class="brand">
+        <span class="dot"></span>
+        <span>Drew Webb</span>
+      </div>
+
+      <div class="top-actions">
+        <a class="btn" href="/" title="Back to the demo">
+          ← Back to demo
+        </a>
+        <a class="btn primary" href="/resume" target="_blank" rel="noopener">
+          <span class="icon"></span> View resume
+        </a>
+        <a class="btn" href="https://www.linkedin.com/in/drewrwebb/" target="_blank" rel="noopener">
+          LinkedIn
+        </a>
+      </div>
+    </div>
+
+    <div class="card hero">
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div>
+          <h1>FAQ</h1>
+          <p class="subhead">
+            Quick answers about what this demo is doing, what gets captured, and how the system behaves in “guest mode.”
+          </p>
+        </div>
+        <span class="pill"><span class="dot"></span><span>Tap a question to open</span></span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="faq-wrap" id="faq">
+
+        <!-- Q1 -->
+        <button class="qbtn" type="button" data-faq="q1" aria-expanded="false">
+          <div class="qhead">
+            <div>
+              <div class="qkicker"><span class="dot"></span> Overview</div>
+              <div class="qtitle">What is this site, exactly?</div>
+              <div class="qmeta"><span>Click to open</span><span class="chev" aria-hidden="true"></span></div>
+            </div>
+          </div>
+          <div class="ans" id="faq-q1" aria-hidden="true">
+            It’s a live Marketing Ops walkthrough, not a static portfolio. The page demonstrates how attribution, identity capture,
+            CRM hygiene (dedupe/upsert), and session intent signals can work together to drive better routing and follow-up.
+          </div>
+        </button>
+
+        <!-- Q2 -->
+        <button class="qbtn" type="button" data-faq="q2" aria-expanded="false">
+          <div class="qhead">
+            <div>
+              <div class="qkicker"><span class="dot"></span> Privacy</div>
+              <div class="qtitle">What data do you capture when I visit?</div>
+              <div class="qmeta"><span>Click to open</span><span class="chev" aria-hidden="true"></span></div>
+            </div>
+          </div>
+          <div class="ans" id="faq-q2" aria-hidden="true">
+            In guest mode, it tracks lightweight session signals like time on page and interactions (clicks), plus entry path (e.g., /r/:slug).
+            If you submit the form with email, it can upsert a contact record in HubSpot and attach attribution + the session signals.
+          </div>
+        </button>
+
+        <!-- Q3 -->
+        <button class="qbtn" type="button" data-faq="q3" aria-expanded="false">
+          <div class="qhead">
+            <div>
+              <div class="qkicker"><span class="dot"></span> Guest mode</div>
+              <div class="qtitle">What’s the difference between guest mode and submitting the form?</div>
+              <div class="qmeta"><span>Click to open</span><span class="chev" aria-hidden="true"></span></div>
+            </div>
+          </div>
+          <div class="ans" id="faq-q3" aria-hidden="true">
+            Guest mode still shows the system and collects basic session intent signals, but it won’t create/update a CRM contact.
+            Submitting the form unlocks the full “live” demo: identity resolution (via email), CRM upsert, and a clean “proof trail.”
+          </div>
+        </button>
+
+        <!-- Q4 -->
+        <button class="qbtn" type="button" data-faq="q4" aria-expanded="false">
+          <div class="qhead">
+            <div>
+              <div class="qkicker"><span class="dot"></span> Attribution</div>
+              <div class="qtitle">How does the tracked link (/r/:slug) work?</div>
+              <div class="qmeta"><span>Click to open</span><span class="chev" aria-hidden="true"></span></div>
+            </div>
+          </div>
+          <div class="ans" id="faq-q4" aria-hidden="true">
+            The demo uses the referral slug path as an attribution signal (similar to UTMs) without needing query parameters.
+            It can persist that “first-touch” source through the session and (when provided) attach it to the CRM record.
+          </div>
+        </button>
+
+        <!-- Q5 -->
+        <button class="qbtn" type="button" data-faq="q5" aria-expanded="false">
+          <div class="qhead">
+            <div>
+              <div class="qkicker"><span class="dot"></span> Security</div>
+              <div class="qtitle">Is this safe? Are you storing passwords or sensitive info?</div>
+              <div class="qmeta"><span>Click to open</span><span class="chev" aria-hidden="true"></span></div>
+            </div>
+          </div>
+          <div class="ans" id="faq-q5" aria-hidden="true">
+            No passwords, no payment info, and no “secret” personal data capture. The only high-signal identifier is email if you choose to submit it.
+            The goal is to demonstrate responsible CRM hygiene and observability, not collect sensitive information.
+          </div>
+        </button>
+
+        <!-- Q6 -->
+        <button class="qbtn" type="button" data-faq="q6" aria-expanded="false">
+          <div class="qhead">
+            <div>
+              <div class="qkicker"><span class="dot"></span> Contact</div>
+              <div class="qtitle">How do I reach you quickly?</div>
+              <div class="qmeta"><span>Click to open</span><span class="chev" aria-hidden="true"></span></div>
+            </div>
+          </div>
+          <div class="ans" id="faq-q6" aria-hidden="true">
+            The fastest path is LinkedIn. If you submitted the form, you can also reply to the follow-up email triggered by the demo.
+          </div>
+        </button>
+
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="footer">
+        <div>Back to the demo: <a class="link" href="/">Home</a></div>
+        <div class="muted">Built as a live demo of personalization + attribution + automation + observability.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Accordion behavior: one open at a time, like your "Choose your path" sections.
+    (function(){
+      const buttons = Array.from(document.querySelectorAll(".qbtn"));
+
+      function closeAll(exceptId){
+        buttons.forEach(btn => {
+          const id = btn.getAttribute("data-faq");
+          const ans = document.getElementById("faq-" + id);
+          const isExcept = exceptId && id === exceptId;
+
+          if (!ans) return;
+
+          if (!isExcept){
+            btn.setAttribute("aria-expanded", "false");
+            ans.classList.remove("is-open");
+            ans.setAttribute("aria-hidden", "true");
+          }
+        });
+      }
+
+      buttons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-faq");
+          const ans = document.getElementById("faq-" + id);
+          if (!ans) return;
+
+          const isOpen = btn.getAttribute("aria-expanded") === "true";
+
+          if (isOpen){
+            btn.setAttribute("aria-expanded", "false");
+            ans.classList.remove("is-open");
+            ans.setAttribute("aria-hidden", "true");
+          } else {
+            closeAll(id);
+            btn.setAttribute("aria-expanded", "true");
+            ans.classList.add("is-open");
+            ans.setAttribute("aria-hidden", "false");
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
