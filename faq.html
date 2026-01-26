@@ -117,7 +117,7 @@
       border: 1px solid var(--border);
       background: rgba(255,255,255,.06);
       border-radius: var(--radius);
-      box-shadow: var(--shadow);
+      box-shadow: 0 18px 48px rgba(0,0,0,.45);
       overflow: visible;
       position: relative;
     }
@@ -195,7 +195,7 @@
       position: relative;
       overflow: hidden;
 
-      /* IMPORTANT: ensure button text stays readable across browsers */
+      /* Ensure button text stays readable across browsers */
       color: var(--text);
       font-family: inherit;
       -webkit-appearance: none;
@@ -206,13 +206,6 @@
       box-shadow: 0 18px 36px rgba(0,0,0,.34);
       border-color: rgba(96,165,250,.35);
       background: rgba(255,255,255,.06);
-    }
-
-    .qhead{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap: 12px;
     }
 
     .qkicker{
@@ -234,32 +227,29 @@
       flex: 0 0 auto;
     }
 
+    .qrow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+    }
+
     .qtitle{
       margin: 0;
       font-size: 16px;
       letter-spacing: -0.02em;
       line-height: 1.35;
     }
-    .qmeta{
-      margin-top: 8px;
-      font-size: 12px;
-      color: rgba(233,238,252,.62);
-      font-weight: 750;
-      display:flex;
-      align-items:center;
-      justify-content:flex-end;
-      gap: 10px;
-    }
 
     .chev{
-      width: 10px; height: 10px;
-      border-right: 2px solid rgba(233,238,252,.65);
-      border-bottom: 2px solid rgba(233,238,252,.65);
+      width: 10px;
+      height: 10px;
+      border-right: 2px solid rgba(233,238,252,.75);
+      border-bottom: 2px solid rgba(233,238,252,.75);
       transform: rotate(-45deg);
       transition: transform .16s ease;
-      margin-left: 8px;
       flex: 0 0 auto;
-      margin-top: 4px;
+      margin-top: 2px;
     }
     .qbtn[aria-expanded="true"] .chev{
       transform: rotate(45deg);
@@ -328,7 +318,7 @@
         <div>
           <h1>FAQ</h1>
           <p class="subhead">
-            Quick answers about what this demo is doing, what gets captured, and how the system behaves before you submit the form.
+            Quick answers about what this demo is doing, what gets captured, and how the system behaves.
           </p>
         </div>
         <span class="pill"><span class="dot"></span><span>Tap a question to open</span></span>
@@ -340,27 +330,28 @@
 
         <!-- Q1 -->
         <button class="qbtn" type="button" data-faq="q1" aria-expanded="false">
-          <div class="qhead">
-            <div>
-              <div class="qkicker"><span class="dot"></span> Overview</div>
+          <div>
+            <div class="qkicker"><span class="dot"></span> Overview</div>
+            <div class="qrow">
               <div class="qtitle">What is this page, exactly?</div>
-              <div class="qmeta"><span class="chev" aria-hidden="true"></span></div>
+              <span class="chev" aria-hidden="true"></span>
             </div>
           </div>
           <div class="ans" id="faq-q1" aria-hidden="true">
             This is a live Marketing Ops walkthrough, not a static portfolio. It demonstrates how personalization, attribution,
-            capture, and follow-up can work together in real time as you explore. It doesn’t just say what I can do, it shows it while doing it.
-            It’s living proof.
+            capture, and follow-up work together in real time as you explore.
+            <br><br>
+            Instead of just saying what I can do, I’m showing you the living proof.
           </div>
         </button>
 
         <!-- Q2 -->
         <button class="qbtn" type="button" data-faq="q2" aria-expanded="false">
-          <div class="qhead">
-            <div>
-              <div class="qkicker"><span class="dot"></span> Privacy</div>
+          <div>
+            <div class="qkicker"><span class="dot"></span> Privacy</div>
+            <div class="qrow">
               <div class="qtitle">What data do you capture when I visit?</div>
-              <div class="qmeta"><span class="chev" aria-hidden="true"></span></div>
+              <span class="chev" aria-hidden="true"></span>
             </div>
           </div>
           <div class="ans" id="faq-q2" aria-hidden="true">
@@ -371,41 +362,42 @@
 
         <!-- Q3 -->
         <button class="qbtn" type="button" data-faq="q3" aria-expanded="false">
-          <div class="qhead">
-            <div>
-              <div class="qkicker"><span class="dot"></span> Identity</div>
+          <div>
+            <div class="qkicker"><span class="dot"></span> Identity</div>
+            <div class="qrow">
               <div class="qtitle">What changes after I submit the form?</div>
-              <div class="qmeta"><span class="chev" aria-hidden="true"></span></div>
+              <span class="chev" aria-hidden="true"></span>
             </div>
           </div>
           <div class="ans" id="faq-q3" aria-hidden="true">
-            Submitting the form unlocks the full “live” demo: identity resolution (via email), CRM upsert (dedupe + update),
+            Submitting the form unlocks the full live demo: identity resolution (via email), CRM upsert (dedupe + update),
             and a clean proof trail that ties attribution and session intent signals back to a single contact record.
           </div>
         </button>
 
         <!-- Q4 -->
         <button class="qbtn" type="button" data-faq="q4" aria-expanded="false">
-          <div class="qhead">
-            <div>
-              <div class="qkicker"><span class="dot"></span> Attribution</div>
+          <div>
+            <div class="qkicker"><span class="dot"></span> Attribution</div>
+            <div class="qrow">
               <div class="qtitle">How does the tracked link (/r/:slug) work?</div>
-              <div class="qmeta"><span class="chev" aria-hidden="true"></span></div>
+              <span class="chev" aria-hidden="true"></span>
             </div>
           </div>
           <div class="ans" id="faq-q4" aria-hidden="true">
-            The demo uses the referral slug path as an attribution signal (similar to UTMs) without needing query parameters.
-            It can persist that first-touch source through the session and, when provided, attach it to the CRM record.
+            The demo uses a tracked link path (for example, /r/:slug) as an attribution signal, similar to UTMs but without query parameters.
+            <br><br>
+            That source can persist as a first-touch signal across the session and, when an email is provided, be attached directly to the CRM contact record.
           </div>
         </button>
 
         <!-- Q5 -->
         <button class="qbtn" type="button" data-faq="q5" aria-expanded="false">
-          <div class="qhead">
-            <div>
-              <div class="qkicker"><span class="dot"></span> Security</div>
+          <div>
+            <div class="qkicker"><span class="dot"></span> Security</div>
+            <div class="qrow">
               <div class="qtitle">Is this safe? Are you storing passwords or sensitive info?</div>
-              <div class="qmeta"><span class="chev" aria-hidden="true"></span></div>
+              <span class="chev" aria-hidden="true"></span>
             </div>
           </div>
           <div class="ans" id="faq-q5" aria-hidden="true">
@@ -416,11 +408,11 @@
 
         <!-- Q6 -->
         <button class="qbtn" type="button" data-faq="q6" aria-expanded="false">
-          <div class="qhead">
-            <div>
-              <div class="qkicker"><span class="dot"></span> Contact</div>
+          <div>
+            <div class="qkicker"><span class="dot"></span> Contact</div>
+            <div class="qrow">
               <div class="qtitle">How do I reach you quickly?</div>
-              <div class="qmeta"><span class="chev" aria-hidden="true"></span></div>
+              <span class="chev" aria-hidden="true"></span>
             </div>
           </div>
           <div class="ans" id="faq-q6" aria-hidden="true">
@@ -430,11 +422,11 @@
 
         <!-- Q7 -->
         <button class="qbtn" type="button" data-faq="q7" aria-expanded="false">
-          <div class="qhead">
-            <div>
-              <div class="qkicker"><span class="dot"></span> Stack</div>
+          <div>
+            <div class="qkicker"><span class="dot"></span> Stack</div>
+            <div class="qrow">
               <div class="qtitle">What MarTech stacks have you worked with in a professional capacity?</div>
-              <div class="qmeta"><span class="chev" aria-hidden="true"></span></div>
+              <span class="chev" aria-hidden="true"></span>
             </div>
           </div>
           <div class="ans" id="faq-q7" aria-hidden="true">
@@ -448,20 +440,22 @@
 
         <!-- Q8 -->
         <button class="qbtn" type="button" data-faq="q8" aria-expanded="false">
-          <div class="qhead">
-            <div>
-              <div class="qkicker"><span class="dot"></span> Experience</div>
+          <div>
+            <div class="qkicker"><span class="dot"></span> Experience</div>
+            <div class="qrow">
               <div class="qtitle">How long have you been working in marketing and marketing operations?</div>
-              <div class="qmeta"><span class="chev" aria-hidden="true"></span></div>
+              <span class="chev" aria-hidden="true"></span>
             </div>
           </div>
           <div class="ans" id="faq-q8" aria-hidden="true">
-            Over a career spanning 15 years, I’ve handled marketing teams top to bottom, from solo marketing, to internal teams of 10+
-            working in concert with stakeholder groups of 50+. I’ve done everything from content and copy, to SEO, to video creation and editing,
-            to system operations, reporting (including P&amp;L reporting), contract negotiations, social media, web, leadership presentations and storytelling,
-            email marketing, drip campaigns, dashboards, attribution, funnel modeling, customer satisfaction, ABM, growth marketing, GTM strategy,
-            campaign management, segmentation, lead scoring and qualification, pipeline management, sales enablement, ads management,
-            CRM hygiene and governance, and people management.
+            Over a 15-year career, I’ve operated across the full marketing lifecycle, from solo roles to leading internal teams of 10+
+            while partnering with stakeholder groups of 50+.
+            <br><br>
+            My experience spans content and copy, SEO, video creation and editing, web and social, email marketing and drip campaigns,
+            campaign management, segmentation, lead scoring and qualification, attribution, funnel modeling, dashboards, and customer satisfaction.
+            <br><br>
+            On the operations side, I’ve owned GTM strategy, growth marketing, ABM, CRM hygiene and governance, pipeline management,
+            sales enablement, ads management, reporting (including P&amp;L), contract negotiations, leadership-level storytelling, and people management.
           </div>
         </button>
 
@@ -470,7 +464,10 @@
       <div class="divider"></div>
 
       <div class="footer">
-        <div>Back to the demo: <a class="link" href="/">Home</a></div>
+        <div>
+          Back to the demo:
+          <a class="link" href="/" id="homeLink">Home</a>
+        </div>
         <div class="muted">Built as a live demo of personalization + attribution + automation + observability.</div>
       </div>
     </div>
@@ -478,13 +475,24 @@
   </div>
 
   <script>
-    // Back behavior: preserve state if possible (best when FAQ is opened in the same tab).
+    // Back/Home behavior: try to preserve state by going back in history first.
     (function(){
       const backBtn = document.getElementById("backBtn");
+      const homeLink = document.getElementById("homeLink");
+
+      function goBackOrHome(){
+        if (window.history.length > 1) window.history.back();
+        else window.location.href = "/";
+      }
+
       if (backBtn){
-        backBtn.addEventListener("click", () => {
-          if (window.history.length > 1) window.history.back();
-          else window.location.href = "/";
+        backBtn.addEventListener("click", goBackOrHome);
+      }
+
+      if (homeLink){
+        homeLink.addEventListener("click", (e) => {
+          e.preventDefault();
+          goBackOrHome();
         });
       }
     })();
