@@ -133,9 +133,7 @@
     }
     .card > *{ position: relative; }
 
-    .hero{
-      padding: 26px;
-    }
+    .hero{ padding: 26px; }
 
     h1{
       font-size: clamp(30px, 3.6vw, 48px);
@@ -177,7 +175,7 @@
       box-shadow: 0 0 0 4px rgba(96,165,250,.18);
     }
 
-    /* FAQ accordion (matches your path buttons vibe) */
+    /* FAQ accordion */
     .faq-wrap{
       display:grid;
       gap: 12px;
@@ -196,6 +194,12 @@
       transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease, background .16s ease;
       position: relative;
       overflow: hidden;
+
+      /* IMPORTANT: ensure button text stays readable across browsers */
+      color: var(--text);
+      font-family: inherit;
+      -webkit-appearance: none;
+      appearance: none;
     }
     .qbtn:hover{
       transform: translateY(-2px);
@@ -243,7 +247,7 @@
       font-weight: 750;
       display:flex;
       align-items:center;
-      justify-content:space-between;
+      justify-content:flex-end;
       gap: 10px;
     }
 
@@ -307,9 +311,9 @@
       </div>
 
       <div class="top-actions">
-        <a class="btn" href="/" title="Back to the demo">
-          ← Back to demo
-        </a>
+        <button class="btn" type="button" id="backBtn" title="Go back to where you came from">
+          ← Back
+        </button>
         <a class="btn primary" href="/resume" target="_blank" rel="noopener">
           <span class="icon"></span> View resume
         </a>
@@ -324,7 +328,7 @@
         <div>
           <h1>FAQ</h1>
           <p class="subhead">
-            Quick answers about what this demo is doing, what gets captured, and how the system behaves in “guest mode.”
+            Quick answers about what this demo is doing, what gets captured, and how the system behaves before you submit the form.
           </p>
         </div>
         <span class="pill"><span class="dot"></span><span>Tap a question to open</span></span>
@@ -339,13 +343,14 @@
           <div class="qhead">
             <div>
               <div class="qkicker"><span class="dot"></span> Overview</div>
-              <div class="qtitle">What is this site, exactly?</div>
-              <div class="qmeta"><span>Click to open</span><span class="chev" aria-hidden="true"></span></div>
+              <div class="qtitle">What is this page, exactly?</div>
+              <div class="qmeta"><span class="chev" aria-hidden="true"></span></div>
             </div>
           </div>
           <div class="ans" id="faq-q1" aria-hidden="true">
-            It’s a live Marketing Ops walkthrough, not a static portfolio. The page demonstrates how attribution, identity capture,
-            CRM hygiene (dedupe/upsert), and session intent signals can work together to drive better routing and follow-up.
+            This is a live Marketing Ops walkthrough, not a static portfolio. It demonstrates how personalization, attribution,
+            capture, and follow-up can work together in real time as you explore. It doesn’t just say what I can do, it shows it while doing it.
+            It’s living proof.
           </div>
         </button>
 
@@ -355,12 +360,12 @@
             <div>
               <div class="qkicker"><span class="dot"></span> Privacy</div>
               <div class="qtitle">What data do you capture when I visit?</div>
-              <div class="qmeta"><span>Click to open</span><span class="chev" aria-hidden="true"></span></div>
+              <div class="qmeta"><span class="chev" aria-hidden="true"></span></div>
             </div>
           </div>
           <div class="ans" id="faq-q2" aria-hidden="true">
-            In guest mode, it tracks lightweight session signals like time on page and interactions (clicks), plus entry path (e.g., /r/:slug).
-            If you submit the form with email, it can upsert a contact record in HubSpot and attach attribution + the session signals.
+            Before you submit the form, it tracks lightweight session signals like time on page and interactions (clicks), plus entry path
+            (for example, /r/:slug). If you submit the form with email, it can upsert a contact record in HubSpot and attach attribution plus the session signals.
           </div>
         </button>
 
@@ -368,14 +373,14 @@
         <button class="qbtn" type="button" data-faq="q3" aria-expanded="false">
           <div class="qhead">
             <div>
-              <div class="qkicker"><span class="dot"></span> Guest mode</div>
-              <div class="qtitle">What’s the difference between guest mode and submitting the form?</div>
-              <div class="qmeta"><span>Click to open</span><span class="chev" aria-hidden="true"></span></div>
+              <div class="qkicker"><span class="dot"></span> Identity</div>
+              <div class="qtitle">What changes after I submit the form?</div>
+              <div class="qmeta"><span class="chev" aria-hidden="true"></span></div>
             </div>
           </div>
           <div class="ans" id="faq-q3" aria-hidden="true">
-            Guest mode still shows the system and collects basic session intent signals, but it won’t create/update a CRM contact.
-            Submitting the form unlocks the full “live” demo: identity resolution (via email), CRM upsert, and a clean “proof trail.”
+            Submitting the form unlocks the full “live” demo: identity resolution (via email), CRM upsert (dedupe + update),
+            and a clean proof trail that ties attribution and session intent signals back to a single contact record.
           </div>
         </button>
 
@@ -385,12 +390,12 @@
             <div>
               <div class="qkicker"><span class="dot"></span> Attribution</div>
               <div class="qtitle">How does the tracked link (/r/:slug) work?</div>
-              <div class="qmeta"><span>Click to open</span><span class="chev" aria-hidden="true"></span></div>
+              <div class="qmeta"><span class="chev" aria-hidden="true"></span></div>
             </div>
           </div>
           <div class="ans" id="faq-q4" aria-hidden="true">
             The demo uses the referral slug path as an attribution signal (similar to UTMs) without needing query parameters.
-            It can persist that “first-touch” source through the session and (when provided) attach it to the CRM record.
+            It can persist that first-touch source through the session and, when provided, attach it to the CRM record.
           </div>
         </button>
 
@@ -400,11 +405,11 @@
             <div>
               <div class="qkicker"><span class="dot"></span> Security</div>
               <div class="qtitle">Is this safe? Are you storing passwords or sensitive info?</div>
-              <div class="qmeta"><span>Click to open</span><span class="chev" aria-hidden="true"></span></div>
+              <div class="qmeta"><span class="chev" aria-hidden="true"></span></div>
             </div>
           </div>
           <div class="ans" id="faq-q5" aria-hidden="true">
-            No passwords, no payment info, and no “secret” personal data capture. The only high-signal identifier is email if you choose to submit it.
+            No passwords, no payment info, and no sensitive personal data capture. The only high-signal identifier is email if you choose to submit it.
             The goal is to demonstrate responsible CRM hygiene and observability, not collect sensitive information.
           </div>
         </button>
@@ -415,11 +420,48 @@
             <div>
               <div class="qkicker"><span class="dot"></span> Contact</div>
               <div class="qtitle">How do I reach you quickly?</div>
-              <div class="qmeta"><span>Click to open</span><span class="chev" aria-hidden="true"></span></div>
+              <div class="qmeta"><span class="chev" aria-hidden="true"></span></div>
             </div>
           </div>
           <div class="ans" id="faq-q6" aria-hidden="true">
             The fastest path is LinkedIn. If you submitted the form, you can also reply to the follow-up email triggered by the demo.
+          </div>
+        </button>
+
+        <!-- Q7 -->
+        <button class="qbtn" type="button" data-faq="q7" aria-expanded="false">
+          <div class="qhead">
+            <div>
+              <div class="qkicker"><span class="dot"></span> Stack</div>
+              <div class="qtitle">What MarTech stacks have you worked with in a professional capacity?</div>
+              <div class="qmeta"><span class="chev" aria-hidden="true"></span></div>
+            </div>
+          </div>
+          <div class="ans" id="faq-q7" aria-hidden="true">
+            Alphabetically:
+            <span class="muted">
+              6sense, Chili Piper, Clay, CommonRoom, DemandTools, Demandbase, Google Ads, Google Analytics, Google Tag Manager,
+              HubSpot, Pardot, Salesforce, Salesloft, SEMrush, Showpad, Zoom, ZoomInfo
+            </span>
+          </div>
+        </button>
+
+        <!-- Q8 -->
+        <button class="qbtn" type="button" data-faq="q8" aria-expanded="false">
+          <div class="qhead">
+            <div>
+              <div class="qkicker"><span class="dot"></span> Experience</div>
+              <div class="qtitle">How long have you been working in marketing and marketing operations?</div>
+              <div class="qmeta"><span class="chev" aria-hidden="true"></span></div>
+            </div>
+          </div>
+          <div class="ans" id="faq-q8" aria-hidden="true">
+            Over a career spanning 15 years, I’ve handled marketing teams top to bottom, from solo marketing, to internal teams of 10+
+            working in concert with stakeholder groups of 50+. I’ve done everything from content and copy, to SEO, to video creation and editing,
+            to system operations, reporting (including P&amp;L reporting), contract negotiations, social media, web, leadership presentations and storytelling,
+            email marketing, drip campaigns, dashboards, attribution, funnel modeling, customer satisfaction, ABM, growth marketing, GTM strategy,
+            campaign management, segmentation, lead scoring and qualification, pipeline management, sales enablement, ads management,
+            CRM hygiene and governance, and people management.
           </div>
         </button>
 
@@ -436,7 +478,18 @@
   </div>
 
   <script>
-    // Accordion behavior: one open at a time, like your "Choose your path" sections.
+    // Back behavior: preserve state if possible (best when FAQ is opened in the same tab).
+    (function(){
+      const backBtn = document.getElementById("backBtn");
+      if (backBtn){
+        backBtn.addEventListener("click", () => {
+          if (window.history.length > 1) window.history.back();
+          else window.location.href = "/";
+        });
+      }
+    })();
+
+    // Accordion behavior: one open at a time
     (function(){
       const buttons = Array.from(document.querySelectorAll(".qbtn"));
 
