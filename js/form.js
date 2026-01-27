@@ -276,7 +276,7 @@
     if (context) {
       context.textContent = state.guest
         ? "You’re in guest mode. For full proof (CRM upsert + follow-up), enter a work email next time."
-        : "This is intentionally subtle: personalization, attribution, capture, and follow-up are happening as you read.";
+        : "Personalization, attribution, capture, and follow-up are happening in real time as you browse.";
     }
 
     if (telemetryIdentity) telemetryIdentity.textContent = state.guest ? "Anonymous (guest)" : "Identified";
