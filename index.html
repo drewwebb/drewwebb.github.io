@@ -541,6 +541,21 @@
         align-self: start;
       }
     }
+
+    /* Turnstile: compact + blends into the card */
+.cf-turnstile {
+  transform: scale(0.92);
+  transform-origin: left top;
+  opacity: 0.92;
+  filter: saturate(0.95);
+}
+
+@media (max-width: 420px){
+  .cf-turnstile {
+    transform: scale(0.88);
+  }
+}
+
   </style>
 </head>
 
