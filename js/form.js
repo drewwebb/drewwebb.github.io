@@ -263,11 +263,11 @@
     // resetUiTimer();
 
     if (statusText) statusText.textContent = state.guest ? "Guest mode" : "Live";
-    if (heroTitle) heroTitle.textContent = state.guest ? "Guest walkthrough" : "Welcome. This is the personalized walkthrough.";
+    if (heroTitle) heroTitle.textContent = state.guest ? "Guest walkthrough" : "Welcome to your personalized walkthrough.";
     if (heroSub) {
       heroSub.textContent = state.guest
         ? "You’re viewing the guest version of the live system. Attribution is visible, but CRM capture and follow-up are intentionally skipped."
-        : "This page has adapted to what you submitted, and real attribution, capture, and engagement signals continue to be written to live systems as you browse.";
+        : "This page has adapted to what you submitted. Attribution, capture, and engagement signals continue to be written to live systems as you browse.";
     }
 
     const displayName = (state.name || state.email || "there").trim();
@@ -276,7 +276,7 @@
     if (context) {
       context.textContent = state.guest
         ? "You’re in guest mode. For full proof (CRM upsert + follow-up), enter a work email next time."
-        : "The system now recognizes you and adapts as you explore. Keep an eye on the panel on the right to see live systems updating in real time.";
+        : "You’re now interacting with the live system. Watch the panel on the right to see identity, interactions, and automation update in real time.";
     }
 
     if (telemetryIdentity) telemetryIdentity.textContent = state.guest ? "Anonymous (guest)" : "Identified";
