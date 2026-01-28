@@ -1,22 +1,51 @@
 /* js/form.js
-   Posts intro form to your Worker API (NOT GitHub Pages).
+   Option B telemetry:
+   - Attribution shown immediately (path/source)
+   - Submit -> upsert -> reveal
+   - Guest -> reveal (no API)
+   - Track valuable interactions only (outbound links + choose-your-path opens)
+   - UI timer starts on load (display only)
+   - Server time markers only after submit (30s + 90s) and only if email exists
 */
 
 (() => {
-  // ✅ Your Worker/API root
   const API_ROOT = "https://api.drewwebbai.com";
-  const WELCOME_PATH = "/welcome.html";
-  const INDEX_PATH = "/index.html";
+  const API_EVENT = API_ROOT + "/event";
 
-  // Try these endpoints in order (prevents the 404 you saw)
-  const POST_ENDPOINTS = ["/send", "/"]; // "/send" first, then fallback to "/"
+  const RESUME_TO = "https://drewwebbai.com/resume";
+  const LINKEDIN_TO = "https://www.linkedin.com/in/drewrwebb/";
+  const FAQ_TO = "https://drewwebbai.com/faq.html";
 
-  // Form + UI elements (match your existing IDs)
-  const form = document.getElementById("introForm");
-  const errorBanner = document.getElementById("serverError"); // your red banner area (if present)
-  const btn = document.getElementById("continueBtn"); // if you have a button id; optional
+  const form = document.getElementById("lead-form");
+  const btn = document.getElementById("submitBtn");
+  const guestBtn = document.getElementById("guestBtn");
 
-  // Inputs
+  const msgError = document.getElementById("msg-error");
+
+  const fog = document.getElementById("fog");
+  const experience = document.getElementById("experience");
+
+  const heroTitle = document.getElementById("hero-title");
+  const heroSub = document.getElementById("hero-sub");
+
+  const hello = document.getElementById("hello");
+  const context = document.getElementById("context");
+
+  const statusText = document.getElementById("status-text");
+  const signalPill = document.getElementById("signal-pill");
+  const signalChips = document.getElementById("signal-chips");
+
+  const telemetryIdentity = document.getElementById("telemetry-identity");
+  const telemetryTime = document.getElementById("telemetry-time");
+  const telemetryClicks = document.getElementById("telemetry-clicks");
+  const telemetryActions = document.getElementById("telemetry-actions");
+  const telemetryCrm = document.getElementById("telemetry-crm");
+
+  const introBlock = document.getElementById("intro-block");
+
+  const stepsWrap = document.getElementById("steps");
+  const stepEls = stepsWrap ? Array.from(stepsWrap.querySelectorAll(".step")) : [];
+
   const elFirst = document.getElementById("firstName");
   const elLast = document.getElementById("lastName");
   const elCompany = document.getElementById("company");
@@ -24,197 +53,436 @@
   const elLinkedIn = document.getElementById("linkedin");
   const elEmail = document.getElementById("email");
 
-  // Cloudflare Turnstile (optional)
-  function getTurnstileToken() {
-    const hidden = document.querySelector('input[name="cf-turnstile-response"]');
-    return hidden ? hidden.value : "";
-  }
+  const resumeLink = document.getElementById("resume-link");
+  const linkedinLink = document.getElementById("linkedin-link");
+  const faqLink = document.getElementById("faq-link");
 
-  function setError(msg) {
-    if (!msg) return;
-    if (errorBanner) {
-      errorBanner.textContent = msg;
-      errorBanner.style.display = "block";
-    } else {
-      alert(msg);
-    }
-  }
+  let wired = false;
+  let startTs = Date.now();
+  let uiTimer = null;
+  let interactions = 0;
+  const recentActions = [];
 
-  function clearError() {
-    if (errorBanner) {
-      errorBanner.textContent = "";
-      errorBanner.style.display = "none";
+  function setMsg(el, text) {
+    if (!el) return;
+    if (!text) {
+      el.style.display = "none";
+      el.textContent = "";
+      return;
     }
+    el.style.display = "block";
+    el.textContent = text;
   }
 
   function qs(key) {
     return new URLSearchParams(location.search).get(key) || "";
   }
 
-  // --- Attribution helpers --------------------------------------------------
-
-  function getRef() {
-    return (qs("ref") || "").trim();
+  function readCookie(name) {
+    const m = document.cookie.match(
+      new RegExp("(^|; )" + name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&") + "=([^;]*)")
+    );
+    return m ? decodeURIComponent(m[2]) : "";
   }
 
-  // If you’re using ?ref=... or /r/:slug sets ref into query, we’ll pass it through.
-  // We also normalize it into a portfolioSlug convention.
-  function getPortfolioSlug() {
-    const direct =
-      (qs("portfolioSlug") || qs("portfolio_slug") || "").trim();
-    if (direct) return direct;
+  function getEntryPath() {
+    const fromQuery = (qs("portfolioSlug") || qs("portfolio_slug") || qs("ref") || "").trim();
+    if (fromQuery) return fromQuery;
 
-    const ref = getRef();
-    if (!ref) return "";
-    return ref;
+    const fromCookie = (readCookie("portfolio_slug") || readCookie("first_ref") || "").trim();
+    if (fromCookie) return fromCookie;
+
+    return "direct";
   }
 
-  // Lead source: prefer explicit params; fallback to UTM-ish; else infer from ref/direct
-  function getLeadSource() {
-    const explicit =
-      (qs("leadSource") || qs("lead_source") || "").trim();
-    if (explicit) return explicit;
+  function getLeadSourceLabel() {
+    const v = (qs("leadSource") || qs("lead_source") || "").trim();
+    return v || "Direct";
+  }
 
-    const utmSource = (qs("utm_source") || "").trim();
-    const utmMedium = (qs("utm_medium") || "").trim();
-    const utmCampaign = (qs("utm_campaign") || "").trim();
+  function getTurnstileToken() {
+    return window.__turnstileToken || "";
+  }
 
-    if (utmSource || utmMedium || utmCampaign) {
-      // Keep it readable, not noisy
-      const parts = [];
-      if (utmSource) parts.push(`utm_source:${utmSource}`);
-      if (utmMedium) parts.push(`utm_medium:${utmMedium}`);
-      if (utmCampaign) parts.push(`utm_campaign:${utmCampaign}`);
-      return parts.join(" | ");
+  function escapeHtml(str) {
+    return String(str || "").replace(/[&<>'"]/g, c => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "'": "&#39;",
+      '"': "&quot;"
+    })[c]);
+  }
+
+  function shortenLinkedIn(url) {
+    const s = String(url || "").trim();
+    if (!s) return "";
+    try {
+      const u = new URL(s);
+      if (u.pathname && u.pathname.startsWith("/in/")) return u.pathname.replace(/\/$/, "");
+      return (u.hostname + u.pathname).replace(/\/$/, "");
+    } catch {
+      if (s.includes("/in/")) {
+        const idx = s.indexOf("/in/");
+        return s.slice(idx).replace(/\/$/, "");
+      }
+      return s.length > 34 ? (s.slice(0, 30) + "…") : s;
+    }
+  }
+
+  function addAction(text) {
+    const t = String(text || "").trim();
+    if (!t) return;
+    const last = recentActions[0] || "";
+    if (last === t) return;
+
+    recentActions.unshift(t);
+    if (recentActions.length > 6) recentActions.length = 6;
+
+    if (telemetryActions) {
+      telemetryActions.innerHTML = recentActions.map(x => `<li>${escapeHtml(x)}</li>`).join("");
+    }
+  }
+
+  function setInteractions(n) {
+    interactions = n;
+    if (telemetryClicks) telemetryClicks.textContent = String(interactions);
+  }
+
+  function bumpInteractions(label) {
+    setInteractions(interactions + 1);
+    addAction(label);
+  }
+
+  function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}m ${String(s).padStart(2, "0")}s`;
+  }
+
+  function startUiTimer() {
+    if (uiTimer) return;
+    uiTimer = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTs) / 1000);
+      if (telemetryTime) telemetryTime.textContent = formatTime(elapsed);
+    }, 500);
+  }
+
+  function initSignalsPreview() {
+    const entryPath = getEntryPath();
+    const leadSource = getLeadSourceLabel();
+
+    if (signalChips) {
+      signalChips.innerHTML =
+        `<span class="chip guest"><span class="k">path</span><span class="mono">${escapeHtml(entryPath)}</span></span>` +
+        `<span class="chip guest"><span class="k">source</span><span class="mono">${escapeHtml(leadSource)}</span></span>`;
     }
 
-    // Inference:
-    // - if ref exists, it came from a tracked link (slug routing)
-    // - else direct
-    return getRef() ? "Tracked link" : "Direct";
+    if (telemetryIdentity) telemetryIdentity.textContent = "Anonymous";
+    if (signalPill) signalPill.textContent = "Capturing";
+
+    addAction("Page loaded");
+
+    // UI timer starts on load (display only).
+    // If you ever want it to start AFTER submit instead:
+    // comment out startUiTimer() here, and call resetUiTimer() inside reveal().
+    startUiTimer();
   }
 
-  // --- API posting ----------------------------------------------------------
+  function resetUiTimer() {
+    startTs = Date.now();
+    if (uiTimer) clearInterval(uiTimer);
+    uiTimer = null;
+    startUiTimer();
+  }
 
-  async function postIntro(payload) {
-    let lastErr = null;
+  function hideIntroBlock() {
+    if (!introBlock) return;
+    introBlock.classList.add("is-hidden");
+  }
 
-    for (const path of POST_ENDPOINTS) {
-      try {
-        const url = API_ROOT + path;
-        const res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+  function animateSteps(state) {
+    const s1 = document.getElementById("step-1");
+    const s2 = document.getElementById("step-2");
+    const s3 = document.getElementById("step-3");
+    const s4 = document.getElementById("step-4");
+    const s5 = document.getElementById("step-5");
 
-        const text = await res.text().catch(() => "");
+    if (state.guest) {
+      if (s1) s1.textContent = "Attribution is captured (entry path + first-touch preserved).";
+      if (s2) s2.textContent = "Guest mode is active (no CRM upsert, identity remains anonymous).";
+      if (s3) s3.textContent = "You can explore the system design and telemetry as you browse.";
+      if (s4) s4.textContent = "Telemetry logs meaningful actions (links + section opens).";
+      if (s5) s5.textContent = "This can be expanded with enrichment + routing rules in production.";
+    } else {
+      if (s1) s1.textContent = "You arrived via a tracked path. Your entry source was captured and attributed.";
+      if (s2) s2.textContent = "You submitted the form. Your profile was upserted into the CRM and deduped by email.";
+      if (s3) s3.textContent = "Your first-touch attribution is preserved. Future visits will not overwrite it.";
+      if (s4) s4.textContent = "Automation is now active. Follow-up and engagement scoring have been triggered.";
+      if (s5) s5.textContent = "As you explore, meaningful interactions are logged. Links and section opens are tracked in real time.";
+    }
 
-        if (!res.ok) {
-          // If this endpoint isn't found, try the next one.
-          if (res.status === 404) {
-            lastErr = new Error(`Server error: HTTP 404 at ${path}${text ? ` — ${text}` : ""}`);
-            continue;
-          }
-          throw new Error(`Server error: HTTP ${res.status}${text ? ` — ${text}` : ""}`);
-        }
+    stepEls.forEach(el => el.classList.remove("is-in"));
+    stepEls.forEach((el, i) => setTimeout(() => el.classList.add("is-in"), 140 + i * 200));
+  }
 
-        // Worker returns JSON; parse from text so we can show body on weird errors
-        let data = {};
-        try { data = JSON.parse(text); } catch {}
-        return data;
+  function buildCrmTelemetry(state) {
+    if (!telemetryCrm) return;
 
-      } catch (e) {
-        lastErr = e;
-        // try next endpoint
+    if (state.guest) {
+      telemetryCrm.innerHTML =
+        `<span class="chip guest"><span class="k">status</span><span>Guest mode (no CRM upsert)</span></span>`;
+      return;
+    }
+
+    const items = [];
+    function tchip(k, v) {
+      if (!v) return;
+      items.push(`<span class="chip guest"><span class="k">${escapeHtml(k)}</span><span>${escapeHtml(v)}</span></span>`);
+    }
+
+    tchip("email", state.email);
+    tchip("name", state.name || "(not provided)");
+    tchip("company", state.company);
+    tchip("title", state.title);
+    if (state.linkedin) tchip("linkedin", shortenLinkedIn(state.linkedin));
+
+    tchip("crm", "upserted");
+    tchip("follow-up", "queued");
+
+    telemetryCrm.innerHTML = items.join("");
+  }
+
+  function reveal(state) {
+    if (fog) fog.classList.add("is-cleared");
+    if (experience) experience.classList.add("is-on");
+
+    hideIntroBlock();
+
+    // OPTIONAL: if you want clock to start at submit/guest, uncomment this:
+    // resetUiTimer();
+
+    if (statusText) statusText.textContent = state.guest ? "Guest mode" : "Live";
+    if (heroTitle) heroTitle.textContent = state.guest ? "Guest walkthrough" : "Welcome to your personalized walkthrough.";
+    if (heroSub) {
+      heroSub.textContent = state.guest
+        ? "You’re viewing the guest version of the live system. Attribution is visible, but CRM capture and follow-up are intentionally skipped."
+        : "This page has adapted to what you submitted. Attribution, capture, and engagement signals continue to be written to live systems as you browse.";
+    }
+
+    const displayName = (state.name || state.email || "there").trim();
+    if (hello) hello.textContent = `Welcome, ${displayName}`;
+
+    if (context) {
+      context.textContent = state.guest
+        ? "You’re in guest mode. For full proof (CRM upsert + follow-up), enter a work email next time."
+        : "You’re now interacting with the live system. Watch the panel on the right to see identity, interactions, and automation signals update in real time.";
+    }
+
+    if (telemetryIdentity) telemetryIdentity.textContent = state.guest ? "Anonymous (guest)" : "Identified";
+    if (signalPill) signalPill.textContent = state.guest ? "Guest" : "Live";
+
+    buildCrmTelemetry(state);
+
+    if (state.guest) addAction("Guest mode selected");
+    else addAction("Form submitted");
+
+    animateSteps(state);
+  }
+
+  async function postEvent(payload) {
+    try {
+      await fetch(API_EVENT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch {}
+  }
+
+  function wireValuableTracking(state) {
+    if (wired) return;
+    wired = true;
+
+    function trackIfIdentified(eventName, extra = {}) {
+      bumpInteractions(eventName.replace(/_/g, " "));
+      if (state.email) postEvent({ email: state.email, event: eventName, ...extra });
+    }
+
+    function onOutbound(a, eventName, toUrl) {
+      if (!a) return;
+      if (toUrl) a.href = toUrl;
+      a.addEventListener("click", () => trackIfIdentified(eventName), { passive: true });
+    }
+
+    onOutbound(resumeLink, "resume_clicked", RESUME_TO);
+    onOutbound(linkedinLink, "linkedin_clicked", LINKEDIN_TO);
+    onOutbound(faqLink, "faq_clicked", FAQ_TO);
+
+    const sections = ["about", "stacks", "behind"];
+
+    function setOpen(key, open) {
+      const panel = document.getElementById(`deep-${key}`);
+      const b = document.querySelector(`.path[data-toggle="${key}"]`);
+      if (!panel || !b) return;
+
+      if (open) {
+        panel.classList.add("is-open");
+        panel.setAttribute("aria-hidden", "false");
+        b.setAttribute("aria-expanded", "true");
+        const hint = b.querySelector(".hint span");
+        if (hint) hint.textContent = "Click to close";
+      } else {
+        panel.classList.remove("is-open");
+        panel.setAttribute("aria-hidden", "true");
+        b.setAttribute("aria-expanded", "false");
+        const hint = b.querySelector(".hint span");
+        if (hint) hint.textContent = "Click to open";
       }
     }
 
-    throw lastErr || new Error("Server error: unable to submit form");
+    sections.forEach(k => setOpen(k, false));
+
+    document.querySelectorAll(".path[data-toggle]").forEach(b => {
+      if (b.dataset.wired === "1") return;
+      b.dataset.wired = "1";
+
+      b.addEventListener("click", () => {
+        const key = b.getAttribute("data-toggle");
+        const isExpanded = b.getAttribute("aria-expanded") === "true";
+        const willOpen = !isExpanded;
+
+        sections.forEach(k => setOpen(k, k === key ? willOpen : false));
+
+       if (willOpen) {
+  // Track for scoring / CRM, but do NOT add a visible action
+  if (state.email) {
+    postEvent({ email: state.email, event: "path_section_opened", section: key });
   }
 
-  // --- Redirect -------------------------------------------------------------
+  // Single, human-readable UI action
+  bumpInteractions(`Opened section: ${key}`);
+} else {
+  addAction(`Closed section: ${key}`);
+}
 
-  function redirectToWelcome(payload) {
-    const u = new URL(WELCOME_PATH, window.location.origin);
-
-    const fullName = `${payload.firstName || ""} ${payload.lastName || ""}`.trim();
-    if (fullName) u.searchParams.set("name", fullName);
-    if (payload.email) u.searchParams.set("email", payload.email);
-    if (payload.company) u.searchParams.set("company", payload.company);
-    if (payload.title) u.searchParams.set("title", payload.title);
-    if (payload.linkedin) u.searchParams.set("linkedin", payload.linkedin);
-
-    // NEW: carry the exact attribution your welcome page expects
-    if (payload.portfolioSlug) u.searchParams.set("portfolioSlug", payload.portfolioSlug);
-    if (payload.leadSource) u.searchParams.set("leadSource", payload.leadSource);
-
-    // Backward compatibility: still carry ref if present
-    const ref = getRef();
-    if (ref) u.searchParams.set("ref", ref);
-
-    window.location.assign(u.toString());
+      }, { passive: true });
+    });
   }
 
-  // --- Submit handler -------------------------------------------------------
+  function startTimeOnPageServer(state) {
+    if (!state.email) return;
+
+    const fired = { 30: false, 90: false };
+    const start = Date.now();
+
+    const timer = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - start) / 1000);
+
+      if (elapsed >= 30 && !fired[30]) {
+        fired[30] = true;
+        postEvent({ email: state.email, event: "time_on_page_sec", value: 30 });
+      }
+      if (elapsed >= 90 && !fired[90]) {
+        fired[90] = true;
+        postEvent({ email: state.email, event: "time_on_page_sec", value: 90 });
+        clearInterval(timer);
+      }
+    }, 1000);
+  }
+
+  async function postIntro(payload) {
+    const res = await fetch(API_ROOT + "/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const text = await res.text().catch(() => "");
+    if (!res.ok) throw new Error(`Server error: HTTP ${res.status}${text ? ` — ${text}` : ""}`);
+
+    let data = {};
+    try { data = JSON.parse(text); } catch {}
+    return data;
+  }
+
+  function buildStateFromInputs({ guest }) {
+    const firstName = (elFirst?.value || "").trim();
+    const lastName = (elLast?.value || "").trim();
+    const name = `${firstName} ${lastName}`.trim();
+
+    return {
+      guest: !!guest,
+      name,
+      email: (elEmail?.value || "").trim(),
+      company: (elCompany?.value || "").trim(),
+      title: (elTitle?.value || "").trim(),
+      linkedin: (elLinkedIn?.value || "").trim(),
+      entryPath: getEntryPath(),
+      leadSource: getLeadSourceLabel(),
+    };
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    clearError();
+    setMsg(msgError, "");
+
+    if (statusText) statusText.textContent = "Submitting…";
+    if (btn) btn.disabled = true;
+
+    const state = buildStateFromInputs({ guest: false });
+
+    if (!state.email) {
+      setMsg(msgError, "Please enter a work email (or use Guest mode).");
+      if (statusText) statusText.textContent = "Ready";
+      if (btn) btn.disabled = false;
+      return;
+    }
 
     const payload = {
       firstName: (elFirst?.value || "").trim(),
       lastName: (elLast?.value || "").trim(),
-      company: (elCompany?.value || "").trim(),
-      title: (elTitle?.value || "").trim(),
-      linkedin: (elLinkedIn?.value || "").trim(),
-      email: (elEmail?.value || "").trim(),
-
-      // NEW: attribution fields
-      portfolioSlug: getPortfolioSlug(),
-      leadSource: getLeadSource(),
-
-      // Optional; only useful if your Worker validates it
+      company: state.company,
+      title: state.title,
+      linkedin: state.linkedin,
+      email: state.email,
+      portfolioSlug: state.entryPath,
       turnstileToken: getTurnstileToken(),
     };
 
-    // Basic validation (email required for “full” flow)
-    if (!payload.email) {
-      setError("Please enter a work email (or choose Continue as guest).");
-      return;
-    }
-
-    // UI disable (optional)
-    if (btn) btn.disabled = true;
-
     try {
       const data = await postIntro(payload);
+      if (data && data.ok === false) throw new Error(data.error || "Something went wrong submitting the form.");
 
-      // If Worker reported an application-level error
-      if (data && data.ok === false) {
-        setError(data.error || "Something went wrong submitting the form.");
-        if (btn) btn.disabled = false;
-        return;
-      }
+      reveal(state);
+      wireValuableTracking(state);
+      startTimeOnPageServer(state);
 
-      // Success → go to welcome
-      redirectToWelcome(payload);
+      bumpInteractions("Form submit");
+      addAction("CRM upsert: success");
+      if (statusText) statusText.textContent = "Live";
     } catch (err) {
-      setError(err?.message || "Unexpected error");
+      setMsg(msgError, err?.message || "Unexpected error");
+      if (statusText) statusText.textContent = "Ready";
       if (btn) btn.disabled = false;
     }
   }
 
-  // Hook up submit
-  if (form) {
-    form.addEventListener("submit", handleSubmit);
-  } else {
-    // If you wired it to a button click instead of form submit
-    const fallbackBtn = btn || document.querySelector('button[type="submit"]');
-    if (fallbackBtn) fallbackBtn.addEventListener("click", handleSubmit);
+  function handleGuest(e) {
+    e.preventDefault();
+    setMsg(msgError, "");
+
+    const state = buildStateFromInputs({ guest: true });
+
+    reveal({ ...state, email: "" });
+    wireValuableTracking({ ...state, email: "" });
+
+    bumpInteractions("Guest mode");
+    if (statusText) statusText.textContent = "Guest mode";
   }
 
-  // Start over button (optional convenience)
-  const startOver = document.getElementById("startOver");
-  if (startOver) startOver.addEventListener("click", () => window.location.assign(INDEX_PATH));
+  if (form) form.addEventListener("submit", handleSubmit);
+  if (guestBtn) guestBtn.addEventListener("click", handleGuest);
+
+  initSignalsPreview();
 })();
