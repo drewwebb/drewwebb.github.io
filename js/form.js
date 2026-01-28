@@ -210,8 +210,8 @@
 
     if (state.guest) {
       if (s1) s1.textContent = "Attribution is captured (entry path + first-touch preserved).";
-      if (s2) s2.textContent = "Guest mode selected (no CRM upsert, identity stays anonymous).";
-      if (s3) s3.textContent = "You can still explore the system design and telemetry while browsing.";
+      if (s2) s2.textContent = "Guest mode is active (no CRM upsert, identity remains anonymous).";
+      if (s3) s3.textContent = "You can explore the system design and telemetry as you browse.";
       if (s4) s4.textContent = "Telemetry logs meaningful actions (links + section opens).";
       if (s5) s5.textContent = "This can be expanded with enrichment + routing rules in production.";
     } else {
@@ -266,7 +266,7 @@
     if (heroTitle) heroTitle.textContent = state.guest ? "Guest walkthrough" : "Welcome. This is the personalized walkthrough.";
     if (heroSub) {
       heroSub.textContent = state.guest
-        ? "You’re viewing the guest version of the live system. Attribution is visible, but CRM capture and follow-up are skipped."
+        ? "You’re viewing the guest version of the live system. Attribution is visible, but CRM capture and follow-up are intentionally skipped."
         : "This page has adapted to what you submitted, and real attribution, capture, and engagement signals continue to be written to live systems as you browse.";
     }
 
