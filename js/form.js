@@ -276,7 +276,7 @@
     if (context) {
       context.textContent = state.guest
         ? "You’re in guest mode. For full proof (CRM upsert + follow-up), enter a work email next time."
-        : "You’re now interacting with the live system. Watch the panel on the right to see identity, interactions, and automation update in real time.";
+        : "You’re now interacting with the live system. Watch the panel on the right to see identity, interactions, and automation signals update in real time.";
     }
 
     if (telemetryIdentity) telemetryIdentity.textContent = state.guest ? "Anonymous (guest)" : "Identified";
