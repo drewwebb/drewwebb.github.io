@@ -542,19 +542,20 @@
       }
     }
 
-    /* Turnstile: compact + blends into the card */
+/* Turnstile: normal size, dark theme, subtly blended */
 .cf-turnstile {
-  transform: scale(0.92);
-  transform-origin: left top;
   opacity: 0.92;
-  filter: saturate(0.95);
+  outline: 2px solid red; /* DEBUG: remove after verifying */
 }
 
+/* Optional: slightly dim on very small screens */
 @media (max-width: 420px){
   .cf-turnstile {
-    transform: scale(0.88);
+    opacity: 0.88;
+    outline: 2px solid red; /* DEBUG: remove after verifying */
   }
 }
+
 
   </style>
 </head>
@@ -670,7 +671,7 @@
                     data-sitekey="0x4AAAAAABsD3RaVvPQfjsNv"
                     data-callback="onTurnstileSuccess"
                     data-theme="dark"
-                    data-size="compact"
+                    data-size="normal"
                     data-appearance="always"
                   ></div>
 
