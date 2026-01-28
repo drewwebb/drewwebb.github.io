@@ -1,13 +1,12 @@
-<!doctype html> 
+<!doctype html>
 <html lang="en">
 <head>
   <link rel="icon" href="/favicon.ico?v=3" sizes="any">
   <meta charset="utf-8" />
   <title>Drew Webb — Live Marketing Ops Portfolio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="A live, instrumented Marketing Operations portfolio — personalization, attribution, capture, and follow-up happening in real time." />
+  <meta name="description" content="A live, instrumented Marketing Operations portfolio. Personalization, attribution, capture, and follow-up happening in real time." />
 
-  <!-- Optional: nicer typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -134,9 +133,7 @@
     .card > *{ position: relative; }
 
     /* Hero */
-    .hero{
-      padding: 26px;
-    }
+    .hero{ padding: 26px; }
     h1{
       font-size: clamp(34px, 4vw, 54px);
       line-height: 1.06;
@@ -176,10 +173,7 @@
       transform: translateY(-8px);
     }
 
-    .grid{
-      display:grid;
-      gap: 16px;
-    }
+    .grid{ display:grid; gap: 16px; }
     @media (min-width: 940px){
       .grid-2{
         grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
@@ -360,6 +354,7 @@
     /* Paths */
     .paths{ display:grid; grid-template-columns: 1fr; gap: 12px; margin-top: 14px; }
     @media (min-width: 940px){ .paths{ grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
     .path{
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,.10);
@@ -371,6 +366,11 @@
       transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease, background .16s ease;
       position: relative;
       overflow:hidden;
+
+      /* layout polish */
+      display:flex;
+      flex-direction:column;
+      min-height: 168px;
     }
     .path:hover{
       transform: translateY(-2px);
@@ -390,21 +390,30 @@
       box-shadow: 0 0 0 4px rgba(96,165,250,.18);
     }
     .path h3{ margin: 0 0 6px; font-size: 16px; letter-spacing: -0.02em; }
-    .path p{ margin: 0; font-size: 13px; line-height: 1.6; color: rgba(233,238,252,.72); }
+
+    /* ✅ lighten the “dark blue” snippet text */
+    .path p{
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.6;
+      color: rgba(233,238,252,.84);
+    }
+
     .hint{
-      margin-top: 10px;
+      margin-top: auto;
       font-size: 12px;
-      color: rgba(233,238,252,.62);
-      font-weight: 750;
+      color: rgba(233,238,252,.78);
+      font-weight: 800;
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap: 10px;
+      padding-top: 10px;
     }
     .chev{
       width: 10px; height: 10px;
-      border-right: 2px solid rgba(233,238,252,.65);
-      border-bottom: 2px solid rgba(233,238,252,.65);
+      border-right: 2px solid rgba(233,238,252,.70);
+      border-bottom: 2px solid rgba(233,238,252,.70);
       transform: rotate(-45deg);
       transition: transform .16s ease;
       margin-left: 8px;
@@ -412,23 +421,95 @@
     }
     .path[aria-expanded="true"] .chev{ transform: rotate(45deg); }
 
-    /* Deep dives */
+    /* Deep dives (container toggle) */
     .deep{ margin-top: 12px; display:none; }
     .deep.is-open{ display:block; }
-    .section{
+
+    /* =========================
+       Deep-dive boxed layout (dark theme)
+       ========================= */
+    .deep-panel{
       border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
+      background: rgba(255,255,255,.05);
       border-radius: var(--radius);
-      padding: 18px;
+      padding: 22px;
       box-shadow: var(--shadow-soft);
     }
-    .section h3{ margin:0 0 6px; font-size: 18px; letter-spacing: -0.02em; }
-    .section p{
+
+    .deep-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap:wrap;
+      margin-bottom: 14px;
+    }
+
+    .deep-kicker{
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-size: 12px;
+      color: rgba(233,238,252,.62);
+    }
+
+    .deep-title{
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .deep-lead{
       margin: 8px 0 0;
+      color: rgba(233,238,252,.78);
       line-height: 1.7;
-      color: rgba(233,238,252,.82);
-      max-width: 92ch;
       font-size: 14px;
+      max-width: 92ch;
+    }
+
+    .deep-pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(96,165,250,.12);
+      border: 1px solid rgba(96,165,250,.26);
+      color: rgba(233,238,252,.88);
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .deep-grid{
+      display:grid;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    @media (min-width: 720px){
+      .deep-grid.two{ grid-template-columns: 1fr 1fr; }
+    }
+
+    .deep-box{
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      padding: 16px;
+      background: rgba(2,6,23,.35);
+    }
+
+    .deep-box h4{
+      margin: 0 0 8px;
+      font-size: 14px;
+      letter-spacing: -0.01em;
+    }
+
+    .deep-box p{
+      margin: 0;
+      color: rgba(233,238,252,.78);
+      line-height: 1.7;
+      font-size: 13.5px;
     }
 
     table{ width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
@@ -533,7 +614,7 @@
       font-weight: 800;
     }
 
-    /* ✅ KEY FIX: make the GRID ITEM sticky (most reliable in CSS Grid) */
+    /* Sticky telemetry column */
     @media (min-width: 940px){
       .telemetry-col{
         position: sticky;
@@ -542,18 +623,9 @@
       }
     }
 
-/* Turnstile: normal size, dark theme, subtly blended */
-.cf-turnstile {
-  opacity: 0.92;
-}
-
-/* Optional: slightly dim on very small screens */
-@media (max-width: 420px){
-  .cf-turnstile {
-    opacity: 0.88;
-  }
-}
-
+    /* Turnstile: normal size, dark theme, subtly blended */
+    .cf-turnstile { opacity: 0.92; }
+    @media (max-width: 420px){ .cf-turnstile { opacity: 0.88; } }
   </style>
 </head>
 
@@ -575,7 +647,7 @@
           LinkedIn
         </a>
 
-       <a class="btn" id="faq-link" href="/faq.html" title="FAQ">
+        <a class="btn" id="faq-link" href="/faq.html" title="FAQ">
           FAQ
         </a>
 
@@ -590,7 +662,7 @@
         <div>
           <h1 id="hero-title">A Marketing Ops system in action</h1>
           <p class="subhead" id="hero-sub">
-            You’re not just reading a portfolio, you're interacting with a real system. Attribution, capture, personalization,
+            You’re not just reading a portfolio, you’re interacting with a real system. Attribution, capture, personalization,
             follow-up, and measurement are happening while you’re here.
           </p>
 
@@ -611,20 +683,20 @@
               <div id="intro-block">
                 <div class="reveal-head">
                   <div>
-                   <h2 id="reveal-title">Want the personalized walkthrough?</h2>
+                    <h2 id="reveal-title">Want the personalized walkthrough?</h2>
 
-<div class="muted" id="reveal-sub" style="margin-top:6px; line-height:1.6;">
-  <p style="margin:0;">
-    Fill out the form to unlock the full experience.
-  </p>
-
-  <p style="margin:10px 0 0;">
-    The content on the left adapts to what you submitted.<br>
-    The panel on the right shows the system working in real time.
-  </p>
-</div>
+                    <div class="muted" id="reveal-sub" style="margin-top:6px; line-height:1.6;">
+                      <p style="margin:0;">Fill out the form to unlock the full experience.</p>
+                      <p style="margin:10px 0 0;">
+                        The content on the left adapts to what you submitted.<br>
+                        The panel on the right shows the system working in real time.
+                      </p>
+                    </div>
                   </div>
-                  <span class="pill" id="status-pill"><span class="dot"></span><span id="status-text">Ready</span></span>
+
+                  <span class="pill" id="status-pill">
+                    <span class="dot"></span><span id="status-text">Ready</span>
+                  </span>
                 </div>
 
                 <div id="msg-error" class="msg error"></div>
@@ -663,15 +735,15 @@
                         <input id="email" type="email" name="email" required autocomplete="email" />
                       </div>
                     </div>
-                  <div
-                    class="cf-turnstile"
-                    data-sitekey="0x4AAAAAABsD3RaVvPQfjsNv"
-                    data-callback="onTurnstileSuccess"
-                    data-theme="dark"
-                    data-size="normal"
-                    data-appearance="always"
-                  ></div>
 
+                    <div
+                      class="cf-turnstile"
+                      data-sitekey="0x4AAAAAABsD3RaVvPQfjsNv"
+                      data-callback="onTurnstileSuccess"
+                      data-theme="dark"
+                      data-size="normal"
+                      data-appearance="always"
+                    ></div>
 
                     <div class="actions">
                       <button id="submitBtn" type="submit">Start the live walkthrough →</button>
@@ -731,7 +803,7 @@
                   <button class="path" type="button" data-toggle="stacks" aria-expanded="false">
                     <div class="kicker"><span class="dot"></span> Tech stack</div>
                     <h3>Operator experience, end-to-end</h3>
-                    <p>The MarTech, data, and lifecycle stacks I’ve run, and how I connect them to real outcomes.</p>
+                    <p>The MarTech, data, and lifecycle stacks I’ve run, and how I connect them to measurable outcomes.</p>
                     <div class="hint"><span>Click to open</span><span class="chev" aria-hidden="true"></span></div>
                   </button>
 
@@ -743,38 +815,168 @@
                   </button>
                 </div>
 
+                <!-- ABOUT -->
                 <div class="deep" id="deep-about" aria-hidden="true">
                   <div class="divider"></div>
-                  <section class="section">
-                    <h3>About me</h3>
-                    <p>
-                    I’m Drew Webb, a senior Marketing Operations and Growth leader who turns messy, multi-tool realities into clean execution: clear signals, automated handoffs, trustworthy reporting, and programs that scale without breaking.
-                    </p>
-                    <p class="muted">
-                     I’m typically brought in to speed up routing and response, fix attribution gaps, make lifecycle programs more relevant, and align teams around a single source of truth, with instrumentation from day one.
-                    </p>
+                  <section class="deep-panel">
+                    <div class="deep-head">
+                      <div>
+                        <div class="deep-kicker">About me</div>
+                        <h3 class="deep-title">Systems-first Marketing Operations and Growth leadership</h3>
+                        <p class="deep-lead">
+                          I’m Drew Webb, a senior Marketing Operations and Growth leader who turns messy, multi-tool realities into clean execution.
+                          Clear signals, automated handoffs, trustworthy reporting, and programs that scale without breaking.
+                        </p>
+                      </div>
+                      <span class="deep-pill">Systems-first operator</span>
+                    </div>
+
+                    <div class="deep-grid two">
+                      <div class="deep-box">
+                        <h4>What I optimize for</h4>
+                        <p>Speed-to-lead, conversion lift, cleaner segmentation, and pipeline impact, with instrumentation from day one.</p>
+                      </div>
+                      <div class="deep-box">
+                        <h4>How I lead</h4>
+                        <p>Tight feedback loops across Marketing, Sales, Product, Analytics, and RevOps, with a bias for shipping.</p>
+                      </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <a class="btn primary" href="/resume" target="_blank" rel="noopener" style="border-radius:14px; padding: 12px 14px;">
+                      <span class="icon"></span> View resume (PDF)
+                    </a>
                   </section>
                 </div>
 
+                <!-- STACKS -->
                 <div class="deep" id="deep-stacks" aria-hidden="true">
                   <div class="divider"></div>
-                  <section class="section">
-                    <h3>Tech stack (and how it connects)</h3>
-                    <p class="muted">
-                      This isn’t a tool list — it’s an operating system mindset: capture signals, unify identity, activate audiences, measure outcomes,
-                      and keep the system observable.
-                    </p>
+                  <section class="deep-panel">
+                    <div class="deep-head">
+                      <div>
+                        <div class="deep-kicker">Tech stack</div>
+                        <h3 class="deep-title">Stacks I’ve run, and how they connect</h3>
+                        <p class="deep-lead">
+                          This is not a tool list. It’s how I build an operating system for growth. Capture signals, unify identity, activate audiences,
+                          measure outcomes, and keep the system observable.
+                        </p>
+                      </div>
+                      <span class="deep-pill">MarTech + Data + Lifecycle + Attribution</span>
+                    </div>
+
+                    <div class="deep-grid two">
+                      <div class="deep-box">
+                        <h4>MarTech and CRM orchestration</h4>
+                        <p>Routing, scoring, enrichment, handoffs, QA, and lifecycle triggers that do not drift over time.</p>
+                      </div>
+                      <div class="deep-box">
+                        <h4>Data and identity</h4>
+                        <p>Consistent identifiers, clean event design, and reliable pipelines so personalization and reporting stay trustworthy.</p>
+                      </div>
+                      <div class="deep-box">
+                        <h4>Lifecycle and messaging</h4>
+                        <p>Segmentation and journeys that stay relevant, and can be measured beyond vanity engagement.</p>
+                      </div>
+                      <div class="deep-box">
+                        <h4>Attribution and measurement</h4>
+                        <p>Practical attribution. What can we trust, how do we validate, and how do we iterate without breaking tracking.</p>
+                      </div>
+                    </div>
                   </section>
                 </div>
 
+                <!-- BEHIND -->
                 <div class="deep" id="deep-behind" aria-hidden="true">
                   <div class="divider"></div>
-                  <section class="section">
-                    <h3>Behind the curtain (live proof)</h3>
-                    <p>
-                      This page is not a mockup. If you entered an email, a contact was created/updated in HubSpot, attributed using a first-touch model,
-                      and scored based on intent signals (time + clicks). Automation can route, enrich, and trigger follow-up based on those signals.
+                  <section class="deep-panel">
+                    <div class="deep-head">
+                      <div>
+                        <div class="deep-kicker">Behind the curtain</div>
+                        <h3 class="deep-title">How this demo works, live</h3>
+                        <p class="deep-lead">
+                          This page is not a mockup. If you entered an email, a contact was created or updated in HubSpot, attributed using a first-touch model,
+                          and scored based on intent signals (time + clicks). Automation can route, enrich, and trigger follow-up based on those signals.
+                        </p>
+                      </div>
+                      <span class="deep-pill">Live demo</span>
+                    </div>
+
+                    <div class="deep-grid two">
+                      <div class="deep-box">
+                        <h4>Routing and attribution</h4>
+                        <p>Tracked links carry a clean label forward (example: /r/slug), so engagement and follow-up can be measured without clutter.</p>
+                      </div>
+                      <div class="deep-box">
+                        <h4>Capture and personalization</h4>
+                        <p>The info you submit is used to tailor this view. Guest mode shows the same journey with reduced context.</p>
+                      </div>
+                      <div class="deep-box">
+                        <h4>Logging and bot filtering</h4>
+                        <p>Visits and actions can be logged with lightweight rules (and bots can be filtered) so signals stay clean.</p>
+                      </div>
+                      <div class="deep-box">
+                        <h4>Observability</h4>
+                        <p>A private dashboard (Pulse) can be used to inspect traffic and engagement without exposing visitor data publicly.</p>
+                      </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="muted" style="font-weight:900; letter-spacing:.06em; text-transform:uppercase; font-size:12px;">
+                      Stack and cost outline
+                    </div>
+                    <p class="deep-lead" style="margin-top:8px;">
+                      Placeholder ranges for now. This can be refined with exact costs and vendors (registrar, etc.) later.
                     </p>
+
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Component</th>
+                          <th>What it does</th>
+                          <th>Est. cost</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><strong>Cloudflare Workers</strong></td>
+                          <td>Routing, attribution, logging, and private admin surfaces.</td>
+                          <td>~$0–$X / mo</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Cloudflare KV</strong></td>
+                          <td>Efficient event storage (visit logs).</td>
+                          <td>~$0–$X / mo</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Cloudflare D1</strong></td>
+                          <td>Slug store + metadata (and future contact store).</td>
+                          <td>~$0–$X / mo</td>
+                        </tr>
+                        <tr>
+                          <td><strong>GitHub Pages</strong></td>
+                          <td>Static hosting for the site.</td>
+                          <td>$0</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Email (Resend)</strong></td>
+                          <td>Follow-up and lifecycle messaging.</td>
+                          <td>~$0–$X / mo</td>
+                        </tr>
+                        <tr>
+                          <td><strong>CRM (HubSpot)</strong></td>
+                          <td>Contact upsert, scoring fields, engagement timeline, and reporting.</td>
+                          <td>Plan-dependent</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Domain</strong></td>
+                          <td>Registrar + renewal.</td>
+                          <td>~$X / year</td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </section>
                 </div>
 
@@ -785,7 +987,6 @@
         </div>
 
         <!-- RIGHT: TELEMETRY -->
-        <!-- ✅ Key change: this GRID ITEM is sticky now -->
         <div class="telemetry-col">
           <div class="card" style="padding: 18px; background: rgba(255,255,255,.05);">
             <div class="telemetry-head">
@@ -828,9 +1029,9 @@
             </div>
 
             <div class="note" style="margin-top:10px;">
-           <span class="muted">
-  <strong>Attribution detail:</strong> First-touch source is captured from the entry path and preserved into CRM.
-</span>
+              <span class="muted">
+                <strong>Attribution detail:</strong> First-touch source is captured from the entry path and preserved into CRM.
+              </span>
             </div>
           </div>
         </div>
@@ -840,7 +1041,7 @@
 
     <div class="footer">
       <div>Want to restart? <a class="link" href="/">Start over</a></div>
-      <div class="muted">Built as a live demo of personalization + attribution + automation + observability.</div>
+      <div class="muted">Built as a live demo of personalization, attribution, automation, and observability.</div>
     </div>
 
   </div>
