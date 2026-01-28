@@ -215,11 +215,11 @@
       if (s4) s4.textContent = "Telemetry logs meaningful actions (links + section opens).";
       if (s5) s5.textContent = "This can be expanded with enrichment + routing rules in production.";
     } else {
-      if (s1) s1.textContent = "Visited via an attributed path (entry path + source captured).";
-      if (s2) s2.textContent = "Submitted form, profile was upserted in CRM (deduped by email).";
-      if (s3) s3.textContent = "First-touch attribution is preserved (not overwritten on future visits).";
-      if (s4) s4.textContent = "Automation is triggered (follow-up email queued + engagement scoring).";
-      if (s5) s5.textContent = "Telemetry logs meaningful interactions while you explore (links + sections).";
+      if (s1) s1.textContent = "You arrived via a tracked path. Your entry source was captured and attributed.";
+      if (s2) s2.textContent = "You submitted the form. Your profile was upserted into the CRM and deduped by email.";
+      if (s3) s3.textContent = "Your first-touch attribution is preserved. Future visits will not overwrite it.";
+      if (s4) s4.textContent = "Automation is now active. Follow-up and engagement scoring have been triggered.";
+      if (s5) s5.textContent = "As you explore, meaningful interactions are logged. Links and section opens are tracked in real time.";
     }
 
     stepEls.forEach(el => el.classList.remove("is-in"));
