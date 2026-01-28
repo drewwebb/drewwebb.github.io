@@ -354,12 +354,18 @@
 
         sections.forEach(k => setOpen(k, k === key ? willOpen : false));
 
-        if (willOpen) {
-          trackIfIdentified("path_section_opened", { section: key });
-          addAction(`Opened section: ${key}`);
-        } else {
-          addAction(`Closed section: ${key}`);
-        }
+       if (willOpen) {
+  // Track for scoring / CRM, but do NOT add a visible action
+  if (state.email) {
+    postEvent({ email: state.email, event: "path_section_opened", section: key });
+  }
+
+  // Single, human-readable UI action
+  bumpInteractions(`Opened section: ${key}`);
+} else {
+  addAction(`Closed section: ${key}`);
+}
+
       }, { passive: true });
     });
   }
