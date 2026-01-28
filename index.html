@@ -910,29 +910,29 @@ This is not a tool list. It’s how I build an operating system for growth: capt
                         <div class="deep-kicker">Under the hood</div>
                         <h3 class="deep-title">How this demo works, live</h3>
                         <p class="deep-lead">
-                          This page is not a mockup. If you entered an email, a contact was created or updated in HubSpot, attributed using a first-touch model,
-                          and scored based on intent signals (time + clicks). Automation can route, enrich, and trigger follow-up based on those signals.
+                         This page is not a mockup. If you entered an email, a contact was created or updated in HubSpot, attributed using a first-touch model, and enriched with real engagement signals (time on page, interactions, and entry path).
+
+Those signals can be used to route, score, enrich, and trigger follow-up, exactly how a production Marketing Ops system should behave.
                         </p>
                       </div>
-                      <span class="deep-pill">Live demo</span>
                     </div>
 
                     <div class="deep-grid two">
                       <div class="deep-box">
                         <h4>Routing and attribution</h4>
-                        <p>Tracked links carry a clean label forward (example: /r/slug), so engagement and follow-up can be measured without clutter.</p>
+                        <p>Tracked links preserve a clean entry path (for example, /r/apple). First-touch attribution is captured once and carried forward, so downstream reporting stays trustworthy without UTM clutter.</p>
                       </div>
                       <div class="deep-box">
                         <h4>Capture and personalization</h4>
-                        <p>The info you submit is used to tailor this view. Guest mode shows the same journey with reduced context.</p>
+                        <p>Submitted fields personalize this experience in real time. Guest mode follows the same flow, but skips CRM upsert and identity resolution to demonstrate controlled degradation.</p>
                       </div>
                       <div class="deep-box">
                         <h4>Logging and bot filtering</h4>
-                        <p>Visits and actions can be logged with lightweight rules (and bots can be filtered) so signals stay clean.</p>
+                        <p>Visits and interactions are logged with lightweight rules, with bot filtering applied so only meaningful signals are retained for attribution and analysis.</p>
                       </div>
                       <div class="deep-box">
                         <h4>Observability</h4>
-                        <p>A private dashboard (Pulse) can be used to inspect traffic and engagement without exposing visitor data publicly.</p>
+                        <p>Engagement and system behavior are visible across multiple layers: a private Pulse dashboard for raw traffic and events, HubSpot contact timelines for individual activity, and HubSpot reporting for aggregate performance and follow-through.</p>
                       </div>
                     </div>
 
@@ -942,7 +942,7 @@ This is not a tool list. It’s how I build an operating system for growth: capt
                       Stack and cost outline
                     </div>
                     <p class="deep-lead" style="margin-top:8px;">
-                      Placeholder ranges for now. This can be refined with exact costs and vendors (registrar, etc.) later.
+                      This demo runs entirely on free tiers and lightweight infrastructure, by design, to show what’s possible before scale introduces cost.
                     </p>
 
                     <table>
@@ -950,44 +950,44 @@ This is not a tool list. It’s how I build an operating system for growth: capt
                         <tr>
                           <th>Component</th>
                           <th>What it does</th>
-                          <th>Est. cost</th>
+                          <th>Cost</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr>
                           <td><strong>Cloudflare Workers</strong></td>
-                          <td>Routing, attribution, logging, and private admin surfaces.</td>
-                          <td>~$0–$X / mo</td>
+                          <td>Routing, attribution, logging, and private admin surfaces</td>
+                          <td>$0</td>
                         </tr>
                         <tr>
                           <td><strong>Cloudflare KV</strong></td>
-                          <td>Efficient event storage (visit logs).</td>
-                          <td>~$0–$X / mo</td>
+                          <td>Lightweight event storage (visit + interaction logs)</td>
+                          <td>$0</td>
                         </tr>
                         <tr>
                           <td><strong>Cloudflare D1</strong></td>
-                          <td>Slug store + metadata (and future contact store).</td>
-                          <td>~$0–$X / mo</td>
+                          <td>Slug store, metadata, and future contact storage</td>
+                          <td>$0</td>
                         </tr>
                         <tr>
                           <td><strong>GitHub Pages</strong></td>
-                          <td>Static hosting for the site.</td>
+                          <td>Static hosting for the site</td>
                           <td>$0</td>
                         </tr>
                         <tr>
                           <td><strong>Email (Resend)</strong></td>
-                          <td>Follow-up and lifecycle messaging.</td>
-                          <td>~$0–$X / mo</td>
+                          <td>Follow-up and lifecycle messaging (free tier)</td>
+                          <td>$0</td>
                         </tr>
                         <tr>
                           <td><strong>CRM (HubSpot)</strong></td>
-                          <td>Contact upsert, scoring fields, engagement timeline, and reporting.</td>
-                          <td>Plan-dependent</td>
+                          <td>Contact upsert, engagement timeline, scoring fields, and reporting (free tier)</td>
+                          <td>$0</td>
                         </tr>
                         <tr>
                           <td><strong>Domain</strong></td>
-                          <td>Registrar + renewal.</td>
-                          <td>~$X / year</td>
+                          <td>Registrar + annual renewal</td>
+                          <td>$10.44 / year</td>
                         </tr>
                       </tbody>
                     </table>
