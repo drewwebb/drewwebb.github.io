@@ -345,20 +345,30 @@
           </div>
         </button>
 
-        <!-- Q2 -->
-        <button class="qbtn" type="button" data-faq="q2" aria-expanded="false">
-          <div>
-            <div class="qkicker"><span class="dot"></span> Privacy</div>
-            <div class="qrow">
-              <div class="qtitle">What data do you capture when I visit?</div>
-              <span class="chev" aria-hidden="true"></span>
-            </div>
-          </div>
-          <div class="ans" id="faq-q2" aria-hidden="true">
-            Before you submit the form, it tracks lightweight session signals like time on page and interactions (clicks), plus entry path
-            (for example, /r/:slug). If you submit the form with email, it can upsert a contact record in HubSpot and attach attribution plus the session signals.
-          </div>
-        </button>
+       <!-- Q2 -->
+<button class="qbtn" type="button" data-faq="q2" aria-expanded="false">
+  <div>
+    <div class="qkicker"><span class="dot"></span> Data &amp; Privacy</div>
+    <div class="qrow">
+      <div class="qtitle">What data do you capture when I visit?</div>
+      <span class="chev" aria-hidden="true"></span>
+    </div>
+  </div>
+  <div class="ans" id="faq-q2" aria-hidden="true">
+    Before you submit the form, the demo tracks lightweight, first-party session signals such as time on page,
+    meaningful interactions (clicks and section opens), and entry path (for example, <code>/r/:slug</code>).
+    <br><br>
+    If you submit the form with an email, a contact record may be upserted into HubSpot, with attribution and
+    session signals attached for demonstration purposes.
+    <br><br>
+    Guest mode remains anonymous. It follows the same UI flow but intentionally skips CRM upsert, identity
+    resolution, and follow-up automation.
+    <br><br>
+    No passwords, payment information, advertising cookies, or third-party tracking pixels are used. The goal
+    is to demonstrate responsible attribution and observability, not collect sensitive data.
+  </div>
+</button>
+
 
         <!-- Q3 -->
         <button class="qbtn" type="button" data-faq="q3" aria-expanded="false">
