@@ -12,7 +12,7 @@
   const API_ROOT = "https://api.drewwebbai.com";
   const API_EVENT = API_ROOT + "/event";
 
-  const RESUME_TO = "https://drewwebbai.com/resume";
+  const RESUME_TO = "https://drewwebbai.com/assets/Drew-Webb-Resume.pdf";
   const LINKEDIN_TO = "https://www.linkedin.com/in/drewrwebb/";
   const FAQ_TO = "https://drewwebbai.com/faq.html";
 
