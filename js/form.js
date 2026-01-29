@@ -270,7 +270,7 @@
         : "This page has adapted to what you submitted. Attribution, capture, and engagement signals continue to be written to live systems as you browse.";
     }
 
-    const displayName = (state.name || state.email || "there").trim();
+    const displayName = (state.name || state.email || "guest").trim();
     if (hello) hello.textContent = `Welcome, ${displayName}`;
 
     if (context) {
